@@ -1,3 +1,8 @@
+## Changes to [@navaismo](https://github.com/navaismo/Ender-3V3-SE) fork of [v1.0.9.7_7](https://github.com/navaismo/Ender-3V3-SE/releases/tag/v1.0.9.7_7):
+- Increased the baudrate from 115200 to 128000
+- Increased the prevent cold extrusion extrusion_temp from 180c to 240c
+- Changed the bed mesh levelling from 5x5 to 7x7
+
 ## Changes to Creality's Firmware
 - Included the Autolevel-Grid to a 7x7-Mesh based on the fork of [@aschmitt1909](https://github.com/aschmitt1909/Ender-3V3-SE)
 - Included the Linear Advance functions based     on the fork of [@queeup-Forks](https://github.com/queeup-Forks/Ender-3V3-SE)
