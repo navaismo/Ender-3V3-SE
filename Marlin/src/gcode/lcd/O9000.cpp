@@ -3,6 +3,10 @@
 #include "../parser.h"
 #include "../../lcd/dwin/e3v2/dwin.h"
 #include "../../lcd/marlinui.h"
+#include <map>
+#include <functional>
+#include <string> // Include for std::string
+#include <string.h> // For strchr, strncpy, strlen
 
 /**
  * M5000: Set Printing Details JOB from OctoPrint in LCD
@@ -25,129 +29,120 @@ char curr_layer[50] = {0};
 char thumbnail[50] = {0};
 char progress[10] = {0};
 char param_value[50] = {0};
+// bool serial_connection_active = false; // defined in serial.cpp
 
-const char *getParsedValue(char *str)
-{
-  const char delimiter[] = "|";
-  char *token;
 
-  // Split the string to get the first part (before '|')
-  token = strtok(str, delimiter);
+std::string getParsedValue(const std::string& str, int index) {
+    if (str.empty()) return "";
 
-  // Split again to get the second part (after '|')
-  token = strtok(NULL, delimiter); // NULL tells strtok to continue with the same string
+    size_t start = 0;
+    size_t end = 0;
+    int i = 0;
 
-  if (token != NULL)
-  {
-    // Copy the second part into the param_value variable
-    strncpy(param_value, token, sizeof(param_value) - 1);
-    param_value[sizeof(param_value) - 1] = '\0'; // Ensure null termination
-  }
+    while ((end = str.find('|', start)) != std::string::npos) {
+        if (i == index) {
+            return str.substr(start, end - start);
+        }
+        start = end + 1;
+        i++;
+    }
 
-  return param_value;
+    if (i == index)
+    {
+        return str.substr(start); // Handle last token
+    }
+
+    return ""; // Return empty string if index is out of bounds
 }
 
-void GcodeSuite::O9000()
-{
+void GcodeSuite::O9000() {
+    if (!parser.string_arg || parser.string_arg[0] == '\0') {
+        //SERIAL_ECHOLN("Empty Command Argument...");
+        return;
+    }
 
-  if (parser.string_arg && parser.string_arg[0] != '\0')
-  {
     char *my_string = parser.string_arg;
     //SERIAL_ECHOLNPAIR("Received: ", my_string);
 
-    if (strcmp(my_string, "SC|") == 0)
-    {
-      // Received all params lets render
-      //SERIAL_ECHOLN("Received all params, now render in LCD");
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoPrintJob(filename, print_time, ptime_left, total_layers, curr_layer, thumbnail, progress));
-    }
-    else if (strstr(my_string, "SFN|") != NULL)
-    {
-      // Set FileName
-      strncpy(filename, getParsedValue(my_string), sizeof(filename) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 1 filename set: ", filename);
-    }
-    else if (strstr(my_string, "SPT|") != NULL)
-    {
-      // Set Print Time
-      strncpy(print_time, getParsedValue(my_string), sizeof(print_time) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 2 print_time set: ", print_time);
-    }
-    else if (strstr(my_string, "SET|") != NULL)
-    {
-      // Set Print Time Left
-      strncpy(ptime_left, getParsedValue(my_string), sizeof(ptime_left) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 3 ptime_left set: ", ptime_left);
-    }
-    else if (strstr(my_string, "STL|") != NULL)
-    {
-      // Set Total Layers
-      strncpy(total_layers, getParsedValue(my_string), sizeof(total_layers) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 4  total_layers set: ", total_layers);
-    }
-    else if (strstr(my_string, "SCL|") != NULL)
-    {
-      // Set Current Layer
-      strncpy(curr_layer, getParsedValue(my_string), sizeof(curr_layer) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 5 curr_layer set: ", curr_layer);
-    }
-    else if (strstr(my_string, "SPP|") != NULL)
-    {
-      // Set Progress
-      strncpy(progress, getParsedValue(my_string), sizeof(progress) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 6 progress set: ", progress);
-    }
-    else if (strstr(my_string, "UPP|") != NULL)
-    {
-      // Update Progress
-      const char *val = getParsedValue(my_string);
-      //SERIAL_ECHOLNPAIR("Updating Progress to: ", val);
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoUpdate_Progress(val));
-    }
-    else if (strstr(my_string, "UCL|") != NULL)
-    {
-      // Update Current Layer
-      const char *val = getParsedValue(my_string);
-      //SERIAL_ECHOLNPAIR("Updating Curr_Layer to: ", val);
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoUpdate_CLayer(val));
-    }
-    else if (strstr(my_string, "UET|") != NULL)
-    {
-      // Update Print Time Left
-      const char *val = getParsedValue(my_string);
-      //SERIAL_ECHOLNPAIR("Updating Curr_Layer to: ", val);
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoUpdate_ETA(val));
-    }
-    else if (strstr(my_string, "PF|") != NULL)
-    {
-      // Print Finished
-      //SERIAL_ECHOLN("Print Finished");
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoJobFinish());
-    }
-    else if (strstr(my_string, "BU1|") != NULL)
-    {
-      
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoShowGCodeImage());
-    }
-     else if (strstr(my_string, "OCON|") != NULL)
-    {
-      serial_connection_active = true;
-      TERN_(DWIN_CREALITY_LCD, Goto_MainMenu());
-    }
-     else if (strstr(my_string, "OCOFF|") != NULL)
-    {
-      serial_connection_active = false;
-      TERN_(DWIN_CREALITY_LCD, Goto_MainMenu());
-    }
-    else
-    {
-      SERIAL_ECHOLN("Invalid Command Argument...");
-    }
-  }
-  else
-  {
-    SERIAL_ECHOLN("Empty Command Argument...");
-  }
+    std::map<std::string, std::function<void(const char*)>> commandHandlers = {
+        {"SC|", [&](const char*){
+            // Received all params lets render
+            //SERIAL_ECHOLN("Received all params, now render in LCD");
+            TERN_(DWIN_CREALITY_LCD, DWIN_OctoPrintJob(filename, print_time, ptime_left, total_layers, curr_layer, thumbnail, progress));
+        }},
+        {"SFN|", [&](const char* arg){
+            // Set FileName
+            std::string filename_str = getParsedValue(arg, 1);
+            strncpy(filename, filename_str.c_str(), sizeof(filename) - 1);
+        }},
+        {"SPT|", [&](const char* arg){
+            // Set Print Time
+            std::string print_time_str = getParsedValue(arg, 1);
+            strncpy(print_time, print_time_str.c_str(), sizeof(print_time) - 1);
+        }},
+        {"SET|", [&](const char* arg){
+            // Set Elapsed Time
+            std::string ptime_left_str = getParsedValue(arg, 1);
+            strncpy(ptime_left, ptime_left_str.c_str(), sizeof(ptime_left) - 1);
+        }},
+        {"STL|", [&](const char* arg){
+            // Set Total Layers
+            std::string total_layers_str = getParsedValue(arg, 1);
+            strncpy(total_layers, total_layers_str.c_str(), sizeof(total_layers) - 1);
+        }},
+        {"SCL|", [&](const char* arg){
+            // Set Current Layer
+            std::string curr_layer_str = getParsedValue(arg, 1);
+            strncpy(curr_layer, curr_layer_str.c_str(), sizeof(curr_layer) - 1);
+        }},
+        {"SPP|", [&](const char* arg){
+            // Set Print Progress
+            std::string progress_str = getParsedValue(arg, 1);
+            strncpy(progress, progress_str.c_str(), sizeof(progress) - 1);
+        }},
+        {"UPP|", [&](const char* arg){
+            // Update Print Progress
+            std::string val_str = getParsedValue(arg, 1);
+            TERN_(DWIN_CREALITY_LCD, DWIN_OctoUpdate_Progress(val_str.c_str()));
+        }},
+        {"UCL|", [&](const char* arg){
+            // Update Current Layer
+            std::string val_str = getParsedValue(arg, 1);
+            TERN_(DWIN_CREALITY_LCD, DWIN_OctoUpdate_CLayer(val_str.c_str()));
+        }},
+        {"UET|", [&](const char* arg){
+            // Update Elapsed Time
+            std::string val_str = getParsedValue(arg, 1);
+            TERN_(DWIN_CREALITY_LCD, DWIN_OctoUpdate_ETA(val_str.c_str()));
+        }},
+        {"UPT|", [&](const char* arg){
+            // Update Print and Time
+            std::string val_str_a = getParsedValue(arg, 1);
+            std::string val_str_b = getParsedValue(arg, 2);
+            TERN_(DWIN_CREALITY_LCD, DWIN_OctoUpdate_Progress(val_str_a.c_str()));
+            TERN_(DWIN_CREALITY_LCD, DWIN_OctoUpdate_ETA(val_str_b.c_str()));
+        }},
+        {"PF|", [&](const char*){ TERN_(DWIN_CREALITY_LCD, DWIN_OctoJobFinish()); }},
+        {"BU1|", [&](const char*){ TERN_(DWIN_CREALITY_LCD, DWIN_OctoShowGCodeImage()); }},
+        {"OCON|", [&](const char*){ serial_connection_active = true; TERN_(DWIN_CREALITY_LCD, Goto_MainMenu()); }},
+        {"OCOFF|", [&](const char*){ serial_connection_active = false; TERN_(DWIN_CREALITY_LCD, Goto_MainMenu()); }}
+    };
 
-  // TODO THUMBNAIL RECBUFFER
+    std::string command_key;
+    const char* delimiterPos = strchr(my_string, '|');
+    if (delimiterPos != nullptr) {
+        command_key = std::string(my_string, delimiterPos - my_string + 1);
+    } else {
+        command_key = my_string;
+    }
+
+    auto it = commandHandlers.find(command_key);
+
+    if (it != commandHandlers.end()) {
+        it->second(my_string);
+    } else {
+        SERIAL_ECHOLN("Invalid Command Argument...");
+    }
+
+    // TODO THUMBNAIL RECBUFFER
 }
