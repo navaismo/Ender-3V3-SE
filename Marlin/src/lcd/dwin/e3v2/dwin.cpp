@@ -154,11 +154,11 @@ static uint8_t left_move_index = 0;
 bool qrShown = false;
 
 //initialize the image map
-uint16_t OctoImageMap[OctoIMAGE_MAP_SIZE];
-void initializeImageMap() {
-    std::fill(OctoImageMap, OctoImageMap + OctoIMAGE_MAP_SIZE, 0xFFFF); // Fill with white
-}
-void initializeImageMap();
+//uint16_t OctoImageMap[OctoIMAGE_MAP_SIZE];
+//void initializeImageMap() {
+//    std::fill(OctoImageMap, OctoImageMap + OctoIMAGE_MAP_SIZE, 0xFFFF); // Fill with white
+//}
+//void initializeImageMap();
 
 /* Value Init */
 HMI_value_t HMI_ValueStruct;
@@ -10400,6 +10400,14 @@ void DWIN_RenderOctoImageMap() {
   HMI_flag.Refresh_bottom_flag = true;
   Clear_Title_Bar();
   Clear_Main_Window();
+
+  SERIAL_ECHOLN("Trying to send IMage to DWIN");
+  if(uiShow.UI_SendJpegDateHandshake(2048, mypicBuf)){
+    SERIAL_ECHOLN("UI_SendJpegDateHandshake success");
+    uiShow.UI_SendJpegDate(mypicBuf, 2048);
+    gcodePicDispalyOnOff(0, true);
+  
+  }
   
   // Show print done confirm
   //if (HMI_flag.language < Language_Max) {
@@ -10407,7 +10415,7 @@ void DWIN_RenderOctoImageMap() {
   //  DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, OK_BUTTON_X, 225);
   //}
   
-  millis_t last_watchdog_refresh = millis();  // Store the last refresh time
+  /* millis_t last_watchdog_refresh = millis();  // Store the last refresh time
   // Render the image pixel by pixel
   for (uint16_t y = 0; y < OctoIMAGE_HEIGHT && (y_start + y) < 320; y++) {
     for (uint16_t x = 0; x < OctoIMAGE_WIDTH && (x_start + x) < 240; x++) {
@@ -10422,7 +10430,7 @@ void DWIN_RenderOctoImageMap() {
        }      
     }
     
-  }
+  } */
 }
 
 void DWIN_OctoShowGCodeImage()

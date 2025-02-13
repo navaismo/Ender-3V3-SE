@@ -29,7 +29,7 @@ void GcodeSuite::O9002() {
         // Handle START command to initialize/reset.
         if (strncmp(parser.string_arg, "START", 5) == 0) {
             // (Optional) Parse dimensions if needed.
-            //memset(mypicBuf, 0, sizeof(mypicBuf));
+            memset(mypicBuf, 0, sizeof(mypicBuf));
             mypicBufIndex = 0;
             SERIAL_ECHOLN("O9002 START: Image map cleared.");
             return;
@@ -57,11 +57,11 @@ void GcodeSuite::O9002() {
                     // Tokenize the pixel data by commas.
                     char *pixel_token = strtok(token, ",");
                     int local_index = chunk_start;
-                    while (pixel_token != nullptr && local_index < OctoIMAGE_MAP_SIZE) {
-                        uint16_t pixel_value = static_cast<uint16_t>(atoi(pixel_token));
-                        //SERIAL_ECHOLNPAIR("Val: ", pixel_value);
-                        OctoImageMap[local_index] = pixel_value;
-                        //SERIAL_ECHOLNPAIR("IMGidxVal: ", OctoImageMap[local_index]);
+                    while (pixel_token != nullptr && local_index < 2096) {
+                        uint8_t pixel_value = static_cast<uint8_t>(atoi(pixel_token));
+                        SERIAL_ECHOLNPAIR("RecVal: ", pixel_value);
+                        mypicBuf[local_index] = pixel_value;
+                        SERIAL_ECHOLNPAIR("IMGVal: ", mypicBuf[local_index]);
                         local_index++;
                         pixel_token = strtok(nullptr, ",");
                     }

@@ -98,6 +98,6 @@ extern uint8_t gcodePicDataSendToDwin(char *, unsigned int , unsigned char , uns
 extern uint8_t OctoDWINPreview();
 extern uint8_t read_gcode_model_information(void);
 extern char Parse_Only_Picture_Data(char* fileName,char * time, char * FilamentUsed, char * layerHeight);
-extern uint16_t mypicBuf[2069];
+extern char mypicBuf[2069];
 void gcodePicDispalyOnOff(unsigned int jpgAddr, bool onoff);
 #endif

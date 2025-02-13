@@ -565,8 +565,11 @@ unsigned long arr_data_num;
 bool UI_SHOW_t::UI_SendJpegDateHandshake(unsigned long size, const char *path)
 {
   // 当使用大彩屏时 -- When using large color screen
-  if (!IsDacaiScreenConnect)
+  if (!IsDacaiScreenConnect){
+    SERIAL_ECHOLN("IsDacaiScreenConnect is false and returned");
+    SERIAL_ECHOLN("No Data Sent to DWIN");
     return true;
+  } 
 
   uint8_t receivedbyte;
   uint8_t cmd_pos = 0;
@@ -668,6 +671,7 @@ bool UI_SHOW_t::UI_SendJpegDateHandshake(unsigned long size, const char *path)
  */
  bool UI_SHOW_t::UI_SendJpegDate(const char *jpeg, unsigned long size)
 {
+  SERIAL_ECHOLN("INSIDE UI_SendJpegDate");
   static char buf[DACAI_JPG_BYTES_PER_BUF] = {0};
   unsigned long jpgSize = size;
   static uint8_t sn = 0;
@@ -692,7 +696,7 @@ bool UI_SHOW_t::UI_SendJpegDateHandshake(unsigned long size, const char *path)
       SERIAL_ECHOLN(arr_data_num);
       databuf[2] = (arr_data_num) >> 8;
       databuf[3] = (arr_data_num) & 0xFF;
-      
+
       arr_data_num += 120;
       memcpy(&databuf[4], &jpeg[sendPacket * DACAI_JPG_BYTES_PER_PACKET], DACAI_JPG_BYTES_PER_PACKET);
       watchdog_refresh();
