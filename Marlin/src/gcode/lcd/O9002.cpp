@@ -61,7 +61,7 @@ void GcodeSuite::O9002() {
                         uint8_t pixel_value = static_cast<uint8_t>(atoi(pixel_token));
                         SERIAL_ECHOLNPAIR("RecVal: ", pixel_value);
                         mypicBuf[local_index] = pixel_value;
-                        SERIAL_ECHOLNPAIR("IMGVal: ", mypicBuf[local_index]);
+                        SERIAL_ECHOLNPAIR("IMGVal: ", static_cast<unsigned int>(mypicBuf[local_index]));
                         local_index++;
                         pixel_token = strtok(nullptr, ",");
                     }
