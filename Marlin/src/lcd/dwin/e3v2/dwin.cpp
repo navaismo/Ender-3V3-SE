@@ -2170,8 +2170,9 @@ void draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t
   // The structure to manage the QR code
   QRCode qrcode;
 
-  // QR version 2 allows strings up to 47 chars, e.g. "https://bit.ly/qwertyuiop_asdfghjkl_zxcvbnm_123"
-  uint8_t QR_VERSION = 2;
+  // QR version 4 allows pretty long strings, that should be enought not to require URL shorteners
+  // https://github.com/navaismo/Ender-3V3-SE/wiki/Fixing-Bed-Skew
+  uint8_t QR_VERSION = 4;
 
   // Allocate a chunk of memory to store the QR code
   uint8_t qrcodeBytes[qrcode_getBufferSize(QR_VERSION)];
@@ -7463,7 +7464,7 @@ void HMI_Control()
 
 #if HAS_ONESTEP_LEVELING
 // Change leveling value
-void HMI_Levling_Change()
+void HMI_Leveling_Change()
 {
   uint16_t rec_LU_x, rec_LU_y, rec_RD_x, rec_RD_y, value_LU_x, value_LU_y;
   ENCODER_DiffState encoder_diffState = get_encoder_state();
@@ -7556,7 +7557,7 @@ void HMI_Leveling_Edit()
     // Temporary code needs to continue to be optimized
     //  xy_int8_t mesh_Count=Converted_Grid_Point(select_level.now); //Convert grid points
     Draw_Dots_On_Screen(&mesh_Count, 2, Select_Color); // Set the font background color without changing the selected block color
-    checkkey = Change_Level_Value;
+    checkkey = Level_Assess_Popup;
     temp_zoffset_single = 0; // Leveling value before adjustment of current point
     dwin_zoffset_edit = z_values[mesh_Count.x][mesh_Count.y];
     HMI_ValueStruct.Temp_Leveling_Value = z_values[mesh_Count.x][mesh_Count.y] * 100;
@@ -7565,6 +7566,27 @@ void HMI_Leveling_Edit()
     // Draw_Dots_On_Screen(&mesh_Count,1,Select_Block_Color);
     DO_BLOCKING_MOVE_TO_XY(mesh_Count.x * G29_X_INTERVAL + G29_X_MIN, mesh_Count.y * G29_Y_INTERVAL + G29_Y_MIN, 100);
     DO_BLOCKING_MOVE_TO_Z(z_values[mesh_Count.x][mesh_Count.y], 5);
+  }
+}
+
+// Show Leveling assessment popup
+void HMI_Leveling_Assess_Popup()
+{
+  DWIN_Frame_Clear(Color_Bg_Black);
+
+  ENCODER_DiffState encoder_diffState = get_encoder_state();
+  if ((encoder_diffState == ENCODER_DIFF_NO)) return;
+    
+  if (encoder_diffState == ENCODER_DIFF_ENTER)
+  {
+    xy_int8_t mesh_Count = Converted_Grid_Point(select_level.now);
+    for (int ix = 0; ix < GRID_MAX_POINTS_X; ix++) {
+      for (int iy = 0; iy < GRID_MAX_POINTS_Y; iy++) {
+        z_values[ix][iy] * 100
+      }
+    }
+    
+    checkkey = Change_Level_Value;
   }
 }
 
@@ -10787,8 +10809,11 @@ void DWIN_HandleScreen()
   case Level_Value_Edit:
     HMI_Leveling_Edit();
     break;
+  case Level_Assess_Popup:
+    HMI_Leveling_Assess_Popup();
+    break;
   case Change_Level_Value:
-    HMI_Levling_Change();
+    HMI_Leveling_Change();
     break;
 #endif
   case PrintProcess:

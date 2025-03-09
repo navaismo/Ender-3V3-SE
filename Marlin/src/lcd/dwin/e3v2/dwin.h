@@ -173,6 +173,7 @@ enum processID : uint8_t {
   AUTO_OUT_FEEDSTOCK, //自动退料
   Level_Value_Edit,  //编辑调平数据
   Change_Level_Value, //改变调平值
+  Level_Assess_Popup, //Show bed level assessment popup
   ONE_HIGH, //一键对高页面
   POPUP_CONFIRM,//弹窗确定界面
   Max_GUI,
