@@ -6653,8 +6653,7 @@ void HMI_Display_Menu(){
       break; 
     case 5:
       settings.save();    
-  
-
+      break;
     }
   }
   DWIN_UpdateLCD();
