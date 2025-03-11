@@ -1,0 +1,15 @@
+name: Build CI
+
+on: [push, pull_request]
+
+jobs:
+  makefile-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Dependencies
+      run: sudo apt-get update && sudo apt-get install -y build-essential make gcc-arm-none-eabi  binutils-arm-none-eabi libnewlib-arm-none-eabi
+    - name: Build
+      run: pip install platformio && pio run
