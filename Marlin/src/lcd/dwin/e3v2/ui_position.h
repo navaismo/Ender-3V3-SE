@@ -357,6 +357,7 @@
 //Boot boot pop-up window
 #define POPUP_BG_X_LU  16
 #define POPUP_BG_Y_LU  67
+#define POPUP_TITLE_HEIGHT 26
 #define POPUP_BG_X_RD  224
 #define POPUP_BG_Y_RD  277
 //Cleaning tips

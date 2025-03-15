@@ -365,6 +365,80 @@ void DWIN_Draw_String(bool widthAdjust, bool bShow, uint8_t size,
   DWIN_Send(i);
 }
 
+void DWIN_Draw_MultilineString(bool widthAdjust, bool bShow, uint8_t size, uint16_t color, uint16_t bColor, uint16_t x, uint16_t y, uint8_t char_limit, uint8_t line_height, const char *text)
+{
+  const char *ptr = text;
+  char currentLine[char_limit + 1];
+  size_t currentLength = 0;
+  uint8_t line = 0;
+
+  while (*ptr)
+  {
+    // Find the next word
+    const char *start = ptr;
+    while (*ptr && !isspace(*ptr))
+    {
+      ptr++;
+    }
+    size_t wordLength = ptr - start;
+
+    // Check if the current word can fit in the current line
+    if (currentLength + wordLength + (currentLength > 0 ? 1 : 0) <= char_limit)
+    {
+      // Add a space before the word if the current line is not empty
+      if (currentLength > 0)
+      {
+        currentLine[currentLength++] = ' ';
+      }
+      // Copy the word into the current line
+      memcpy(currentLine + currentLength, start, wordLength);
+      currentLength += wordLength;
+    }
+    else
+    {
+      // Print the current line
+      currentLine[currentLength] = '\0';
+
+      DWIN_Draw_String(widthAdjust, bShow, size, color, bColor, x, y + (line_height * line), currentLine);
+      line++;
+
+      // Start a new line with the current word
+      if (wordLength > char_limit)
+      {
+        // If the word itself is too long, split it
+        for (size_t i = 0; i < wordLength; i += char_limit)
+        {
+          size_t len = (i + char_limit > wordLength) ? (wordLength - i) : char_limit;
+          memcpy(currentLine, start + i, len);
+          currentLine[len] = '\0';
+          DWIN_Draw_String(widthAdjust, bShow, size, color, bColor, x, y + (line_height * line), currentLine);
+          line++;
+        }
+        currentLength = 0;
+      }
+      else
+      {
+        // Otherwise, start a new line with the current word
+        memcpy(currentLine, start, wordLength);
+        currentLength = wordLength;
+      }
+    }
+
+    // Skip spaces
+    while (*ptr && isspace(*ptr))
+    {
+      ptr++;
+    }
+  }
+
+  // Print the remaining part of the current line
+  if (currentLength > 0)
+  {
+    currentLine[currentLength] = '\0';
+    DWIN_Draw_String(widthAdjust, bShow, size, color, bColor, x, y + (line_height * line), currentLine);
+  }
+}
+
 void DWIN_SHOW_MAIN_PIC()
 {
   size_t i = 0;

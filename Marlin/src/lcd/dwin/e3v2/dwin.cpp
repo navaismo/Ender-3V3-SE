@@ -2992,16 +2992,6 @@ void Popup_window_boot(uint8_t type_popup)
       DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
     }
     break;
-  case UnknownError:
-    if (HMI_flag.language < Language_Max)
-    {
-      DWIN_Draw_String(false, false, font10x20, Color_Red, Color_Bg_Black, WORD_HINT_CLEAR_X, WORD_HINT_CLEAR_Y, F("Unknown error"));
-      DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, BUTTON_BOOT_X, BUTTON_BOOT_Y); // OK button
-      // Add a white selection block
-      DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 1, BUTTON_BOOT_Y - 1, BUTTON_BOOT_X + 82, BUTTON_BOOT_Y + 32);
-      DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
-    }
-    break;
   default:
     break;
   }
@@ -4830,7 +4820,23 @@ void HMI_SDCardInit() { card.cdroot(); }
 
 void MarlinUI::refresh() { /* Nothing to see here */ }
 void MarlinUI::kill_screen(PGM_P lcd_error, PGM_P lcd_component) {
-  Popup_window_boot(UnknownError);
+  Clear_Main_Window();
+  DWIN_Draw_Rectangle(1, Color_Bg_Window, POPUP_BG_X_LU, POPUP_BG_Y_LU, POPUP_BG_X_RD, POPUP_BG_Y_RD);
+  DWIN_Draw_Rectangle(1, Color_Bg_Red, POPUP_BG_X_LU + 1, POPUP_BG_Y_LU + 1, POPUP_BG_X_RD - 1, POPUP_BG_Y_LU + POPUP_TITLE_HEIGHT);
+  
+  DWIN_Draw_String(false, false, font12x24, All_Black, Color_Bg_Red, POPUP_BG_X_LU + ((POPUP_BG_X_LU - POPUP_BG_X_LU) / 2) - ((strlen_P((PGM_P)GET_TEXT_F(MSG_HALTED)) / 2) * 12), POPUP_BG_Y_LU + 1, GET_TEXT_F(MSG_HALTED));
+  // HMI_flag.Refresh_bottom_flag = true; // Flag does not refresh bottom parameters
+#if ENABLED(DWIN_CREALITY_480_LCD)
+#elif ENABLED(DWIN_CREALITY_320_LCD)
+    if (HMI_flag.language < Language_Max)
+    {
+      DWIN_Draw_MultilineString(false, false, font10x20, Color_Red, Color_Bg_Black, WORD_HINT_CLEAR_X + 10, WORD_HINT_CLEAR_Y + POPUP_TITLE_HEIGHT, 19, 20, F(lcd_error));
+      // Add a white selection block
+      DWIN_Draw_Rectangle(0, Color_Bg_Red, BUTTON_BOOT_X - 1, BUTTON_BOOT_Y - 1, BUTTON_BOOT_X + 82, BUTTON_BOOT_Y + 32);
+      DWIN_Draw_Rectangle(0, Color_Bg_Red, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
+      DWIN_Draw_String(false, false, font10x20, Color_Red, Color_Bg_Black, BUTTON_BOOT_X, BUTTON_BOOT_Y, GET_TEXT_F(MSG_PLEASE_RESET));
+    }
+#endif // DWIN_CREALITY_320_LCD
 
   // RED ALERT. RED ALERT.
   #ifdef HAS_COLOR_LEDS
@@ -7582,7 +7588,7 @@ void HMI_Leveling_Assess_Popup()
     xy_int8_t mesh_Count = Converted_Grid_Point(select_level.now);
     for (int ix = 0; ix < GRID_MAX_POINTS_X; ix++) {
       for (int iy = 0; iy < GRID_MAX_POINTS_Y; iy++) {
-        z_values[ix][iy] * 100
+        z_values[ix][iy] * 100;
       }
     }
     
