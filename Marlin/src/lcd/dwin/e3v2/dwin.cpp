@@ -7563,7 +7563,7 @@ void HMI_Leveling_Edit()
     // Temporary code needs to continue to be optimized
     //  xy_int8_t mesh_Count=Converted_Grid_Point(select_level.now); //Convert grid points
     Draw_Dots_On_Screen(&mesh_Count, 2, Select_Color); // Set the font background color without changing the selected block color
-    checkkey = Level_Assess_Popup;
+    checkkey = Change_Level_Value;
     temp_zoffset_single = 0; // Leveling value before adjustment of current point
     dwin_zoffset_edit = z_values[mesh_Count.x][mesh_Count.y];
     HMI_ValueStruct.Temp_Leveling_Value = z_values[mesh_Count.x][mesh_Count.y] * 100;
@@ -7585,13 +7585,10 @@ void HMI_Leveling_Assess_Popup()
     
   if (encoder_diffState == ENCODER_DIFF_ENTER)
   {
-    xy_int8_t mesh_Count = Converted_Grid_Point(select_level.now);
-    for (int ix = 0; ix < GRID_MAX_POINTS_X; ix++) {
-      for (int iy = 0; iy < GRID_MAX_POINTS_Y; iy++) {
-        z_values[ix][iy] * 100;
-      }
-    }
-    
+    BedLevel_Score score = assess_bed_level();
+    // show assessment score
+    // show QR code for further info
+
     checkkey = Change_Level_Value;
   }
 }

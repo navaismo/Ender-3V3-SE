@@ -172,6 +172,12 @@
 #define K8_EXTRUDER             0 //1 是K8挤出机   0 是精灵挤出机
 #define USER_LEVEL_CHECK        1 // 调平校准使能
 #define WUHAN_CHENGE_PLATFORM   1 // 武汉改平台板  20230913_Rock
+
+// We should probably add some flag like "NEWCOMER_MODE" which will enable fancy features targeted
+// at people that are new to the hobby and would benefit from helpful messages.
+// Then single NEWCOMER_MODE define here would trigger following flags somewhere in Conditionals_LCD
+#define ASSESS_BED_LEVEL        1 // Enabled bed level assessment
+
 //打开高速打印的宏之后由于震动补偿功能会高温报警
 
 // Printer's unique ID, used by some programs to differentiate between machines.
