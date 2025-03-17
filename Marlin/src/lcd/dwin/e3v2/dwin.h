@@ -889,10 +889,10 @@ void octoUpdateScroll();
 void clearOctoScrollVars();
 // Set Values for updates
 void DWIN_SetPrintingDetails(const char *eta, const char *progress, const char *current_layer);
-
 // Update print time
 void DWIN_OctoSetPrintTime(char* print_time);
-
+void render_bed_mesh_3D();
+void DWIN_RenderMesh();
 
 
 void DWIN_CompletedHoming();

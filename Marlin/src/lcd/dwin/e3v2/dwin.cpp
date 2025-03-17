@@ -1418,7 +1418,8 @@ inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valr
 // #define CONTROL_CASE_INFO  (CONTROL_CASE_ADVSET + 1)
 #define CONTROL_CASE_INFO (CONTROL_CASE_RESET + 1)
 #define CONTROL_CASE_STATS (CONTROL_CASE_INFO + 1)
-#define CONTROL_CASE_TOTAL CONTROL_CASE_STATS
+#define CONTROL_CASE_BEDVIS (CONTROL_CASE_STATS + 1)
+#define CONTROL_CASE_TOTAL CONTROL_CASE_BEDVIS
 
 #define TUNE_CASE_SPEED 1
 #define TUNE_CASE_TEMP (TUNE_CASE_SPEED + ENABLED(HAS_HOTEND))
@@ -1908,6 +1909,16 @@ void Item_Control_Stats(const uint16_t line)
   Draw_Menu_Line(line, ICON_Info);
 }
 
+void Item_Control_BedVisualizer(const uint16_t line)
+{
+  if (HMI_flag.language < Language_Max)
+  {
+    DWIN_Draw_Label(line, F("BedLevel Visualizer"));
+    DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(line) - 3);
+  }
+  Draw_Menu_Line(line, ICON_PrintSize);
+}
+
 static void Item_Temp_HMPID(const uint16_t line)
 {
   if (HMI_flag.language < Language_Max)
@@ -1975,7 +1986,9 @@ void Draw_Control_Menu()
   if (CVISI(CONTROL_CASE_INFO))
     Item_Control_Info(CLINE(CONTROL_CASE_INFO));
   if (CVISI(CONTROL_CASE_STATS))
-    Item_Control_Stats(CLINE(CONTROL_CASE_STATS));  
+    Item_Control_Stats(CLINE(CONTROL_CASE_STATS)); 
+  if (CVISI(CONTROL_CASE_BEDVIS))
+    Item_Control_BedVisualizer(CLINE(CONTROL_CASE_BEDVIS));     
   if (select_control.now && CVISI(select_control.now))
     Draw_Menu_Cursor(CSCROL(select_control.now));
 
@@ -2004,6 +2017,7 @@ void Draw_Control_Menu()
 #endif
   _TEMP_ICON(CONTROL_CASE_INFO, ICON_Info, true);
   _TEMP_ICON(CONTROL_CASE_STATS, ICON_Info, true);
+  _TEMP_ICON(CONTROL_CASE_BEDVIS, ICON_PrintSize, true);
 }
 
 static void Show_Temp_Default_Data(const uint8_t line, uint8_t index)
@@ -6660,6 +6674,7 @@ void HMI_Display_Menu(){
       break; 
     case 5:
       settings.save();    
+      break;
   
 
     }
@@ -7301,7 +7316,11 @@ void HMI_Control()
           Draw_Menu_Icon(MROWS, ICON_Info);
           DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(MROWS) - 3);
           break;
-
+        case CONTROL_CASE_BEDVIS: // Printer Statistics >
+          Item_Control_BedVisualizer(MBASE(MROWS));
+          Draw_Menu_Icon(MROWS, ICON_PrintSize);
+          DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(MROWS) - 3);
+          break;  
         default:
           break;
         }
@@ -7343,6 +7362,13 @@ void HMI_Control()
           {
             Draw_Menu_Icon(0, ICON_WriteEEPROM);
             DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Store, 42, MBASE(0) + JPN_OFFSET);
+
+           }
+        }else if (index_control == 9){
+          if (HMI_flag.language < Language_Max)
+          {
+            Draw_Menu_Icon(0, ICON_ReadEEPROM);
+            DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Read, 42, MBASE(0) + JPN_OFFSET);
 
            }
         }
@@ -7461,6 +7487,10 @@ void HMI_Control()
       checkkey = Pstats;
       Draw_PStats_Menu();
       break;      
+    case CONTROL_CASE_BEDVIS: // Bed Level Visualizer
+      checkkey = M117Info;
+      DWIN_RenderMesh();
+      break;          
     default:
       break;
     }
@@ -11560,6 +11590,22 @@ void DWIN_OctoSetPrintTime(char* print_time){
   DWIN_Draw_Rectangle(1, All_Black, 120, 123, 230, 143);
   DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 126, 123, F(vprint_time));
 
+}
+
+void DWIN_RenderMesh() {
+  checkkey = M117Info;
+  HMI_flag.Refresh_bottom_flag = true;
+  Clear_Main_Window();
+  Clear_Title_Bar();
+  delay(5);
+  render_bed_mesh_3D();
+  delay(5);
+  // show print done confirm
+  if (HMI_flag.language < Language_Max) // Rock 20211120
+  {
+    DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, OK_BUTTON_X + 10, 275);
+  }
+ 
 }
 
 void DWIN_OctoShowGCodeImage()
