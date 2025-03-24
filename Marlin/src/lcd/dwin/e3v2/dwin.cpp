@@ -820,14 +820,7 @@ void ICON_Leveling(bool show)
     DWIN_Draw_Rectangle(0, Color_White, ICON_LEVEL_X, ICON_LEVEL_Y, ICON_LEVEL_X + ICON_W, ICON_LEVEL_Y + ICON_H);
     if (HMI_flag.language < Language_Max)
     {
-      if (HMI_flag.language == Russian)
-      {
-        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_1, WORD_LEVEL_X, WORD_LEVEL_Y);
-      }
-      else
-      {
-        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_1, WORD_LEVEL_X, WORD_LEVEL_Y);
-      }
+      DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_1, WORD_LEVEL_X, WORD_LEVEL_Y);
     }
     else
     {
@@ -840,15 +833,7 @@ void ICON_Leveling(bool show)
     DWIN_ICON_Not_Filter_Show(ICON, ICON_Leveling_0, ICON_LEVEL_X, ICON_LEVEL_Y);
     if (HMI_flag.language < Language_Max)
     {
-      // The Russian entry is too long and moved forward by 30 pixels.
-      if (HMI_flag.language == Russian)
-      {
-        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_0, WORD_LEVEL_X, WORD_LEVEL_Y);
-      }
-      else
-      {
-        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_0, WORD_LEVEL_X, WORD_LEVEL_Y);
-      }
+      DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_0, WORD_LEVEL_X, WORD_LEVEL_Y);
     }
     else
     {
@@ -3341,7 +3326,6 @@ void Goto_MainMenu()
 #if ENABLED(DWIN_CREALITY_480_LCD)
   DWIN_ICON_Show(ICON, ICON_LOGO, 71, 52);
 #elif ENABLED(DWIN_CREALITY_320_LCD)
-                                       //  DWIN_ICON_Show(ICON, ICON_LOGO, LOGO_LITTLE_X, LOGO_LITTLE_Y);
   if (HMI_flag.language < Language_Max)
   {
     if(serial_connection_active)
@@ -3352,14 +3336,12 @@ void Goto_MainMenu()
     {
       DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Main, TITLE_X, TITLE_Y); // Rock j
     }
-    //DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Main, TITLE_X, TITLE_Y); //rock_j
   }
 #endif
   ICON_Print();
   ICON_Prepare();
   ICON_Control();
-  TERN(HAS_ONESTEP_LEVELING, ICON_Leveling, ICON_StartInfo)
-  (select_page.now == 3);
+  TERN(HAS_ONESTEP_LEVELING, ICON_Leveling, ICON_StartInfo)(select_page.now == 3);
 }
 
 
@@ -7488,9 +7470,9 @@ void HMI_Control()
       Draw_PStats_Menu();
       break;      
     case CONTROL_CASE_BEDVIS: // Bed Level Visualizer
-      checkkey = M117Info;
+      checkkey = POPUP_OK;
       DWIN_RenderMesh();
-      break;          
+      break;
     default:
       break;
     }
@@ -7602,24 +7584,6 @@ void HMI_Leveling_Edit()
     // Draw_Dots_On_Screen(&mesh_Count,1,Select_Block_Color);
     DO_BLOCKING_MOVE_TO_XY(mesh_Count.x * G29_X_INTERVAL + G29_X_MIN, mesh_Count.y * G29_Y_INTERVAL + G29_Y_MIN, 100);
     DO_BLOCKING_MOVE_TO_Z(z_values[mesh_Count.x][mesh_Count.y], 5);
-  }
-}
-
-// Show Leveling assessment popup
-void HMI_Leveling_Assess_Popup()
-{
-  DWIN_Frame_Clear(Color_Bg_Black);
-
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if ((encoder_diffState == ENCODER_DIFF_NO)) return;
-    
-  if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    BedLevel_Score score = assess_bed_level();
-    // show assessment score
-    // show QR code for further info
-
-    checkkey = Change_Level_Value;
   }
 }
 
@@ -8968,20 +8932,38 @@ void HMI_Pstats()
   DWIN_UpdateLCD();
 }
 
-
-/* M117 Info */
-void HMI_M117Info()
+/* Generic OK dialog handling with OK button */
+void HMI_Ok_Dialog(processID returnTo = ErrNoValue)
 {
+  static processID backKey = ErrNoValue;
+
+  if (returnTo != ErrNoValue) {
+    backKey = returnTo;
+  }
   ENCODER_DiffState encoder_diffState = get_encoder_state();
   if (encoder_diffState == ENCODER_DIFF_NO)
     return;
   if (encoder_diffState == ENCODER_DIFF_ENTER)
   {
+    if (backKey != ErrNoValue) {
+      checkkey = backKey;
+      backKey = ErrNoValue;
+    }
+
     // If enter go back to main menu
-    Goto_MainMenu();
-    HMI_flag.Refresh_bottom_flag = true; // Flag not to refresh bottom parameters --Flag not to refresh bottom parameters
+    if (backKey == MainMenu) {
+      Goto_MainMenu();
+    }
+    HMI_flag.Refresh_bottom_flag = true; // Flag not to refresh bottom parameters
   }
   DWIN_UpdateLCD(); // Update LCD
+}
+
+/* M117 Info */
+void HMI_M117Info()
+{
+  checkkey = POPUP_OK;
+  HMI_Ok_Dialog(MainMenu);
 }
 
 /* Print Finish */
@@ -10842,9 +10824,6 @@ void DWIN_HandleScreen()
   case Level_Value_Edit:
     HMI_Leveling_Edit();
     break;
-  case Level_Assess_Popup:
-    HMI_Leveling_Assess_Popup();
-    break;
   case Change_Level_Value:
     HMI_Leveling_Change();
     break;
@@ -11066,6 +11045,9 @@ void DWIN_HandleScreen()
     break;       // Interface with a single confirmation button
   case M117Info: // M117 window fix for HMI
     HMI_M117Info();
+    break;
+  case POPUP_OK: // Handle generic OK button popup
+    HMI_Ok_Dialog();
     break;
   case O9000Ctrl: // Octoprint Job HMI
     HMI_O9000();
@@ -11600,12 +11582,11 @@ void DWIN_RenderMesh() {
   delay(5);
   render_bed_mesh_3D();
   delay(5);
-  // show print done confirm
   if (HMI_flag.language < Language_Max) // Rock 20211120
   {
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, OK_BUTTON_X + 10, 275);
   }
- 
+
 }
 
 void DWIN_OctoShowGCodeImage()

@@ -238,26 +238,45 @@ void reset_bed_level() {
 
 #if ENABLED(ASSESS_BED_LEVEL)
   #include "bedlevel_stats.h"
-  
-  BedLevel_Score assess_bed_level() {
+
+  BedLevelResult assess_bed_level() {
     // xy_int8_t mesh_Count = Converted_Grid_Point(select_level.now);
     float flattened_array[GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y];
 
     for (int i = 0; i < GRID_MAX_POINTS_Y; ++i) {
         std::copy(z_values[i], z_values[i] + GRID_MAX_POINTS_X, flattened_array + i * GRID_MAX_POINTS_X);
     }
+    BedLevelResult result;
     // Calculate the delta
-    const float delta = min_max_delta(flattened_array);
+    result.z_min = min_element(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
+    result.z_max = max_element(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
+    result.delta = result.z_max - result.z_min;
+    SERIAL_ECHOLNPAIR("result.z_min: ", result.z_min);
+    SERIAL_ECHOLNPAIR("result.z_max: ", result.z_max);
+    SERIAL_ECHOLNPAIR("result.delta: ", result.delta);
 
     // Calculate the standard deviation
-    const float stddev = calculate_stddev(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
+    result.stddev = calculate_stddev(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
 
-    if (stddev <= BED_LEVEL_STDDEV_PERFECT && delta <= BED_LEVEL_DELTA_PERFECT) return BedLevel_Perfect;
-    if (stddev <= BED_LEVEL_STDDEV_GOOD && delta <= BED_LEVEL_DELTA_GOOD) return BedLevel_Good;
-    if (stddev <= BED_LEVEL_STDDEV_OK && delta <= BED_LEVEL_DELTA_OK) return BedLevel_Ok;
-    if (stddev <= BED_LEVEL_STDDEV_BAD && delta <= BED_LEVEL_DELTA_BAD) return BedLevel_Bad;
+    if (result.stddev <= BED_LEVEL_STDDEV_PERFECT && result.delta <= BED_LEVEL_DELTA_PERFECT) {
+      result.score = BedLevel_Perfect;
+      return result;
+    }
+    if (result.stddev <= BED_LEVEL_STDDEV_GOOD && result.delta <= BED_LEVEL_DELTA_GOOD) {
+      result.score = BedLevel_Good;
+      return result;
+    }
+    if (result.stddev <= BED_LEVEL_STDDEV_OK && result.delta <= BED_LEVEL_DELTA_OK) {
+      result.score = BedLevel_Ok;
+      return result;
+    }
+    if (result.stddev <= BED_LEVEL_STDDEV_BAD && result.delta <= BED_LEVEL_DELTA_BAD) {
+      result.score = BedLevel_Bad;
+      return result;
+    }
 
-    return BedLevel_Horrible;
+    result.score = BedLevel_Horrible;
+    return result;
   }
 #endif
 

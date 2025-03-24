@@ -58,13 +58,21 @@
   #define Flat_Color        0x7FE0  //草坪绿 -->平坦颜色
   #define Relatively_Flat   0x1C9F  //道奇蓝色 --> 较平坦颜色
   // #define Slope_Small       0xF81F  //洋红色 -->小倾斜
-  #define Slope_Small       0xFFE0  //黄色 -->小倾斜 
+  #define Slope_Small       0xFFE0  //黄色 -->小倾斜
   #define Slope_Big         0xF800  //深红色 -->大倾斜
-  
+
+  #define HeightColor_VeryLow  0x909e
+  #define HeightColor_Low      0x1aff
+  #define HeightColor_FlatLow  0x04cc
+  #define HeightColor_Flat     0xffff
+  #define HeightColor_FlatHigh 0x5d20
+  #define HeightColor_High     0xed80
+  #define HeightColor_VeryHigh 0xf240
+
   #define  Select_Block_Color 0xFFE0 //黄色色 选中块颜色
 
-  #define Slope_Big_Max        2.0  //大倾斜上边界值
-  #define Slope_Big_Min       -2.0  //大倾斜下边界值
+  #define Slope_Big_Max        1.5  //大倾斜上边界值
+  #define Slope_Big_Min       -1.5  //大倾斜下边界值
   #define Slope_Small_Max      1.0  //小倾斜上边界值
   #define Slope_Small_Min     -1.0  //小倾斜下边界值
   #define Relatively_Flat_Max  0.5  //较平坦上边界值
@@ -173,10 +181,9 @@ enum processID : uint8_t {
   AUTO_OUT_FEEDSTOCK, //自动退料
   Level_Value_Edit,  //编辑调平数据
   Change_Level_Value, //改变调平值
-  Level_Assess_Popup, //Show bed level assessment popup
   ONE_HIGH, //一键对高页面
   POPUP_CONFIRM,//弹窗确定界面
-  Max_GUI,
+  POPUP_OK,// Generic OK Popup
  #if ENABLED(DWIN_CREALITY_LCD) // Enable the M117 string into LCD if LCD and Hosts commands are enabled.
   #if ENABLED(HOST_ACTION_COMMANDS)
     M117Info,
@@ -191,7 +198,8 @@ enum processID : uint8_t {
     O9000Print_window,
     OctoFinish,
   #endif
- #endif  
+ #endif
+  ErrNoValue,
 };
 
 enum DC_language{
