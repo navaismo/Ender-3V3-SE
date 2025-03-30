@@ -251,9 +251,6 @@ void reset_bed_level() {
     result.z_min = min_element(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
     result.z_max = max_element(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
     result.delta = result.z_max - result.z_min;
-    SERIAL_ECHOLNPAIR("result.z_min: ", result.z_min);
-    SERIAL_ECHOLNPAIR("result.z_max: ", result.z_max);
-    SERIAL_ECHOLNPAIR("result.delta: ", result.delta);
 
     // Calculate the standard deviation
     result.stddev = calculate_stddev(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);

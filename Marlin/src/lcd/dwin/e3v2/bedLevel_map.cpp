@@ -178,7 +178,6 @@ void render_bed_mesh_3D()
             DWIN_Draw_Line(color, sx01, sy01, sx00, sy00);
             DWIN_Draw_Line(color, sx00, sy00, sx11, sy11);
             delay(10);
-            SERIAL_ECHOLNPAIR(">>>>     mesh[", sx00, ":", sy00, "][", sx01, ":", sy01, "][", sx10, ":", sy10, "][", sx11, ":", sy11, "]");
         }
     }
 
@@ -189,39 +188,32 @@ void render_bed_mesh_3D()
     sprintf(delta_str, "Delta: %.2f", result.delta);
     sprintf(stddev_str, "StdDev: %.3f", result.stddev);
 
-    uint8_t scoreColor;
-    switch(result.score) {
-        case BedLevel_Perfect:
-            strcpy(score_str, "Bed level is PERFECT");
-            scoreColor = Flat_Color;
-            break;
-        case BedLevel_Good:
-            strcpy(score_str, "Bed level is GOOD");
-            scoreColor = Relatively_Flat;
-            break;
-        case BedLevel_Ok:
-            strcpy(score_str, "Bed level is OK");
-            scoreColor = Slope_Small;
-            break;
-        case BedLevel_Bad:
-            strcpy(score_str, "Bed level is BAD");
-            scoreColor = Slope_Big;
-            break;
-        case BedLevel_Horrible:
-            strcpy(score_str, "Bed level is HORRIBLE");
-            scoreColor = Slope_Big;
-            break;
-        default:
-            strcpy(score_str, "Bed level is Unknown");
-            scoreColor = Slope_Big;
-            break;
-
-    }
-    delay(3);
     DWIN_Draw_String(false, false, font10x20, Color_White, Color_Bg_Blue, 45, 4, F("Bed Level Visualizer"));
     DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 10, 40, delta_str);
     DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 10, 60, stddev_str);
-    DWIN_Draw_String(false, false, font6x12, scoreColor, Color_Bg_Black, 10, 80, score_str);
+    DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 10, 80, F("Bed level score:"));
+
+    switch(result.score) {
+        case BedLevel_Perfect:
+            DWIN_Draw_String(false, false, font14x28, Flat_Color, Color_Bg_Black, 10, 100, F("PERFECT"));
+            break;
+        case BedLevel_Good:
+            DWIN_Draw_String(false, false, font14x28, Relatively_Flat, Color_Bg_Black, 10, 100, F("GOOD"));
+            break;
+        case BedLevel_Ok:
+            DWIN_Draw_String(false, false, font14x28, Slope_Small, Color_Bg_Black, 10, 100, F("OK"));
+            break;
+        case BedLevel_Bad:
+            DWIN_Draw_String(false, false, font14x28, Slope_Big, Color_Bg_Black, 10, 100, F("BAD"));
+            break;
+        case BedLevel_Horrible:
+            DWIN_Draw_String(false, false, font14x28, Slope_Big, Color_Bg_Black, 10, 100, F("HORRIBLE"));
+            break;
+        default:
+            DWIN_Draw_String(false, false, font14x28, Slope_Big, Color_Bg_Black, 10, 100, F("Unknown"));
+            break;
+    }
     delay(3);
+    DWIN_Draw_qrcode(155, 40, 3, "https://bit.ly/navaismo-bed-leveling");
     SERIAL_ECHOLN("FINISHED BED MESH 3D LINES");
 }

@@ -42,6 +42,8 @@
 //#define DEBUG_OUT 1
 #include "../../core/debug_out.h"
 
+#include <QRCodeGenerator.h>
+
 // Make sure DWIN_SendBuf is large enough to hold the largest string plus draw command and tail.
 // Assume the narrowest (6 pixel) font and 2-byte gb2312-encoded characters.
 uint8_t DWIN_SendBuf[11 + DWIN_WIDTH / 6 * 2] = { 0xAA };
@@ -573,6 +575,71 @@ void DWIN_Draw_FloatValue(uint8_t bShow, bool zeroFill, uint8_t zeroMode, uint8_
   DWIN_Byte(i, fvalue[0]);
   */
   DWIN_Send(i);
+}
+
+void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const char *qrcode_data) {
+  // The structure to manage the QR code
+  QRCode qrcode;
+
+  // QR version 2 allows strings up to 47 uppercase chars, e.g. "https://bit.ly/qwertyuiop_asdfghjkl_zxcvbnm_123"
+  uint8_t QR_VERSION = 2;
+  char uppercase_data[48];
+
+  size_t i = 0;
+  while (qrcode_data[i] && i < sizeof(uppercase_data) - 1) {
+      uppercase_data[i] = toupper(qrcode_data[i]);
+      i++;
+  }
+  uppercase_data[i] = '\0'; // Null-terminate the new string
+
+  // Allocate a chunk of memory to store the QR code
+  uint8_t qrcodeBytes[qrcode_getBufferSize(QR_VERSION)];
+
+  qrcode_initText(&qrcode, qrcodeBytes, QR_VERSION, ECC_LOW, uppercase_data);
+
+  DWIN_Draw_Rectangle(1, Color_White, topLeftX, topLeftY, topLeftX + qrcode.size * moduleSize, topLeftY + qrcode.size * moduleSize);
+
+  // top left position marker
+  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY, topLeftX + moduleSize * 7, topLeftY + moduleSize * 7);
+  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * 1, topLeftY + moduleSize * 1, topLeftX + moduleSize * 6, topLeftY + moduleSize * 6);
+  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * 2, topLeftY + moduleSize * 2, topLeftX + moduleSize * 5, topLeftY + moduleSize * 5);
+  // top right position marker
+  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * (qrcode.size - 7), topLeftY, topLeftX + moduleSize * qrcode.size, topLeftY + moduleSize * 7);
+  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * (qrcode.size - 6), topLeftY + moduleSize * 1, topLeftX + moduleSize * (qrcode.size - 1), topLeftY + moduleSize * 6);
+  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * (qrcode.size - 5), topLeftY + moduleSize * 2, topLeftX + moduleSize * (qrcode.size - 2), topLeftY + moduleSize * 5);
+  // // bottom left position marker
+  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY + moduleSize * (qrcode.size - 7), topLeftX + moduleSize * 7, topLeftY + moduleSize * qrcode.size);
+  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * 1, topLeftY + moduleSize * (qrcode.size - 6), topLeftX + moduleSize * 6, topLeftY + moduleSize * (qrcode.size - 1));
+  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * 2, topLeftY + moduleSize * (qrcode.size - 5), topLeftX + moduleSize * 5, topLeftY + moduleSize * (qrcode.size - 2));
+
+  #define QR_POSITIONING_SIZE 8
+  for (uint8_t y = 0; y < qrcode.size; y++) {
+      for (uint8_t x = 0; x < qrcode.size; x++) {
+        // skip top left and bottom left position markers
+        if (x < QR_POSITIONING_SIZE && (y < QR_POSITIONING_SIZE || y > (qrcode.size - QR_POSITIONING_SIZE - 1))) {
+          continue;
+        }
+        // skip top right position marker
+        if (x > (qrcode.size - QR_POSITIONING_SIZE - 1) && y < QR_POSITIONING_SIZE) {
+          continue;
+        }
+        if (qrcode_getModule(&qrcode, x, y)) {
+          DWIN_Draw_Rectangle(
+            1,
+            Color_Bg_Black,
+            topLeftX + moduleSize * x,
+            topLeftY + moduleSize * y,
+            topLeftX + moduleSize * (x + 1),
+            topLeftY + moduleSize * (y + 1)
+          );
+        }
+      }
+      delay(10);
+  }
+}
+
+void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const __FlashStringHelper *qrcode_data) {
+  DWIN_Draw_qrcode(topLeftX, topLeftY, moduleSize, (const char *)qrcode_data);
 }
 
 /*---------------------------------------- Picture related functions ----------------------------------------*/
