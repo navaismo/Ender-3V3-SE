@@ -764,6 +764,9 @@ typedef struct {
     bool leveling_edit_home_flag :1; //调平编辑页面回零是否完成
     bool cr_touch_error_flag :1; //CR_Touch错误标志位
   #endif
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
+    bool advanced_help_enabled_flag:1;
+  #endif
   AxisEnum feedspeed_axis, acc_axis, jerk_axis, step_axis;
   uint8_t HM_PID_ROW,Auto_PID_ROW;
   uint8_t PID_ERROR_FLAG;
@@ -899,9 +902,11 @@ void clearOctoScrollVars();
 void DWIN_SetPrintingDetails(const char *eta, const char *progress, const char *current_layer);
 // Update print time
 void DWIN_OctoSetPrintTime(char* print_time);
-void render_bed_mesh_3D();
-void DWIN_RenderMesh();
 
+#if ENABLED(ADVANCED_HELP_MESSAGES)
+  void render_bed_mesh_3D();
+  void DWIN_RenderMesh(processID returnTo = MainMenu);
+#endif
 
 void DWIN_CompletedHoming();
 void DWIN_CompletedHeight();

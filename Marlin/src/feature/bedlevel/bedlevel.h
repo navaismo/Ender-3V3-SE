@@ -99,7 +99,7 @@ class TemporaryBedLevelingState {
     operator const xy_int8_t&() const { return pos; }
   };
 
-  #if ENABLED(ASSESS_BED_LEVEL)
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
     enum BedLevel_Score : uint8_t{
       BedLevel_Perfect = 0,
       BedLevel_Good,

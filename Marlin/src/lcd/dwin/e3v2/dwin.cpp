@@ -7410,10 +7410,13 @@ void HMI_Control()
       checkkey = Pstats;
       Draw_PStats_Menu();
       break;      
+
+#if ENABLED(ADVANCED_HELP_MESSAGES)
     case CONTROL_CASE_BEDVIS: // Bed Level Visualizer
       checkkey = POPUP_OK;
       DWIN_RenderMesh();
       break;
+#endif
     default:
       break;
     }
@@ -7422,7 +7425,10 @@ void HMI_Control()
 }
 
 #if HAS_ONESTEP_LEVELING
-// Change leveling value
+
+/**
+ * Processing the editing of selected Bed leveling grid cell
+ */
 void HMI_Leveling_Change()
 {
   uint16_t rec_LU_x, rec_LU_y, rec_RD_x, rec_RD_y, value_LU_x, value_LU_y;
@@ -7476,7 +7482,10 @@ void HMI_Leveling_Change()
     }
   }
 }
-// Edit Leveling Data Page
+
+/**
+ * Processing the selection of Bed leveling grid cell selection to be edited
+ */
 void HMI_Leveling_Edit()
 {
   uint16_t rec_LU_x, rec_LU_y, rec_RD_x, rec_RD_y, value_LU_x, value_LU_y;
@@ -7528,7 +7537,11 @@ void HMI_Leveling_Edit()
   }
 }
 
-/* Leveling */
+/**
+ * Screen with Bed leveling grid values, Edit and Confirm buttons.
+ *
+ * Shown after bed leveling is complete or from Control -> Edit Bed leveling
+ */
 void HMI_Leveling()
 {
   ENCODER_DiffState encoder_diffState = get_encoder_state();
@@ -11522,7 +11535,8 @@ void DWIN_OctoSetPrintTime(char* print_time){
 
 }
 
-void DWIN_RenderMesh() {
+#if ENABLED(ADVANCED_HELP_MESSAGES)
+void DWIN_RenderMesh(processID returnTo) {
   checkkey = POPUP_OK;
   HMI_flag.Refresh_bottom_flag = true;
   Clear_Main_Window();
@@ -11535,8 +11549,9 @@ void DWIN_RenderMesh() {
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, OK_BUTTON_X + 10, 275);
   }
 
-  HMI_Ok_Dialog(MainMenu);
+  HMI_Ok_Dialog(returnTo);
 }
+#endif // ENABLED(ADVANCED_HELP_MESSAGES)
 
 void DWIN_OctoShowGCodeImage()
 {
@@ -11548,6 +11563,9 @@ void DWIN_OctoShowGCodeImage()
 void DWIN_CompletedHoming()
 {
   HMI_flag.home_flag = false;
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
+    HMI_flag.advanced_help_enabled_flag = true;
+  #endif
   dwin_zoffset = TERN0(HAS_BED_PROBE, probe.offset.z);
   // Print log("checkkey:",checkkey);
   if (checkkey == Last_Prepare)

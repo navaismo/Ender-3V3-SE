@@ -125,10 +125,12 @@ void GcodeSuite::O9000()
       serial_connection_active = false;
       TERN_(DWIN_CREALITY_LCD, Goto_MainMenu());
     }
+#if ENABLED(ADVANCED_HELP_MESSAGES)
     else if (strstr(my_string, "MESH|") != NULL)
     {
       DWIN_RenderMesh();
     }
+#endif
 
     else
     {

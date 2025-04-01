@@ -173,10 +173,7 @@
 #define USER_LEVEL_CHECK        1 // 调平校准使能
 #define WUHAN_CHENGE_PLATFORM   1 // 武汉改平台板  20230913_Rock
 
-// We should probably add some flag like "NEWCOMER_MODE" which will enable fancy features targeted
-// at people that are new to the hobby and would benefit from helpful messages.
-// Then single NEWCOMER_MODE define here would trigger following flags somewhere in Conditionals_LCD
-#define ASSESS_BED_LEVEL        1 // Enabled bed level assessment
+#define ADVANCED_HELP_MESSAGES  1 // Enabled advanced help messages
 
 //打开高速打印的宏之后由于震动补偿功能会高温报警
 

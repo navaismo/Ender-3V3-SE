@@ -236,7 +236,7 @@ void reset_bed_level() {
 
 #endif // MESH_BED_LEVELING || PROBE_MANUALLY
 
-#if ENABLED(ASSESS_BED_LEVEL)
+#if ENABLED(ADVANCED_HELP_MESSAGES)
   #include "bedlevel_stats.h"
 
   BedLevelResult assess_bed_level() {

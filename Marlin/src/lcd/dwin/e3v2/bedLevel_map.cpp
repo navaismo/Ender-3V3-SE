@@ -1,4 +1,6 @@
 #include "../../../inc/MarlinConfigPre.h"
+
+#if ENABLED(ADVANCED_HELP_MESSAGES)
 #include "dwin.h"
 #include "ui_position.h"
 #if ANY(AUTO_BED_LEVELING_BILINEAR, AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_3POINT) && DISABLED(PROBE_MANUALLY)
@@ -217,3 +219,5 @@ void render_bed_mesh_3D()
     DWIN_Draw_qrcode(155, 40, 3, "https://bit.ly/navaismo-bed-leveling");
     SERIAL_ECHOLN("FINISHED BED MESH 3D LINES");
 }
+
+#endif // ENABLED(ADVANCED_HELP_MESSAGES)
