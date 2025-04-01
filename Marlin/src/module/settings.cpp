@@ -502,6 +502,9 @@ typedef struct SettingsDataStruct {
    int16_t lcddimm;             
    int16_t lcdbright;              
   #endif
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
+    bool advanced_help_mesasges_enabled;
+  #endif
 
 //  uint16_t Auto_PID_Value_set1;
 //  uint16_t Auto_PID_Value_set2;
@@ -1504,6 +1507,15 @@ void MarlinSettings::postprocess() {
      }             
      #endif
 
+    #if ENABLED(ADVANCED_HELP_MESSAGES)
+    {
+      bool advanced_help_mesasges_enabled;
+
+      advanced_help_mesasges_enabled = HMI_flag.advanced_help_enabled_flag;
+      EEPROM_WRITE(advanced_help_mesasges_enabled);
+    }
+    #endif
+
     // Auto_PID_Value_set[1]=HMI_ValueStruct.Auto_PID_Value[1];
     // Auto_PID_Value_set[2]=HMI_ValueStruct.Auto_PID_Value[2];
     // EEPROM_WRITE(Auto_PID_Value_set[1]);
@@ -2471,8 +2483,16 @@ void MarlinSettings::postprocess() {
       DIMM_SCREEN_BRIGHTNESS = (dimmBright > 175) ? 175  : dimmBright;         
       EEPROM_READ(bright);             
       MAX_SCREEN_BRIGHTNESS = ( bright > 230) ? 230 : bright;
+    }
+    #endif
 
-    }             
+    #if ENABLED(ADVANCED_HELP_MESSAGES)
+    {
+      bool advanced_help_mesasges_enabled;
+      EEPROM_READ(advanced_help_mesasges_enabled);
+
+      HMI_flag.advanced_help_enabled_flag = advanced_help_mesasges_enabled;
+    }
     #endif
       //  EEPROM_READ(Auto_PID_Value_set[1]);
       //  if(!Auto_PID_Value_set[1])Auto_PID_Value_set[1]=100;

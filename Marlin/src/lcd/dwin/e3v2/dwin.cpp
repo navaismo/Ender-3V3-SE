@@ -71,9 +71,6 @@ lin 3D Printer Firmware
 #include "lcd_rts.h"
 #include "../../../module/AutoOffset.h"
 
-#include <QRCodeGenerator.h>
-
-
 #ifndef MACHINE_SIZE
 #define MACHINE_SIZE STRINGIFY(X_BED_SIZE) "x" STRINGIFY(Y_BED_SIZE) "x" STRINGIFY(Z_MAX_POS)
 #endif
@@ -163,6 +160,7 @@ uint8_t G29_level_num = 0; // Record how many points g29 has been leveled to det
 bool end_flag = false;     // Prevent repeated refresh of curve completion instructions
 enum DC_language current_language;
 volatile uint8_t checkkey = 0;
+volatile processID backKey = ErrNoValue;
 // 0 Without interruption, 1 runout filament paused 2 remove card pause
 static bool temp_remove_card_flag = false, temp_cutting_line_flag = false /*,temp wifi print flag=false*/;
 typedef struct
@@ -820,14 +818,7 @@ void ICON_Leveling(bool show)
     DWIN_Draw_Rectangle(0, Color_White, ICON_LEVEL_X, ICON_LEVEL_Y, ICON_LEVEL_X + ICON_W, ICON_LEVEL_Y + ICON_H);
     if (HMI_flag.language < Language_Max)
     {
-      if (HMI_flag.language == Russian)
-      {
-        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_1, WORD_LEVEL_X, WORD_LEVEL_Y);
-      }
-      else
-      {
-        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_1, WORD_LEVEL_X, WORD_LEVEL_Y);
-      }
+      DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_1, WORD_LEVEL_X, WORD_LEVEL_Y);
     }
     else
     {
@@ -840,15 +831,7 @@ void ICON_Leveling(bool show)
     DWIN_ICON_Not_Filter_Show(ICON, ICON_Leveling_0, ICON_LEVEL_X, ICON_LEVEL_Y);
     if (HMI_flag.language < Language_Max)
     {
-      // The Russian entry is too long and moved forward by 30 pixels.
-      if (HMI_flag.language == Russian)
-      {
-        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_0, WORD_LEVEL_X, WORD_LEVEL_Y);
-      }
-      else
-      {
-        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_0, WORD_LEVEL_X, WORD_LEVEL_Y);
-      }
+      DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Level_0, WORD_LEVEL_X, WORD_LEVEL_Y);
     }
     else
     {
@@ -1418,7 +1401,8 @@ inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valr
 // #define CONTROL_CASE_INFO  (CONTROL_CASE_ADVSET + 1)
 #define CONTROL_CASE_INFO (CONTROL_CASE_RESET + 1)
 #define CONTROL_CASE_STATS (CONTROL_CASE_INFO + 1)
-#define CONTROL_CASE_TOTAL CONTROL_CASE_STATS
+#define CONTROL_CASE_BEDVIS (CONTROL_CASE_STATS + 1)
+#define CONTROL_CASE_TOTAL CONTROL_CASE_BEDVIS
 
 #define TUNE_CASE_SPEED 1
 #define TUNE_CASE_TEMP (TUNE_CASE_SPEED + ENABLED(HAS_HOTEND))
@@ -1908,6 +1892,16 @@ void Item_Control_Stats(const uint16_t line)
   Draw_Menu_Line(line, ICON_Info);
 }
 
+void Item_Control_BedVisualizer(const uint16_t line)
+{
+  if (HMI_flag.language < Language_Max)
+  {
+    DWIN_Draw_Label(line, F("BedLevel Visualizer"));
+    DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(line) - 3);
+  }
+  Draw_Menu_Line(line, ICON_PrintSize);
+}
+
 static void Item_Temp_HMPID(const uint16_t line)
 {
   if (HMI_flag.language < Language_Max)
@@ -1975,7 +1969,9 @@ void Draw_Control_Menu()
   if (CVISI(CONTROL_CASE_INFO))
     Item_Control_Info(CLINE(CONTROL_CASE_INFO));
   if (CVISI(CONTROL_CASE_STATS))
-    Item_Control_Stats(CLINE(CONTROL_CASE_STATS));  
+    Item_Control_Stats(CLINE(CONTROL_CASE_STATS)); 
+  if (CVISI(CONTROL_CASE_BEDVIS))
+    Item_Control_BedVisualizer(CLINE(CONTROL_CASE_BEDVIS));     
   if (select_control.now && CVISI(select_control.now))
     Draw_Menu_Cursor(CSCROL(select_control.now));
 
@@ -2004,6 +2000,7 @@ void Draw_Control_Menu()
 #endif
   _TEMP_ICON(CONTROL_CASE_INFO, ICON_Info, true);
   _TEMP_ICON(CONTROL_CASE_STATS, ICON_Info, true);
+  _TEMP_ICON(CONTROL_CASE_BEDVIS, ICON_PrintSize, true);
 }
 
 static void Show_Temp_Default_Data(const uint8_t line, uint8_t index)
@@ -2164,62 +2161,6 @@ void Draw_Tune_Menu()
   
   if (select_tune.now)
     Draw_Menu_Cursor(TSCROL(select_tune.now));
-}
-
-void draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const char *qrcode_data) {
-  // The structure to manage the QR code
-  QRCode qrcode;
-
-  // QR version 2 allows strings up to 47 chars, e.g. "https://bit.ly/qwertyuiop_asdfghjkl_zxcvbnm_123"
-  uint8_t QR_VERSION = 2;
-
-  // Allocate a chunk of memory to store the QR code
-  uint8_t qrcodeBytes[qrcode_getBufferSize(QR_VERSION)];
-
-  qrcode_initText(&qrcode, qrcodeBytes, QR_VERSION, ECC_LOW, qrcode_data);
-
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX, topLeftY, topLeftX + qrcode.size * moduleSize, topLeftY + qrcode.size * moduleSize);
-
-  // top left position marker
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY, topLeftX + moduleSize * 7, topLeftY + moduleSize * 7);
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * 1, topLeftY + moduleSize * 1, topLeftX + moduleSize * 6, topLeftY + moduleSize * 6);
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * 2, topLeftY + moduleSize * 2, topLeftX + moduleSize * 5, topLeftY + moduleSize * 5);
-  // top right position marker
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * (qrcode.size - 7), topLeftY, topLeftX + moduleSize * qrcode.size, topLeftY + moduleSize * 7);
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * (qrcode.size - 6), topLeftY + moduleSize * 1, topLeftX + moduleSize * (qrcode.size - 1), topLeftY + moduleSize * 6);
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * (qrcode.size - 5), topLeftY + moduleSize * 2, topLeftX + moduleSize * (qrcode.size - 2), topLeftY + moduleSize * 5);
-  // // bottom left position marker
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY + moduleSize * (qrcode.size - 7), topLeftX + moduleSize * 7, topLeftY + moduleSize * qrcode.size);
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * 1, topLeftY + moduleSize * (qrcode.size - 6), topLeftX + moduleSize * 6, topLeftY + moduleSize * (qrcode.size - 1));
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * 2, topLeftY + moduleSize * (qrcode.size - 5), topLeftX + moduleSize * 5, topLeftY + moduleSize * (qrcode.size - 2));
-  
-  for (uint8_t y = 0; y < qrcode.size; y++) {
-      for (uint8_t x = 0; x < qrcode.size; x++) {
-        // skip top left and bottom left position markers
-        if (x < 7 && (y < 7 || y > (qrcode.size - 7 - 1))) {
-          continue;
-        }
-        // skip top right position marker
-        if (x > (qrcode.size - 7 - 1) && y < 7) {
-          continue;
-        }
-        if (qrcode_getModule(&qrcode, x, y)) {
-          DWIN_Draw_Rectangle(
-            1,
-            Color_Bg_Black,
-            topLeftX + moduleSize * x, 
-            topLeftY + moduleSize * y,
-            topLeftX + moduleSize * (x + 1),
-            topLeftY + moduleSize * (y + 1)
-          );
-          delay(5);
-        }
-      }
-  }
-}
-
-void draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const __FlashStringHelper *qrcode_data) {
-  draw_qrcode(topLeftX, topLeftY, moduleSize, (const char *)qrcode_data);
 }
 
 void draw_max_en(const uint16_t line)
@@ -2991,16 +2932,6 @@ void Popup_window_boot(uint8_t type_popup)
       DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
     }
     break;
-  case UnknownError:
-    if (HMI_flag.language < Language_Max)
-    {
-      DWIN_Draw_String(false, false, font10x20, Color_Red, Color_Bg_Black, WORD_HINT_CLEAR_X, WORD_HINT_CLEAR_Y, F("Unknown error"));
-      DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, BUTTON_BOOT_X, BUTTON_BOOT_Y); // OK button
-      // Add a white selection block
-      DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 1, BUTTON_BOOT_Y - 1, BUTTON_BOOT_X + 82, BUTTON_BOOT_Y + 32);
-      DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
-    }
-    break;
   default:
     break;
   }
@@ -3336,7 +3267,6 @@ void Goto_MainMenu()
 #if ENABLED(DWIN_CREALITY_480_LCD)
   DWIN_ICON_Show(ICON, ICON_LOGO, 71, 52);
 #elif ENABLED(DWIN_CREALITY_320_LCD)
-                                       //  DWIN_ICON_Show(ICON, ICON_LOGO, LOGO_LITTLE_X, LOGO_LITTLE_Y);
   if (HMI_flag.language < Language_Max)
   {
     if(serial_connection_active)
@@ -3347,14 +3277,12 @@ void Goto_MainMenu()
     {
       DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Main, TITLE_X, TITLE_Y); // Rock j
     }
-    //DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Main, TITLE_X, TITLE_Y); //rock_j
   }
 #endif
   ICON_Print();
   ICON_Prepare();
   ICON_Control();
-  TERN(HAS_ONESTEP_LEVELING, ICON_Leveling, ICON_StartInfo)
-  (select_page.now == 3);
+  TERN(HAS_ONESTEP_LEVELING, ICON_Leveling, ICON_StartInfo)(select_page.now == 3);
 }
 
 
@@ -4829,7 +4757,23 @@ void HMI_SDCardInit() { card.cdroot(); }
 
 void MarlinUI::refresh() { /* Nothing to see here */ }
 void MarlinUI::kill_screen(PGM_P lcd_error, PGM_P lcd_component) {
-  Popup_window_boot(UnknownError);
+  Clear_Main_Window();
+  DWIN_Draw_Rectangle(1, Color_Bg_Window, POPUP_BG_X_LU, POPUP_BG_Y_LU, POPUP_BG_X_RD, POPUP_BG_Y_RD);
+  DWIN_Draw_Rectangle(1, Color_Bg_Red, POPUP_BG_X_LU + 1, POPUP_BG_Y_LU + 1, POPUP_BG_X_RD - 1, POPUP_BG_Y_LU + POPUP_TITLE_HEIGHT);
+  
+  DWIN_Draw_String(false, false, font12x24, All_Black, Color_Bg_Red, POPUP_BG_X_LU + ((POPUP_BG_X_LU - POPUP_BG_X_LU) / 2) - ((strlen_P((PGM_P)GET_TEXT_F(MSG_HALTED)) / 2) * 12), POPUP_BG_Y_LU + 1, GET_TEXT_F(MSG_HALTED));
+  // HMI_flag.Refresh_bottom_flag = true; // Flag does not refresh bottom parameters
+#if ENABLED(DWIN_CREALITY_480_LCD)
+#elif ENABLED(DWIN_CREALITY_320_LCD)
+    if (HMI_flag.language < Language_Max)
+    {
+      DWIN_Draw_MultilineString(false, false, font10x20, Color_Red, Color_Bg_Black, WORD_HINT_CLEAR_X + 10, WORD_HINT_CLEAR_Y + POPUP_TITLE_HEIGHT, 19, 20, F(lcd_error));
+      // Add a white selection block
+      DWIN_Draw_Rectangle(0, Color_Bg_Red, BUTTON_BOOT_X - 1, BUTTON_BOOT_Y - 1, BUTTON_BOOT_X + 82, BUTTON_BOOT_Y + 32);
+      DWIN_Draw_Rectangle(0, Color_Bg_Red, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
+      DWIN_Draw_String(false, false, font10x20, Color_Red, Color_Bg_Black, BUTTON_BOOT_X, BUTTON_BOOT_Y, GET_TEXT_F(MSG_PLEASE_RESET));
+    }
+#endif // DWIN_CREALITY_320_LCD
 
   // RED ALERT. RED ALERT.
   #ifdef HAS_COLOR_LEDS
@@ -6653,6 +6597,7 @@ void HMI_Display_Menu(){
       break; 
     case 5:
       settings.save();    
+      break;
   
 
     }
@@ -7294,7 +7239,11 @@ void HMI_Control()
           Draw_Menu_Icon(MROWS, ICON_Info);
           DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(MROWS) - 3);
           break;
-
+        case CONTROL_CASE_BEDVIS: // Printer Statistics >
+          Item_Control_BedVisualizer(MBASE(MROWS));
+          Draw_Menu_Icon(MROWS, ICON_PrintSize);
+          DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(MROWS) - 3);
+          break;  
         default:
           break;
         }
@@ -7336,6 +7285,13 @@ void HMI_Control()
           {
             Draw_Menu_Icon(0, ICON_WriteEEPROM);
             DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Store, 42, MBASE(0) + JPN_OFFSET);
+
+           }
+        }else if (index_control == 9){
+          if (HMI_flag.language < Language_Max)
+          {
+            Draw_Menu_Icon(0, ICON_ReadEEPROM);
+            DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Read, 42, MBASE(0) + JPN_OFFSET);
 
            }
         }
@@ -7454,6 +7410,13 @@ void HMI_Control()
       checkkey = Pstats;
       Draw_PStats_Menu();
       break;      
+
+#if ENABLED(ADVANCED_HELP_MESSAGES)
+    case CONTROL_CASE_BEDVIS: // Bed Level Visualizer
+      checkkey = POPUP_OK;
+      DWIN_RenderMesh();
+      break;
+#endif
     default:
       break;
     }
@@ -7462,8 +7425,11 @@ void HMI_Control()
 }
 
 #if HAS_ONESTEP_LEVELING
-// Change leveling value
-void HMI_Levling_Change()
+
+/**
+ * Processing the editing of selected Bed leveling grid cell
+ */
+void HMI_Leveling_Change()
 {
   uint16_t rec_LU_x, rec_LU_y, rec_RD_x, rec_RD_y, value_LU_x, value_LU_y;
   ENCODER_DiffState encoder_diffState = get_encoder_state();
@@ -7516,7 +7482,10 @@ void HMI_Levling_Change()
     }
   }
 }
-// Edit Leveling Data Page
+
+/**
+ * Processing the selection of Bed leveling grid cell selection to be edited
+ */
 void HMI_Leveling_Edit()
 {
   uint16_t rec_LU_x, rec_LU_y, rec_RD_x, rec_RD_y, value_LU_x, value_LU_y;
@@ -7568,7 +7537,11 @@ void HMI_Leveling_Edit()
   }
 }
 
-/* Leveling */
+/**
+ * Screen with Bed leveling grid values, Edit and Confirm buttons.
+ *
+ * Shown after bed leveling is complete or from Control -> Edit Bed leveling
+ */
 void HMI_Leveling()
 {
   ENCODER_DiffState encoder_diffState = get_encoder_state();
@@ -8913,20 +8886,45 @@ void HMI_Pstats()
   DWIN_UpdateLCD();
 }
 
-
-/* M117 Info */
-void HMI_M117Info()
+/* Generic OK dialog handling with OK button */
+void HMI_Ok_Dialog(processID returnTo = ErrNoValue)
 {
+  if (backKey != ErrNoValue) {
+    SERIAL_ECHOLNPAIR("checkKey: ", checkkey, " backKey: ", backKey);
+    checkkey = backKey;
+    backKey = ErrNoValue;
+
+    return;
+  }
+
+  if (returnTo != ErrNoValue) {
+    backKey = returnTo;
+  }
+
   ENCODER_DiffState encoder_diffState = get_encoder_state();
   if (encoder_diffState == ENCODER_DIFF_NO)
     return;
   if (encoder_diffState == ENCODER_DIFF_ENTER)
   {
+    if (backKey != ErrNoValue) {
+      checkkey = backKey;
+      backKey = ErrNoValue;
+    }
+
     // If enter go back to main menu
-    Goto_MainMenu();
-    HMI_flag.Refresh_bottom_flag = true; // Flag not to refresh bottom parameters --Flag not to refresh bottom parameters
+    if (checkkey == MainMenu) {
+      Goto_MainMenu();
+    }
+    HMI_flag.Refresh_bottom_flag = true; // Flag not to refresh bottom parameters
   }
   DWIN_UpdateLCD(); // Update LCD
+}
+
+/* M117 Info */
+void HMI_M117Info()
+{
+  checkkey = POPUP_OK;
+  HMI_Ok_Dialog(MainMenu);
 }
 
 /* Print Finish */
@@ -10788,7 +10786,7 @@ void DWIN_HandleScreen()
     HMI_Leveling_Edit();
     break;
   case Change_Level_Value:
-    HMI_Levling_Change();
+    HMI_Leveling_Change();
     break;
 #endif
   case PrintProcess:
@@ -11008,6 +11006,9 @@ void DWIN_HandleScreen()
     break;       // Interface with a single confirmation button
   case M117Info: // M117 window fix for HMI
     HMI_M117Info();
+    break;
+  case POPUP_OK: // Handle generic OK button popup
+    HMI_Ok_Dialog();
     break;
   case O9000Ctrl: // Octoprint Job HMI
     HMI_O9000();
@@ -11534,6 +11535,24 @@ void DWIN_OctoSetPrintTime(char* print_time){
 
 }
 
+#if ENABLED(ADVANCED_HELP_MESSAGES)
+void DWIN_RenderMesh(processID returnTo) {
+  checkkey = POPUP_OK;
+  HMI_flag.Refresh_bottom_flag = true;
+  Clear_Main_Window();
+  Clear_Title_Bar();
+  delay(5);
+  render_bed_mesh_3D();
+  delay(5);
+  if (HMI_flag.language < Language_Max) // Rock 20211120
+  {
+    DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, OK_BUTTON_X + 10, 275);
+  }
+
+  HMI_Ok_Dialog(returnTo);
+}
+#endif // ENABLED(ADVANCED_HELP_MESSAGES)
+
 void DWIN_OctoShowGCodeImage()
 {
   checkkey = M117Info; // Implement Human Interface Control for M117
@@ -11544,6 +11563,9 @@ void DWIN_OctoShowGCodeImage()
 void DWIN_CompletedHoming()
 {
   HMI_flag.home_flag = false;
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
+    HMI_flag.advanced_help_enabled_flag = true;
+  #endif
   dwin_zoffset = TERN0(HAS_BED_PROBE, probe.offset.z);
   // Print log("checkkey:",checkkey);
   if (checkkey == Last_Prepare)

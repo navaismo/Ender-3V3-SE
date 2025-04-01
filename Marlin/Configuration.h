@@ -172,6 +172,9 @@
 #define K8_EXTRUDER             0 //1 是K8挤出机   0 是精灵挤出机
 #define USER_LEVEL_CHECK        1 // 调平校准使能
 #define WUHAN_CHENGE_PLATFORM   1 // 武汉改平台板  20230913_Rock
+
+#define ADVANCED_HELP_MESSAGES  1 // Enabled advanced help messages
+
 //打开高速打印的宏之后由于震动补偿功能会高温报警
 
 // Printer's unique ID, used by some programs to differentiate between machines.

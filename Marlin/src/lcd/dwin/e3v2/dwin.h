@@ -58,13 +58,21 @@
   #define Flat_Color        0x7FE0  //草坪绿 -->平坦颜色
   #define Relatively_Flat   0x1C9F  //道奇蓝色 --> 较平坦颜色
   // #define Slope_Small       0xF81F  //洋红色 -->小倾斜
-  #define Slope_Small       0xFFE0  //黄色 -->小倾斜 
+  #define Slope_Small       0xFFE0  //黄色 -->小倾斜
   #define Slope_Big         0xF800  //深红色 -->大倾斜
-  
+
+  #define HeightColor_VeryLow  0x909e
+  #define HeightColor_Low      0x1aff
+  #define HeightColor_FlatLow  0x04cc
+  #define HeightColor_Flat     0xffff
+  #define HeightColor_FlatHigh 0x5d20
+  #define HeightColor_High     0xed80
+  #define HeightColor_VeryHigh 0xf240
+
   #define  Select_Block_Color 0xFFE0 //黄色色 选中块颜色
 
-  #define Slope_Big_Max        2.0  //大倾斜上边界值
-  #define Slope_Big_Min       -2.0  //大倾斜下边界值
+  #define Slope_Big_Max        1.5  //大倾斜上边界值
+  #define Slope_Big_Min       -1.5  //大倾斜下边界值
   #define Slope_Small_Max      1.0  //小倾斜上边界值
   #define Slope_Small_Min     -1.0  //小倾斜下边界值
   #define Relatively_Flat_Max  0.5  //较平坦上边界值
@@ -175,7 +183,7 @@ enum processID : uint8_t {
   Change_Level_Value, //改变调平值
   ONE_HIGH, //一键对高页面
   POPUP_CONFIRM,//弹窗确定界面
-  Max_GUI,
+  POPUP_OK,// Generic OK Popup
  #if ENABLED(DWIN_CREALITY_LCD) // Enable the M117 string into LCD if LCD and Hosts commands are enabled.
   #if ENABLED(HOST_ACTION_COMMANDS)
     M117Info,
@@ -190,7 +198,8 @@ enum processID : uint8_t {
     O9000Print_window,
     OctoFinish,
   #endif
- #endif  
+ #endif
+  ErrNoValue,
 };
 
 enum DC_language{
@@ -222,7 +231,6 @@ enum DWIN_Poupe{
   Level_faild_QR, //调平失败请扫描二维码，获取解决方案
   Boot_undone,  //开机引导未完成
   CRTouch_err,  //CRTouch异常，
-  UnknownError, // Used for future MarlinUI integration
 };
 extern enum DC_language current_language;
 // Picture ID
@@ -756,6 +764,9 @@ typedef struct {
     bool leveling_edit_home_flag :1; //调平编辑页面回零是否完成
     bool cr_touch_error_flag :1; //CR_Touch错误标志位
   #endif
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
+    bool advanced_help_enabled_flag:1;
+  #endif
   AxisEnum feedspeed_axis, acc_axis, jerk_axis, step_axis;
   uint8_t HM_PID_ROW,Auto_PID_ROW;
   uint8_t PID_ERROR_FLAG;
@@ -889,11 +900,13 @@ void octoUpdateScroll();
 void clearOctoScrollVars();
 // Set Values for updates
 void DWIN_SetPrintingDetails(const char *eta, const char *progress, const char *current_layer);
-
 // Update print time
 void DWIN_OctoSetPrintTime(char* print_time);
 
-
+#if ENABLED(ADVANCED_HELP_MESSAGES)
+  void render_bed_mesh_3D();
+  void DWIN_RenderMesh(processID returnTo = MainMenu);
+#endif
 
 void DWIN_CompletedHoming();
 void DWIN_CompletedHeight();

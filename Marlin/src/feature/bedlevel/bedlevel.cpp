@@ -236,4 +236,45 @@ void reset_bed_level() {
 
 #endif // MESH_BED_LEVELING || PROBE_MANUALLY
 
+#if ENABLED(ADVANCED_HELP_MESSAGES)
+  #include "bedlevel_stats.h"
+
+  BedLevelResult assess_bed_level() {
+    // xy_int8_t mesh_Count = Converted_Grid_Point(select_level.now);
+    float flattened_array[GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y];
+
+    for (int i = 0; i < GRID_MAX_POINTS_Y; ++i) {
+        std::copy(z_values[i], z_values[i] + GRID_MAX_POINTS_X, flattened_array + i * GRID_MAX_POINTS_X);
+    }
+    BedLevelResult result;
+    // Calculate the delta
+    result.z_min = min_element(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
+    result.z_max = max_element(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
+    result.delta = result.z_max - result.z_min;
+
+    // Calculate the standard deviation
+    result.stddev = calculate_stddev(flattened_array, GRID_MAX_POINTS_X * GRID_MAX_POINTS_Y);
+
+    if (result.stddev <= BED_LEVEL_STDDEV_PERFECT && result.delta <= BED_LEVEL_DELTA_PERFECT) {
+      result.score = BedLevel_Perfect;
+      return result;
+    }
+    if (result.stddev <= BED_LEVEL_STDDEV_GOOD && result.delta <= BED_LEVEL_DELTA_GOOD) {
+      result.score = BedLevel_Good;
+      return result;
+    }
+    if (result.stddev <= BED_LEVEL_STDDEV_OK && result.delta <= BED_LEVEL_DELTA_OK) {
+      result.score = BedLevel_Ok;
+      return result;
+    }
+    if (result.stddev <= BED_LEVEL_STDDEV_BAD && result.delta <= BED_LEVEL_DELTA_BAD) {
+      result.score = BedLevel_Bad;
+      return result;
+    }
+
+    result.score = BedLevel_Horrible;
+    return result;
+  }
+#endif
+
 #endif // HAS_LEVELING

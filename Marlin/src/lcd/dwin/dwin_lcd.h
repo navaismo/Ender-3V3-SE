@@ -160,6 +160,24 @@ inline void DWIN_Draw_String(bool widthAdjust, bool bShow, uint8_t size, uint16_
   DWIN_Draw_String(widthAdjust, bShow, size, color, bColor, x, y, (char *)title);
 }
 
+// Draw a multiline string. Split string to next line by space character, keeping maximum char_limit chars on single line.
+//  widthAdjust: true=self-adjust character width; false=no adjustment
+//  bShow: true=display background color; false=don't display background color
+//  size: Font size
+//  color: Character color
+//  bColor: Background color
+//  x/y: Upper-left coordinate of the string
+//  char_limit: single line character limit
+//  line_height: height of line (should be at least the font height)
+//  *str: The string
+void DWIN_Draw_MultilineString(bool widthAdjust, bool bShow, uint8_t size, uint16_t color, uint16_t bColor, uint16_t x, uint16_t y,
+                               uint8_t char_limit, uint8_t line_height, const char* str);
+
+inline void DWIN_Draw_MultilineString(bool widthAdjust, bool bShow, uint8_t size, uint16_t color, uint16_t bColor, uint16_t x, uint16_t y,
+                               uint8_t char_limit, uint8_t line_height, const __FlashStringHelper *str) {
+  DWIN_Draw_MultilineString(widthAdjust, bShow, size, color, bColor, x, y, char_limit, line_height, (char *)str);
+}
+
 // Draw a positive integer
 //  bShow: true=display background color; false=don't display background color
 //  zeroFill: true=zero fill; false=no zero fill
@@ -188,6 +206,10 @@ void DWIN_Draw_IntValue_N0SPACE(uint8_t bShow, bool zeroFill, uint8_t zeroMode, 
 void DWIN_Draw_FloatValue(uint8_t bShow, bool zeroFill, uint8_t zeroMode, uint8_t size, uint16_t color,
                             uint16_t bColor, uint8_t iNum, uint8_t fNum, uint16_t x, uint16_t y, long value);
 
+void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize,
+                        const char *qrcode_data);
+void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize,
+                        const __FlashStringHelper *qrcode_data);
 /*---------------------------------------- Picture related functions ----------------------------------------*/
 
 // Draw JPG and cached in #0 virtual display area

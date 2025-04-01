@@ -99,4 +99,41 @@ class TemporaryBedLevelingState {
     operator const xy_int8_t&() const { return pos; }
   };
 
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
+    enum BedLevel_Score : uint8_t{
+      BedLevel_Perfect = 0,
+      BedLevel_Good,
+      BedLevel_Ok,
+      BedLevel_Bad,
+      BedLevel_Horrible,
+    };
+
+    struct BedLevelResult {
+        BedLevel_Score score;
+        float stddev;
+        float delta;
+        float z_min;
+        float z_max;
+    };
+
+    // Bed level assessment stddev thresholds
+    #define BED_LEVEL_STDDEV_PERFECT 0.1f
+    #define BED_LEVEL_STDDEV_GOOD 0.2f
+    #define BED_LEVEL_STDDEV_OK 0.3f
+    #define BED_LEVEL_STDDEV_BAD 1.0f
+
+    // Bed level assessment min-max delta thresholds
+    #define BED_LEVEL_DELTA_PERFECT 0.3f
+    #define BED_LEVEL_DELTA_GOOD 0.5f
+    #define BED_LEVEL_DELTA_OK 1.0f
+    #define BED_LEVEL_DELTA_BAD 2.0f
+
+    // Bed level assessment min-max delta thresholds
+    #define BED_LEVEL_SLOPE_THRESHOLD_0 0.05f
+    #define BED_LEVEL_SLOPE_THRESHOLD_1 0.1f
+    #define BED_LEVEL_SLOPE_THRESHOLD_2 1.0f
+
+    BedLevelResult assess_bed_level();
+  #endif
+
 #endif
