@@ -944,11 +944,11 @@ G29_TYPE GcodeSuite::G29()
   process_subcommands_now_P(PSTR("G28"));
   process_subcommands_now_P("G1 Z10");  //调平完成之后上台到10mm
 
- #if DISABLED(SHOW_GRID_VALUES)  //不显示网格值
-  #if ENABLED(DWIN_CREALITY_LCD)
-    DWIN_CompletedLeveling();  
-  #endif
-#else
+  #if DISABLED(SHOW_GRID_VALUES)  //不显示网格值
+    #if ENABLED(DWIN_CREALITY_LCD)
+      DWIN_CompletedLeveling();  
+    #endif
+  #else
     if(((GRID_MAX_POINTS_Y*GRID_MAX_POINTS_X)==G29_level_num)&&(!HMI_flag.G29_level_not_normal))
     {
       HMI_flag.G29_finish_flag=true; //如果16点的调平值都正常
@@ -989,7 +989,7 @@ G29_TYPE GcodeSuite::G29()
       }
       HMI_flag.local_leveling_flag = false;
     }
-#endif
+  #endif
 
   report_current_position();
 
