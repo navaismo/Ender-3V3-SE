@@ -286,6 +286,18 @@ Added option to edit the height of the nozzle after homing. From feature request
 
 <br>
 
+
+## * CRTouch Probe tests:
+Added option to test the probe to deploay and stow inside Move Menu. From feature request on [Issue #105](https://github.com/navaismo/Ender-3V3-SE/issues/105)
+
+<div align="center">
+
+<a href=""><img src="https://i.imgur.com/0qEBfUl.jpeg" align="center" height="620" width="440" ></a>
+
+</div>
+
+<br>
+
 ----------
 
 <br><br>
