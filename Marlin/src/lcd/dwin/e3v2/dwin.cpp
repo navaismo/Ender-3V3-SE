@@ -6627,6 +6627,9 @@ void Draw_Move_Menu()
     // DWIN_Frame_AreaCopy(1, 212, 118, 253, 131, LBLX, MBASE(4));
     DWIN_ICON_Show(HMI_flag.language, LANGUAGE_MoveE, 50, MBASE(4) + JPN_OFFSET);
 #endif
+    DWIN_Draw_Label(MBASE(5), F(" Probe Deploy"));
+    DWIN_Draw_Label(MBASE(6), F(" Probe Stow"));
+
 #endif
   }
   else
@@ -6654,6 +6657,10 @@ void Draw_Move_Menu()
   // Draw separators and icons
   LOOP_L_N(i, 3 + ENABLED(HAS_HOTEND))
   Draw_Menu_Line(i + 1, ICON_MoveX + i);
+
+  Draw_Menu_Line(5, ICON_Edit_Level_Data);
+  Draw_Menu_Line(6, ICON_Edit_Level_Data);
+
 }
 
 void Draw_AdvSet_Menu()
@@ -7876,7 +7883,7 @@ void HMI_AxisMove()
   // Avoid flicker by updating only the previous menu
   if (encoder_diffState == ENCODER_DIFF_CW)
   {
-    if (select_axis.inc(1 + 3 + ENABLED(HAS_HOTEND)))
+    if (select_axis.inc(1 + 3 + ENABLED(HAS_HOTEND) + 2))
       Move_Highlight(1, select_axis.now);
   }
   else if (encoder_diffState == ENCODER_DIFF_CCW)
@@ -7932,6 +7939,31 @@ void HMI_AxisMove()
       EncoderRate.enabled = true;
       break;
 #endif
+
+    case 5: {// Probe deploy
+      gcode.process_subcommands_now_P(PSTR("G0 Z40 F7000"));
+      gcode.process_subcommands_now_P(PSTR("G4 P1000"));
+      bool r = probe.deploy();
+      if (!r){
+        gcode.process_subcommands_now_P(PSTR("M117 Probe Deployed"));
+      }else{
+        gcode.process_subcommands_now_P(PSTR("M117 Probe Deploy Failed"));
+      }
+    break;
+    }
+
+    case 6:{ //Probe Stow
+      gcode.process_subcommands_now_P(PSTR("G0 Z40 F7000"));
+      gcode.process_subcommands_now_P(PSTR("G4 P1000"));
+      bool r2 = probe.stow();
+      if (!r2){
+        gcode.process_subcommands_now_P(PSTR("M117 Probe Stowed"));
+      }else{
+        gcode.process_subcommands_now_P(PSTR("M117 Probe Stow Failed"));
+      }
+    break;
+  }  
+
     }
   }
   DWIN_UpdateLCD();
