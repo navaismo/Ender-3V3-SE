@@ -55,6 +55,7 @@ extern uint8_t record_lcd_flag;
 // Buzzer
 #if ENABLED(DWIN_LCD_BEEP)
   uint8_t toggle_LCDBeep;
+  uint8_t toggle_PreHAlert;
 #endif
 
 

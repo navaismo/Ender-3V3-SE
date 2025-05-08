@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V88"
+#define EEPROM_VERSION "V89"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
@@ -494,6 +494,8 @@ typedef struct SettingsDataStruct {
   // LCD Sound
   #if ENABLED(DWIN_LCD_BEEP)
     uint8_t toggleLCDBeep;
+    uint8_t toggle_PreHAlert;
+
   #endif     
 
   // LCD Brightness settings
@@ -1491,6 +1493,9 @@ void MarlinSettings::postprocess() {
     {
       uint8_t beep = toggle_LCDBeep;
       EEPROM_WRITE(beep);
+
+      uint8_t prealert = toggle_PreHAlert;
+      EEPROM_WRITE(prealert);
     }
     #endif
 
@@ -2458,8 +2463,14 @@ void MarlinSettings::postprocess() {
       #if ENABLED(DWIN_LCD_BEEP)
       {
         uint8_t beep;
+
         EEPROM_READ(beep); //Read LCD_Beeper state
         toggle_LCDBeep = (beep > 0) ? 1 : 0;
+
+        uint8_t prealert;
+        EEPROM_READ(prealert); //Read LCD_Beeper state
+        toggle_PreHAlert = (prealert > 0) ? 1 : 0;
+
       }
       #endif
 
@@ -4088,6 +4099,7 @@ void MarlinSettings::reset() {
     #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)  
       SERIAL_ECHOLN("DISPLAY Settings:");
       SERIAL_ECHOLNPAIR("Buzzer ON/OFF: ", toggle_LCDBeep);
+      SERIAL_ECHOLNPAIR("Preheat Alert ON/OFF: ", toggle_PreHAlert);
       SERIAL_ECHOLNPAIR("MAX BRIGHTNESS: ", MAX_SCREEN_BRIGHTNESS);
       SERIAL_ECHOLNPAIR("DIMM BRIGHTNESS: ", DIMM_SCREEN_BRIGHTNESS);
       SERIAL_ECHOLNPAIR("AUTO OFF TIME: ", TURN_OFF_TIME);
