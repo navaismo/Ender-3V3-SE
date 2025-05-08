@@ -6764,7 +6764,7 @@ void Draw_Display_Menu(){
   // Title
   Draw_Title(F("Display Settings"));
 
-  DWIN_Draw_Label(MBASE(1), F("Beeper Settings"));
+  DWIN_Draw_Label(MBASE(1), F("Buzzer Settings"));
   Draw_Menu_Line(1, ICON_Contact);
   Draw_More_Icon(1);
 
@@ -6795,13 +6795,13 @@ void Draw_Beeper_Menu(){
   // Back option
   Draw_Back_First();
   // Title
-  Draw_Title(F("Beeper Settings"));
+  Draw_Title(F("Buzzer Settings"));
 
-  DWIN_Draw_Label(MBASE(1), F("Mute/Unmute Beeper"));
+  DWIN_Draw_Label(MBASE(1), F("Mute/Unmute Buzzer"));
   Draw_Menu_Line(1, ICON_Contact);
 
   // There's no graphical asset for this label, so we just write it as string
-  DWIN_Draw_Label(MBASE(2), F("Mute/Unmute Preheat Alert"));
+  DWIN_Draw_Label(MBASE(2), F("Mute/Unmute Heat Alert"));
   Draw_Menu_Line(2, ICON_Contact);
 
   DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Store, 60, MBASE(3) + JPN_OFFSET);
