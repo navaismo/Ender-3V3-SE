@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V86"
+#define EEPROM_VERSION "V87"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
@@ -1509,7 +1509,7 @@ void MarlinSettings::postprocess() {
 
     #if ENABLED(ADVANCED_HELP_MESSAGES)
     {
-      bool advanced_help_mesasges_enabled;
+      bool advanced_help_mesasges_enabled = false;
 
       advanced_help_mesasges_enabled = HMI_flag.advanced_help_enabled_flag;
       EEPROM_WRITE(advanced_help_mesasges_enabled);
