@@ -1,0 +1,19 @@
+name: ✨ Request a feature
+description: Use this template to ask for new features and propose new ideas
+title: "Summary of your feature"
+labels: ["enhancement"]
+body:
+  - type: textarea
+    attributes:
+      label: Describe it
+      description: |
+        Describe your idea in details. Provide any references you may find useful: screebshots from other firmwares, links to related products, your drawings, etc.
+        Do not submit multiple ideas at once — it's always better to submit them separately.
+      value: |
+        Add this new feature I have seen in other printers, that should work like following:
+         - User does A
+         - Printer goes brrrrr
+         - Screen shows C
+         - User profits
+    validations:
+      required: true

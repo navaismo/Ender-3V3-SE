@@ -55,10 +55,12 @@
  *    P<bool>   = Always show a prompt and await a response
  */
 void GcodeSuite::M125() {
+  SERIAL_ECHOLN("M125: Pause Print");
   // Initial retract before move to filament change position
   const float retract = -ABS(parser.axisunitsval('L', E_AXIS, PAUSE_PARK_RETRACT_LENGTH));
 
   xyz_pos_t park_point = NOZZLE_PARK_POINT;
+  SERIAL_ECHOLNPAIR("M125: Park Point X ", park_point.x, " Y ", park_point.y, " Z ", park_point.z);
 
   // Move XY axes to filament change position or given position
   if (parser.seenval('X')) park_point.x = RAW_X_POSITION(parser.linearval('X'));
@@ -72,6 +74,7 @@ void GcodeSuite::M125() {
   #endif
 
   const bool sd_printing = TERN0(SDSUPPORT, IS_SD_PRINTING());
+  SERIAL_ECHOLNPAIR("M125: SD Printing: ", sd_printing);
 
   ui.pause_show_message(PAUSE_MESSAGE_PARKING, PAUSE_MODE_PAUSE_PRINT);
 

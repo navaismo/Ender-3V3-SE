@@ -112,7 +112,7 @@ void GcodeSuite::M600() {
   // Initial retract before move to filament change position
   const float retract = -ABS(parser.axisunitsval('E', E_AXIS, PAUSE_PARK_RETRACT_LENGTH));
 
-  #define Custom_NOZZLE_PARK_POINT { (0), (0), 35 }
+  #define Custom_NOZZLE_PARK_POINT { (0), (0), 40 }
   xyz_pos_t park_point Custom_NOZZLE_PARK_POINT;
 
   // Lift Z axis

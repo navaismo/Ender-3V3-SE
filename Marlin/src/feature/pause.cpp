@@ -639,6 +639,10 @@ void resume_print(const_float_t slow_load_length/*=0*/, const_float_t fast_load_
   DEBUG_SECTION(rp, "resume_print", true);
   DEBUG_ECHOLNPAIR("... slowlen:", slow_load_length, " fastlen:", fast_load_length, " purgelen:", purge_length, " maxbeep:", max_beep_count, " targetTemp:", targetTemp DXC_SAY);
    SERIAL_ECHOLNPAIR("=====++++>> Resume Value Flag: ", serial_connection_active);
+   SERIAL_ECHOLNPAIR("==+++ CURRPOS:", current_position.x, " ", current_position.y, " ", current_position.z, " ", current_position.e);
+   SERIAL_ECHOLNPAIR("==+++ RESUMEPOS:", resume_position.x, " ", resume_position.y, " ", resume_position.z, " ", resume_position.e);
+  SERIAL_ECHOLNPAIR("==+++ Destination:", destination.x, " ", destination.y, " ", destination.z, " ", destination.e);
+   SERIAL_ECHOLNPAIR("==+++ didpause:", did_pause_print);
   /*
   SERIAL_ECHOLNPAIR(
     "start of resume_print()\ndual_x_carriage_mode:", dual_x_carriage_mode,
@@ -677,8 +681,11 @@ void resume_print(const_float_t slow_load_length/*=0*/, const_float_t fast_load_
   unscaled_e_move(-(PAUSE_PARK_RETRACT_LENGTH), feedRate_t(PAUSE_PARK_RETRACT_FEEDRATE));
 
   if (!axes_should_home()) {
+    SERIAL_ECHOLNPAIR("=====++++>> Axes should home why?: ", axes_should_home());
     // Move XY back to saved position
+    SERIAL_ECHOLNPAIR("=====++++>> Destination XY:", destination.x, " ", destination.y);
     destination.set(resume_position.x, resume_position.y, current_position.z, current_position.e);
+    SERIAL_ECHOLNPAIR("=====++++>> NEW Destination XY:", destination.x, " ", destination.y);
     prepare_internal_move_to_destination(NOZZLE_PARK_XY_FEEDRATE);
 
     // Move Z back to saved position

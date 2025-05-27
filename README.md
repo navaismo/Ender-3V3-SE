@@ -147,6 +147,15 @@ Merged the [PR#22](https://github.com/navaismo/Ender-3V3-SE/pull/22) from [@edua
 
 </div>
 
+You can automate the configuration of your Input Shaping with the [Octoprint-Pinput_Shaping plugin for Marlin here](https://github.com/navaismo/Octoprint-Pinput_Shaping)
+
+
+<br>
+<div align="center">
+   <img src="https://i.imgur.com/l2Y03AS.png" width="60%" height="60%"/>      
+</div>
+<br>
+
 <br>
 
 ## * Added Extrusion Flow Item to the Tune Menu:
@@ -260,6 +269,30 @@ Added options for preheat new Materials: PETG and ABS under Control and Pepare M
 <div align="center">
 
 <a href=""><img src="https://i.imgur.com/Q051ckp.jpeg" align="center" height="976" width="940" ></a>
+
+</div>
+
+<br>
+
+
+## * Custom Height after Homing:
+Added option to edit the height of the nozzle after homing. From feature request on [Issue #49](https://github.com/navaismo/Ender-3V3-SE/issues/80)
+
+<div align="center">
+
+<a href=""><img src="https://i.imgur.com/WR7rl8V.jpeg" align="center" height="620" width="440" ></a>
+
+</div>
+
+<br>
+
+
+## * CRTouch Probe tests:
+Added option to test the probe to deploay and stow inside Move Menu. From feature request on [Issue #105](https://github.com/navaismo/Ender-3V3-SE/issues/105)
+
+<div align="center">
+
+<a href=""><img src="https://i.imgur.com/0qEBfUl.jpeg" align="center" height="620" width="440" ></a>
 
 </div>
 

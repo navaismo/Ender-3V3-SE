@@ -51,9 +51,13 @@ typedef enum {
 
 // Encoder initialization
 void Encoder_Configuration();
+void Generic_BeepAlert();
 
 #if ENABLED(DWIN_LCD_BEEP)
  extern uint8_t toggle_LCDBeep;
+ extern uint8_t toggle_PreHAlert;
+ extern bool restore_brightness_active; 
+ //void restore_brightness();
 #endif
 
 // Analyze encoder value and return state

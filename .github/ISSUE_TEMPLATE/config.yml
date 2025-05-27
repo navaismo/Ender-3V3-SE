@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Reddit Community Support
+    url: https://reddit.com/r/Ender3V3SE
+    about: Please ask and answer questions here.
+  - name: Navaismo Wiki
+    url: https://github.com/navaismo/Ender-3V3-SE/wiki
+    about: Some useful bits of knowledge to absorb
+  - name: GitHub discussions
+    url: https://github.com/navaismo/Ender-3V3-SE/discussions
+    about: Drop in for general discussions, Q&A and other random stuff

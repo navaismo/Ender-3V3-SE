@@ -150,6 +150,8 @@ millis_t shift_ms; // = 0
 static uint8_t left_move_index = 0;
 
 bool qrShown = false;
+bool preheat_flag = false;
+uint8_t material_index = 0;
 
 /* Value Init */
 HMI_value_t HMI_ValueStruct;
@@ -197,10 +199,11 @@ typedef struct
   char longfilename[LONG_FILENAME_LENGTH];
 } PrintFile_InfoTypeDef;
 
-select_t select_page{0}, select_file{0}, select_print{0}, select_prepare{0}, select_control{0}, select_axis{0}, select_temp{0}, select_motion{0}, select_tune{0}, select_advset{0}, select_PLA{0}, select_ABS{0},select_TPU{0},select_PETG{0}, select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_input_shaping{0}, select_linear_adv{0}, select_cextr{0},select_display{0}, select_item{0}, select_language{0}, select_hm_set_pid{0}, select_set_pid{0}, select_level{0}, select_show_pic{0};
+select_t select_page{0}, select_file{0}, select_print{0}, select_prepare{0}, select_control{0}, select_axis{0}, select_temp{0}, select_motion{0}, select_tune{0}, select_advset{0}, select_PLA{0}, select_ABS{0},select_TPU{0},select_PETG{0}, select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_input_shaping{0}, select_linear_adv{0}, select_cextr{0},select_display{0},select_beeper{0}, select_item{0}, select_language{0}, select_hm_set_pid{0}, select_set_pid{0}, select_level{0}, select_show_pic{0};
 
 uint8_t index_file = MROWS,
         index_prepare = MROWS,
+        index_motion = MROWS,
         index_control = MROWS,
         index_leveling = MROWS,
         index_tune = MROWS,
@@ -393,6 +396,19 @@ static void Auto_in_out_feedstock(bool dir) // 0 returns material, 1 feeds
     SET_HOTEND_TEMP(STOP_TEMPERATURE, 0);                                    // Cool down to 140℃
     // WAIT_HOTEND_TEMP(60 *5 *1000, 5); //Wait for the nozzle temperature to reach the set value
   }
+}
+
+
+// Preheat finished alert
+void Preheat_alert(uint8_t material){
+  if( preheat_flag && thermalManager.degHotend(0) >= ui.material_preset[material].hotend_temp && thermalManager.degBed() >= ui.material_preset[material].bed_temp){
+    // beep to alert process finished
+    Generic_BeepAlert();
+    delay(200);
+    Generic_BeepAlert();
+    preheat_flag = false;
+   }
+
 }
 
 // Custom Extrude Process
@@ -1388,7 +1404,8 @@ inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valr
 #define PREPARE_CASE_LANG (PREPARE_CASE_COOL + 1)
 #define PREPARE_CASE_DISPLAY (PREPARE_CASE_LANG + 1)
 #define PREPARE_CASE_CUSTOM_EXTRUDE (PREPARE_CASE_DISPLAY + 1)
-#define PREPARE_CASE_TOTAL PREPARE_CASE_CUSTOM_EXTRUDE
+#define PREPARE_CASE_ZHEIGHT (PREPARE_CASE_CUSTOM_EXTRUDE + 1)
+#define PREPARE_CASE_TOTAL PREPARE_CASE_ZHEIGHT
 
 #define CONTROL_CASE_TEMP 1
 #define CONTROL_CASE_MOVE (CONTROL_CASE_TEMP + 1)
@@ -1786,6 +1803,19 @@ void Item_Prepare_CExtrude(const uint8_t row)
 }
 
 
+void Item_Prepare_Homeheight(const uint8_t row)
+{
+  if (HMI_flag.language < Language_Max)
+  {
+    DWIN_Draw_Label(MBASE(row)+2, F("Homing Height(mm)"));
+    //DWIN_ICON_Show(HMI_flag.language, LANGUAGE_IN_STORK, 42, MBASE(row) + JPN_OFFSET);
+    //DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(row) - 3);
+  }
+  Draw_Menu_Line(row, ICON_MoveZ);
+  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(row) , CZ_AFTER_HOMING);
+
+}
+
 
 
 
@@ -1855,6 +1885,9 @@ void Draw_Prepare_Menu()
       
   if (PVISI(PREPARE_CASE_CUSTOM_EXTRUDE))
     Item_Prepare_CExtrude(PSCROL(PREPARE_CASE_CUSTOM_EXTRUDE)); // Custom Extrude 
+  
+  if(PVISI(PREPARE_CASE_ZHEIGHT))
+    Item_Prepare_Homeheight(PSCROL(PREPARE_CASE_ZHEIGHT)); // Custom Z height
     
 
   if (select_prepare.now)
@@ -2200,6 +2233,10 @@ void draw_lin_adv(const uint16_t line)
 }
 
 
+ 
+
+
+
 
 void say_x(const uint16_t inset, const uint16_t line)
 {
@@ -2245,6 +2282,7 @@ void Draw_Motion_Menu()
     DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Step, 42, MBASE(MOTION_CASE_STEPS) + JPN_OFFSET);
     draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
     draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
+   
   }
   else
   {
@@ -2272,6 +2310,7 @@ void Draw_Motion_Menu()
     draw_steps_per_mm(MBASE(MOTION_CASE_STEPS)); // "steps per mm"
     draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
     draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
+   
 #endif // USE_STRING_TITLES
   }
 
@@ -3212,20 +3251,22 @@ void Goto_PrintProcess()
   Draw_Printing_Screen();
   // Setting interface
   ICON_Tune();
-  if (printingIsPaused() && !HMI_flag.cloud_printing_flag)
-    ICON_Continue();
+  // if (printingIsPaused() && !HMI_flag.cloud_printing_flag)
+  //   ICON_Continue();
   // pause
-  if (printingIsPaused())
-  {
-    Show_JPN_pause_title(); // show title
-    ICON_Continue();
-  }
-  else
-  {
-    // Printing
-    Show_JPN_print_title();
-    ICON_Pause();
-  }
+  ICON_Pause();
+  // if (!printingIsPaused())
+  // {
+  //   // Printing
+  //   Show_JPN_print_title();
+  //   ICON_Pause();
+  // }
+  // else
+  // {
+  //   Show_JPN_pause_title(); // show title
+  //   ICON_Continue();
+    
+  // }
   // stop button
   ICON_Stop();
   // Copy into filebuf string before entry
@@ -3535,6 +3576,12 @@ void HMI_ETemp()
     case -3:
       temp_line = PREHEAT_CASE_TEMP;
       break;
+    case -7:
+      temp_line = PREHEAT_CASE_TEMP;
+      break;
+    case -8:
+      temp_line = PREHEAT_CASE_TEMP;
+      break;    
     default:
       temp_line = TUNE_CASE_TEMP + MROWS - index_tune;
     }
@@ -3553,9 +3600,23 @@ void HMI_ETemp()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].hotend_temp = HMI_ValueStruct.E_Temp;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[1].hotend_temp);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -7)
+      {
+        checkkey = PETGPreheat;
+        ui.material_preset[2].hotend_temp = HMI_ValueStruct.E_Temp;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[2].hotend_temp);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -8)
+      {
+        checkkey = ABSPreheat;
+        ui.material_preset[3].hotend_temp = HMI_ValueStruct.E_Temp;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[3].hotend_temp);
         return;
       }
       else if (HMI_ValueStruct.show_mode == -1) // Temperature
@@ -3605,6 +3666,12 @@ void HMI_O9000ETemp()
     case -3:
       temp_line = PREHEAT_CASE_TEMP;
       break;
+    case -7:
+      temp_line = PREHEAT_CASE_TEMP;
+      break;
+    case -8:
+      temp_line = PREHEAT_CASE_TEMP;
+      break;      
     default:
       temp_line = TUNE_CASE_TEMP + MROWS - index_tune;
     }
@@ -3623,9 +3690,23 @@ void HMI_O9000ETemp()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].hotend_temp = HMI_ValueStruct.E_Temp;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[1].hotend_temp);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -7)
+      {
+        checkkey = PETGPreheat;
+        ui.material_preset[2].hotend_temp = HMI_ValueStruct.E_Temp;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[2].hotend_temp);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -8)
+      {
+        checkkey = ABSPreheat;
+        ui.material_preset[3].hotend_temp = HMI_ValueStruct.E_Temp;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[3].hotend_temp);
         return;
       }
       else if (HMI_ValueStruct.show_mode == -1) // Temperature
@@ -3735,6 +3816,12 @@ void HMI_BedTemp()
     case -3:
       bed_line = PREHEAT_CASE_BED;
       break;
+    case -7:
+      bed_line = PREHEAT_CASE_BED;
+      break;
+    case -8:
+      bed_line = PREHEAT_CASE_BED;
+      break;       
     default:
       bed_line = TUNE_CASE_BED + MROWS - index_tune;
     }
@@ -3754,9 +3841,23 @@ void HMI_BedTemp()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].bed_temp = HMI_ValueStruct.Bed_Temp;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[1].bed_temp);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -7)
+      {
+        checkkey = PETGPreheat;
+        ui.material_preset[2].bed_temp = HMI_ValueStruct.Bed_Temp;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[2].bed_temp);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -8)
+      {
+        checkkey = ABSPreheat;
+        ui.material_preset[3].bed_temp = HMI_ValueStruct.Bed_Temp;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[3].bed_temp);
         return;
       }
       else if (HMI_ValueStruct.show_mode == -1)
@@ -3810,6 +3911,12 @@ void HMI_O9000BedTemp()
     case -3:
       bed_line = PREHEAT_CASE_BED;
       break;
+    case -7:
+      bed_line = PREHEAT_CASE_BED;
+      break;
+    case -8:
+      bed_line = PREHEAT_CASE_BED;
+      break;     
     default:
       bed_line = TUNE_CASE_BED + MROWS - index_tune;
     }
@@ -3829,9 +3936,23 @@ void HMI_O9000BedTemp()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].bed_temp = HMI_ValueStruct.Bed_Temp;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[1].bed_temp);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -7)
+      {
+        checkkey = PETGPreheat;
+        ui.material_preset[2].bed_temp = HMI_ValueStruct.Bed_Temp;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[2].bed_temp);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -8)
+      {
+        checkkey = ABSPreheat;
+        ui.material_preset[3].bed_temp = HMI_ValueStruct.Bed_Temp;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[3].bed_temp);
         return;
       }
       else if (HMI_ValueStruct.show_mode == -1)
@@ -3888,6 +4009,12 @@ void HMI_FanSpeed()
     case -3:
       fan_line = PREHEAT_CASE_FAN;
       break;
+    case -7:
+      fan_line = PREHEAT_CASE_FAN;
+      break;
+    case -8:
+      fan_line = PREHEAT_CASE_FAN;
+      break;       
     // case -4: fan_line = TEMP_CASE_FAN + MROWS -index_temp;break;
     default:
       fan_line = TUNE_CASE_FAN + MROWS - index_tune;
@@ -3905,9 +4032,23 @@ void HMI_FanSpeed()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].fan_speed = HMI_ValueStruct.Fan_speed;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[1].fan_speed);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -7)
+      {
+        checkkey = PETGPreheat;
+        ui.material_preset[2].fan_speed = HMI_ValueStruct.Fan_speed;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[2].fan_speed);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -8)
+      {
+        checkkey = ABSPreheat;
+        ui.material_preset[3].fan_speed = HMI_ValueStruct.Fan_speed;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[3].fan_speed);
         return;
       }
       else if (HMI_ValueStruct.show_mode == -1)
@@ -3955,6 +4096,12 @@ void HMI_O9000FanSpeed()
     case -3:
       fan_line = PREHEAT_CASE_FAN;
       break;
+    case -7:
+      fan_line = PREHEAT_CASE_FAN;
+      break;
+    case -8:
+      fan_line = PREHEAT_CASE_FAN;
+      break;      
     // case -4: fan_line = TEMP_CASE_FAN + MROWS -index_temp;break;
     default:
       fan_line = TUNE_CASE_FAN + MROWS - index_tune;
@@ -3972,9 +4119,23 @@ void HMI_O9000FanSpeed()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].fan_speed = HMI_ValueStruct.Fan_speed;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[1].fan_speed);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -7)
+      {
+        checkkey = PETGPreheat;
+        ui.material_preset[2].fan_speed = HMI_ValueStruct.Fan_speed;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[2].fan_speed);
+        return;
+      }
+      else if (HMI_ValueStruct.show_mode == -8)
+      {
+        checkkey = ABSPreheat;
+        ui.material_preset[3].fan_speed = HMI_ValueStruct.Fan_speed;
+        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[3].fan_speed);
         return;
       }
       else if (HMI_ValueStruct.show_mode == -1)
@@ -4760,7 +4921,7 @@ void MarlinUI::kill_screen(PGM_P lcd_error, PGM_P lcd_component) {
   Clear_Main_Window();
   DWIN_Draw_Rectangle(1, Color_Bg_Window, POPUP_BG_X_LU, POPUP_BG_Y_LU, POPUP_BG_X_RD, POPUP_BG_Y_RD);
   DWIN_Draw_Rectangle(1, Color_Bg_Red, POPUP_BG_X_LU + 1, POPUP_BG_Y_LU + 1, POPUP_BG_X_RD - 1, POPUP_BG_Y_LU + POPUP_TITLE_HEIGHT);
-  
+
   DWIN_Draw_String(false, false, font12x24, All_Black, Color_Bg_Red, POPUP_BG_X_LU + ((POPUP_BG_X_LU - POPUP_BG_X_LU) / 2) - ((strlen_P((PGM_P)GET_TEXT_F(MSG_HALTED)) / 2) * 12), POPUP_BG_Y_LU + 1, GET_TEXT_F(MSG_HALTED));
   // HMI_flag.Refresh_bottom_flag = true; // Flag does not refresh bottom parameters
 #if ENABLED(DWIN_CREALITY_480_LCD)
@@ -5184,16 +5345,16 @@ void Draw_PStats_Menu(){
   // Total Prints
    DWIN_Draw_Small_Label(MBASE(1), F("Total Prints"));
   Draw_Menu_Line(1, ICON_Info);
-  DWIN_Draw_IntValue(true, true, 0, font6x12, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(1) + 3 , totalPrints);
+  DWIN_Draw_IntValue(true, true, 0, font6x12, Color_White, Color_Bg_Black, 6, 152, MBASE(1) + 3 , totalPrints);
   // Completed Prints
-  DWIN_Draw_Small_Label(MBASE(2), F("Completed Prints"));
+  DWIN_Draw_Small_Label(MBASE(2), F("Completed"));
   Draw_Menu_Line(2, ICON_Info);
-  DWIN_Draw_IntValue(true, true, 0, font6x12, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2) + 3 , finishedPrints);
+  DWIN_Draw_IntValue(true, true, 0, font6x12, Color_White, Color_Bg_Black, 6, 152, MBASE(2) + 3 , finishedPrints);
 
   // Failed Prints
-  DWIN_Draw_Small_Label(MBASE(3), F("Failed Prints"));
+  DWIN_Draw_Small_Label(MBASE(3), F("Failed"));
   Draw_Menu_Line(3, ICON_Info);
-  DWIN_Draw_IntValue(true, true, 0, font6x12, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3) + 3 , failedPrints);
+  DWIN_Draw_IntValue(true, true, 0, font6x12, Color_White, Color_Bg_Black, 6, 152, MBASE(3) + 3 , failedPrints);
 
   // Total Time
   DWIN_Draw_Small_Label(MBASE(4), F("Total Time"));
@@ -5789,24 +5950,27 @@ void HMI_Printing()
         break;
       case 1:
         ICON_Tune();
-        if (printingIsPaused())
+        if (!printingIsPaused())
         {
-          ICON_Continue();
+          ICON_Pause();
+          //ICON_Continue();
         }
         else
         {
-          ICON_Pause();
+          ICON_Continue();
+          // ICON_Pause();
         }
         break;
       case 2:
-        if (printingIsPaused())
+        if (!printingIsPaused())
         {
-
-          ICON_Continue();
+          ICON_Pause();
+          // ICON_Continue();
         }
         else
         {
-          ICON_Pause();
+          ICON_Continue();
+          // ICON_Pause();
         }
         ICON_Stop();
         break;
@@ -5821,16 +5985,20 @@ void HMI_Printing()
       {
       case 0:
         ICON_Tune();
-        if (printingIsPaused())
-          ICON_Continue();
-        else
+        if (!printingIsPaused())
           ICON_Pause();
+          // ICON_Continue();
+        else
+          ICON_Continue();
+          // ICON_Pause();
         break;
       case 1:
-        if (printingIsPaused())
-          ICON_Continue();
-        else
+        if (!printingIsPaused())
           ICON_Pause();
+          // ICON_Continue();
+        else
+          ICON_Continue();
+          // ICON_Pause();
         ICON_Stop();
         break;
       case 2:
@@ -6397,6 +6565,9 @@ void Draw_Move_Menu()
     // DWIN_Frame_AreaCopy(1, 212, 118, 253, 131, LBLX, MBASE(4));
     DWIN_ICON_Show(HMI_flag.language, LANGUAGE_MoveE, 50, MBASE(4) + JPN_OFFSET);
 #endif
+    DWIN_Draw_Label(MBASE(5), F(" Probe Deploy"));
+    DWIN_Draw_Label(MBASE(6), F(" Probe Stow"));
+
 #endif
   }
   else
@@ -6424,6 +6595,10 @@ void Draw_Move_Menu()
   // Draw separators and icons
   LOOP_L_N(i, 3 + ENABLED(HAS_HOTEND))
   Draw_Menu_Line(i + 1, ICON_MoveX + i);
+
+  Draw_Menu_Line(5, ICON_Edit_Level_Data);
+  Draw_Menu_Line(6, ICON_Edit_Level_Data);
+
 }
 
 void Draw_AdvSet_Menu()
@@ -6527,8 +6702,9 @@ void Draw_Display_Menu(){
   // Title
   Draw_Title(F("Display Settings"));
 
-  DWIN_Draw_Label(MBASE(1), F("Mute/Unmute Beeper"));
+  DWIN_Draw_Label(MBASE(1), F("Buzzer Settings"));
   Draw_Menu_Line(1, ICON_Contact);
+  Draw_More_Icon(1);
 
   // There's no graphical asset for this label, so we just write it as string
   DWIN_Draw_Label(MBASE(2), F("Max Brightness(%)"));
@@ -6548,6 +6724,29 @@ void Draw_Display_Menu(){
   DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Store, 60, MBASE(5) + JPN_OFFSET);
   Draw_Menu_Line(5, ICON_WriteEEPROM); 
 }
+
+void Draw_Beeper_Menu(){
+  Clear_Main_Window();
+  Draw_Mid_Status_Area(true);
+  HMI_flag.Refresh_bottom_flag = false; // Flag refresh bottom parameter
+
+  // Back option
+  Draw_Back_First();
+  // Title
+  Draw_Title(F("Buzzer Settings"));
+
+  DWIN_Draw_Label(MBASE(1), F("Mute/Unmute Buzzer"));
+  Draw_Menu_Line(1, ICON_Contact);
+
+  // There's no graphical asset for this label, so we just write it as string
+  DWIN_Draw_Label(MBASE(2), F("Mute/Unmute Heat Alert"));
+  Draw_Menu_Line(2, ICON_Contact);
+
+  DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Store, 60, MBASE(3) + JPN_OFFSET);
+  Draw_Menu_Line(3, ICON_WriteEEPROM); 
+  
+}
+
 
 void HMI_Display_Menu(){
   ENCODER_DiffState encoder_diffState = get_encoder_state();
@@ -6575,7 +6774,9 @@ void HMI_Display_Menu(){
       Draw_Prepare_Menu();
       break;
     case 1: // Toggle LCD Beeper
-      toggle_LCDBeep = !toggle_LCDBeep;
+      checkkey = Beeper;
+      Draw_Beeper_Menu();
+      // toggle_LCDBeep = !toggle_LCDBeep;
       break;
     case 2: // Max Brightness
       checkkey = Max_LCD_Bright;
@@ -6596,14 +6797,58 @@ void HMI_Display_Menu(){
       EncoderRate.enabled = true;
       break; 
     case 5:
-      settings.save();    
+      settings.save();
       break;
+    }
+  }
+  DWIN_UpdateLCD();
+}
+
+
+void HMI_Beeper_Menu(){
+  ENCODER_DiffState encoder_diffState = get_encoder_state();
+  if (encoder_diffState == ENCODER_DIFF_NO)
+    return;
+
+  // Avoid flicker by updating only the previous menu
+  if (encoder_diffState == ENCODER_DIFF_CW)
+  {
+    if (select_beeper.inc(1  + 3))
+      Move_Highlight(1, select_beeper.now);
+  }
+  else if (encoder_diffState == ENCODER_DIFF_CCW)
+  {
+    if (select_beeper.dec())
+      Move_Highlight(-1, select_beeper.now);
+  }
+  else if (encoder_diffState == ENCODER_DIFF_ENTER)
+  {
+    switch (select_beeper.now)
+    {
+    case 0: // Back
+      select_display.now = 0;
+      checkkey = Display_Menu;
+      Draw_Display_Menu();
+      break;
+    case 1: // Toggle LCD Beeper
+      toggle_LCDBeep = !toggle_LCDBeep;
+      break;
+    case 2: // Toggle Preheat Aert
+      toggle_PreHAlert = !toggle_PreHAlert;  
+    break; 
+    case 3:
+      settings.save();  
+      break;  
   
 
     }
   }
   DWIN_UpdateLCD();
 }
+
+
+
+
 
 void HMI_LCDBright(){
   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
@@ -6664,6 +6909,25 @@ void HMI_DimmTime(){
 
   LIMIT(HMI_ValueStruct.Dimm_Time, 1, 60);
   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(4)+3 , HMI_ValueStruct.Dimm_Time);
+}
+
+void HMI_ZHeight(){
+  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+  if (encoder_diffState == ENCODER_DIFF_NO)
+    return;
+
+  if (Apply_Encoder(encoder_diffState,  HMI_ValueStruct.Z_height)) {
+    EncoderRate.enabled = false;
+    LIMIT(HMI_ValueStruct.Z_height, 10, 100);
+    checkkey = Prepare;
+    DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(PREPARE_CASE_ZHEIGHT + MROWS - index_prepare) , HMI_ValueStruct.Z_height);
+    CZ_AFTER_HOMING = HMI_ValueStruct.Z_height;
+    //save to eeprom
+    return;
+  }
+
+  LIMIT(HMI_ValueStruct.Z_height, 10, 100);
+  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(PREPARE_CASE_ZHEIGHT + MROWS - index_prepare) , HMI_ValueStruct.Z_height);
 }
 
 
@@ -6828,7 +7092,6 @@ void HMI_CustomExtrudeLength(){
 }
 
 
-
 /* Prepare */
 void HMI_Prepare()
 {
@@ -6878,8 +7141,11 @@ void HMI_Prepare()
         if(index_prepare == PREPARE_CASE_DISPLAY)
           Item_Prepare_Display(MROWS); 
         
-          if(index_prepare == PREPARE_CASE_CUSTOM_EXTRUDE)
-          Item_Prepare_CExtrude(MROWS);   
+        if(index_prepare == PREPARE_CASE_CUSTOM_EXTRUDE)
+          Item_Prepare_CExtrude(MROWS);
+          
+        if(index_prepare == PREPARE_CASE_ZHEIGHT)
+          Item_Prepare_Homeheight(MROWS);
       }
       else
       {
@@ -6920,6 +7186,8 @@ void HMI_Prepare()
           Item_Prepare_TPU(0);
         else if (index_prepare == 14)
           Item_Prepare_PETG(0);
+        else if (index_prepare == 15)
+          Item_Prepare_ABS(0);   
   
           
       }
@@ -7017,6 +7285,8 @@ void HMI_Prepare()
     case PREPARE_CASE_PLA: // PLA preheat
       TERN_(HAS_HEATED_BED, thermalManager.setTargetBed(ui.material_preset[0].bed_temp));
       TERN_(HAS_FAN, thermalManager.set_fan_speed(0, ui.material_preset[0].fan_speed));
+      preheat_flag = true;
+      material_index = 0;
 #if ENABLED(USE_SWITCH_POWER_200W)
       while (ABS(thermalManager.degTargetBed() - thermalManager.degBed()) > TEMP_WINDOW)
       {
@@ -7028,6 +7298,8 @@ void HMI_Prepare()
     case PREPARE_CASE_TPU: // TPU preheat
       TERN_(HAS_HEATED_BED, thermalManager.setTargetBed(ui.material_preset[1].bed_temp));
       TERN_(HAS_FAN, thermalManager.set_fan_speed(0, ui.material_preset[1].fan_speed));
+      preheat_flag = true;
+      material_index = 1;
 #if ENABLED(USE_SWITCH_POWER_200W)
       while (ABS(thermalManager.degTargetBed() - thermalManager.degBed()) > TEMP_WINDOW)
       {
@@ -7040,6 +7312,8 @@ void HMI_Prepare()
       case PREPARE_CASE_PETG: // PETG preheat
       TERN_(HAS_HEATED_BED, thermalManager.setTargetBed(ui.material_preset[2].bed_temp));
       TERN_(HAS_FAN, thermalManager.set_fan_speed(0, ui.material_preset[2].fan_speed));
+      preheat_flag = true;
+      material_index = 2;
 #if ENABLED(USE_SWITCH_POWER_200W)
       while (ABS(thermalManager.degTargetBed() - thermalManager.degBed()) > TEMP_WINDOW)
       {
@@ -7052,6 +7326,8 @@ void HMI_Prepare()
     case PREPARE_CASE_ABS: // ABS preheat
       TERN_(HAS_HEATED_BED, thermalManager.setTargetBed(ui.material_preset[3].bed_temp));
       TERN_(HAS_FAN, thermalManager.set_fan_speed(0, ui.material_preset[3].fan_speed));
+      preheat_flag = true;
+      material_index = 3;
 #if ENABLED(USE_SWITCH_POWER_200W)
       while (ABS(thermalManager.degTargetBed() - thermalManager.degBed()) > TEMP_WINDOW)
       {
@@ -7092,11 +7368,17 @@ void HMI_Prepare()
       Popup_Window_Home();
       gcode.process_subcommands_now_P(PSTR("G28")); //home
       delay(200);
-      gcode.process_subcommands_now_P(PSTR("G1 Z35 F300")); // raise Z
+      gcode.process_subcommands_now_P(PSTR("G0 X-40 Z40 F7000")); // raise Z
       checkkey = CExtrude_Menu;
       select_cextr.reset();
       Draw_CExtrude_Menu();
-    break;  
+      break;  
+
+    case PREPARE_CASE_ZHEIGHT: // Z height
+      checkkey = ZHeight;
+      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(PREPARE_CASE_ZHEIGHT + MROWS - index_prepare) , CZ_AFTER_HOMING);
+      EncoderRate.enabled = true;
+      break;
 
     default:
       break;
@@ -7567,8 +7849,7 @@ void HMI_Leveling()
       {
         gcode.process_subcommands_now_P(PSTR("M420 S0"));
         checkkey = Level_Value_Edit;
-        select_level.reset();
-        xy_int8_t mesh_Count = {0, 0};
+        xy_int8_t mesh_Count = Converted_Grid_Point(select_level.now);
         Draw_Dots_On_Screen(&mesh_Count, 1, Select_Block_Color);
         EncoderRate.enabled = true;
         DO_BLOCKING_MOVE_TO_Z(5, 5); // Raise to a height of 5mm each time before moving
@@ -7592,6 +7873,7 @@ void HMI_Leveling()
       {
         Goto_MainMenu(); // Return to the main interface
       }
+      select_level.reset();
       // HMI_flag.Refresh_bottom_flag=false;//The flag does not refresh the bottom parameters
       // Draw_Mid_Status_Area(true); //rock_20230529 //Update all parameters once
     }
@@ -7637,7 +7919,7 @@ void HMI_AxisMove()
   // Avoid flicker by updating only the previous menu
   if (encoder_diffState == ENCODER_DIFF_CW)
   {
-    if (select_axis.inc(1 + 3 + ENABLED(HAS_HOTEND)))
+    if (select_axis.inc(1 + 3 + ENABLED(HAS_HOTEND) + 2))
       Move_Highlight(1, select_axis.now);
   }
   else if (encoder_diffState == ENCODER_DIFF_CCW)
@@ -7693,6 +7975,31 @@ void HMI_AxisMove()
       EncoderRate.enabled = true;
       break;
 #endif
+
+    case 5: {// Probe deploy
+      gcode.process_subcommands_now_P(PSTR("G0 Z40 F7000"));
+      gcode.process_subcommands_now_P(PSTR("G4 P1000"));
+      bool r = probe.deploy();
+      if (!r){
+        gcode.process_subcommands_now_P(PSTR("M117 Probe Deployed"));
+      }else{
+        gcode.process_subcommands_now_P(PSTR("M117 Probe Deploy Failed"));
+      }
+    break;
+    }
+
+    case 6:{ //Probe Stow
+      gcode.process_subcommands_now_P(PSTR("G0 Z40 F7000"));
+      gcode.process_subcommands_now_P(PSTR("G4 P1000"));
+      bool r2 = probe.stow();
+      if (!r2){
+        gcode.process_subcommands_now_P(PSTR("M117 Probe Stowed"));
+      }else{
+        gcode.process_subcommands_now_P(PSTR("M117 Probe Stow Failed"));
+      }
+    break;
+  }  
+
     }
   }
   DWIN_UpdateLCD();
@@ -8008,7 +8315,7 @@ void HMI_Temperature()
      { // PETG preheat setting
        checkkey = PETGPreheat;
        select_PETG.reset();
-       HMI_ValueStruct.show_mode = -3;
+       HMI_ValueStruct.show_mode = -7;
        Clear_Main_Window();
        Draw_Mid_Status_Area(true);
        HMI_flag.Refresh_bottom_flag = false; // Flag refresh bottom parameter
@@ -8059,7 +8366,7 @@ void HMI_Temperature()
     { // ABS preheat setting
       checkkey = ABSPreheat;
       select_ABS.reset();
-      HMI_ValueStruct.show_mode = -3;
+      HMI_ValueStruct.show_mode = -8;
       Clear_Main_Window();
       Draw_Mid_Status_Area(true);
       HMI_flag.Refresh_bottom_flag = false; // Flag refresh bottom parameter
@@ -10065,11 +10372,16 @@ void EachMomentUpdate()
   if (ELAPSED(ms, next_var_update_ms))
   {
     next_var_update_ms = ms + DWIN_VAR_UPDATE_INTERVAL;
-
+    
+    //Update LCD when using Octoprint
     if(serial_connection_active){
       DWIN_OctoUpdate();
     }
 
+    //Monitor the Preheat Material Alert
+    if(preheat_flag && toggle_PreHAlert == 1){
+      Preheat_alert(material_index);
+    }
 
     if (!HMI_flag.Refresh_bottom_flag)
     {
@@ -10961,6 +11273,9 @@ void DWIN_HandleScreen()
   case Display_Menu:
     HMI_Display_Menu();
     break;
+  case Beeper:
+    HMI_Beeper_Menu();
+    break;  
   case Max_LCD_Bright:
     HMI_LCDBright();
     break;
@@ -10970,6 +11285,9 @@ void DWIN_HandleScreen()
   case DimmTime:
     HMI_DimmTime();
     break;        
+  case ZHeight:
+    HMI_ZHeight();
+    break;  
   case Step_value:
     HMI_StepXYZE();
     break;

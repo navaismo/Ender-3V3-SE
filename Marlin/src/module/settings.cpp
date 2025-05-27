@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V87"
+#define EEPROM_VERSION "V90"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
@@ -494,13 +494,16 @@ typedef struct SettingsDataStruct {
   // LCD Sound
   #if ENABLED(DWIN_LCD_BEEP)
     uint8_t toggleLCDBeep;
+    uint8_t toggle_PreHAlert;
+
   #endif     
 
   // LCD Brightness settings
   #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)
    uint8_t lcdtime;                
    int16_t lcddimm;             
-   int16_t lcdbright;              
+   int16_t lcdbright;       
+   uint8_t czheight;       
   #endif
   #if ENABLED(ADVANCED_HELP_MESSAGES)
     bool advanced_help_mesasges_enabled;
@@ -928,6 +931,8 @@ void MarlinSettings::postprocess() {
     #if PREHEAT_COUNT
       _FIELD_TEST(ui_material_preset);
       EEPROM_WRITE(ui.material_preset);
+      
+      
     #endif
 
     //
@@ -1491,6 +1496,9 @@ void MarlinSettings::postprocess() {
     {
       uint8_t beep = toggle_LCDBeep;
       EEPROM_WRITE(beep);
+
+      uint8_t prealert = toggle_PreHAlert;
+      EEPROM_WRITE(prealert);
     }
     #endif
 
@@ -1500,10 +1508,11 @@ void MarlinSettings::postprocess() {
        uint8_t sleep = TURN_OFF_TIME;                
        int16_t dimmBright = DIMM_SCREEN_BRIGHTNESS;
        int16_t bright = MAX_SCREEN_BRIGHTNESS;
+       uint8_t zheight = CZ_AFTER_HOMING;
        EEPROM_WRITE(sleep);              
        EEPROM_WRITE(dimmBright);         
        EEPROM_WRITE(bright);             
- 
+       EEPROM_WRITE(zheight); 
      }             
      #endif
 
@@ -2466,8 +2475,14 @@ void MarlinSettings::postprocess() {
       #if ENABLED(DWIN_LCD_BEEP)
       {
         uint8_t beep;
+
         EEPROM_READ(beep); //Read LCD_Beeper state
         toggle_LCDBeep = (beep > 0) ? 1 : 0;
+
+        uint8_t prealert;
+        EEPROM_READ(prealert); //Read LCD_Beeper state
+        toggle_PreHAlert = (prealert > 0) ? 1 : 0;
+
       }
       #endif
 
@@ -2477,12 +2492,15 @@ void MarlinSettings::postprocess() {
       uint8_t sleep;                 
       int16_t dimmBright;
       int16_t bright;
+      uint8_t zheight;
       EEPROM_READ(sleep);
       TURN_OFF_TIME = (sleep > 60) ? 5 : sleep;              
       EEPROM_READ(dimmBright);
       DIMM_SCREEN_BRIGHTNESS = (dimmBright > 175) ? 175  : dimmBright;         
       EEPROM_READ(bright);             
       MAX_SCREEN_BRIGHTNESS = ( bright > 230) ? 230 : bright;
+      EEPROM_READ(zheight);
+      CZ_AFTER_HOMING = (zheight >= 10) ? zheight : 10; //Set default value
     }
     #endif
 
@@ -4102,9 +4120,11 @@ void MarlinSettings::reset() {
     #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)  
       SERIAL_ECHOLN("DISPLAY Settings:");
       SERIAL_ECHOLNPAIR("Buzzer ON/OFF: ", toggle_LCDBeep);
+      SERIAL_ECHOLNPAIR("Preheat Alert ON/OFF: ", toggle_PreHAlert);
       SERIAL_ECHOLNPAIR("MAX BRIGHTNESS: ", MAX_SCREEN_BRIGHTNESS);
       SERIAL_ECHOLNPAIR("DIMM BRIGHTNESS: ", DIMM_SCREEN_BRIGHTNESS);
       SERIAL_ECHOLNPAIR("AUTO OFF TIME: ", TURN_OFF_TIME);
+      SERIAL_ECHOLNPAIR("CUSTOM Z Height After Homing: ", CZ_AFTER_HOMING);
     #endif
 
 

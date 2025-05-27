@@ -1021,7 +1021,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok /*=false*/)
       M226();
       break; // M226: Wait until a pin reaches a state
 #endif
-
+#if ENABLED(DWIN_CREALITY_LCD)
+    case 255: M255(); break;  // M255: Set LCD Sleep/Backlight Timeout (Minutes)
+    case 256: M256(); break;  // M256: Set LCD brightness
+#endif
 #if HAS_SERVOS
     case 280:
       M280();

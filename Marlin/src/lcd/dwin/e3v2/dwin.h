@@ -125,6 +125,8 @@ enum processID : uint8_t {
   Max_LCD_Bright,
   Dimm_Bright,
   DimmTime,
+  ZHeight,
+  Beeper,
   HomeOff,
   HomeOffX,
   HomeOffY,
@@ -682,6 +684,7 @@ typedef struct
     int16_t LCD_MaxBright  = MAX_SCREEN_BRIGHTNESS;
     int16_t LCD_DimmBright = DIMM_SCREEN_BRIGHTNESS;
     uint8_t Dimm_Time = TURN_OFF_TIME;
+    uint8_t Z_height = CZ_AFTER_HOMING;
   #endif
   #if ENABLED(HAS_HEATED_BED)
     celsius_t Bed_Temp = 0;

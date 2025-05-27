@@ -138,9 +138,11 @@
    {
      SERIAL_ECHOLN("=====++++>> M25 with Octo, Sending Pause Command");
  #if ENABLED(HOST_ACTION_COMMANDS)
+     SERIAL_ECHOLN(" ==== M25 tern");
      TERN_(HOST_PROMPT_SUPPORT, host_prompt_open(PROMPT_PAUSE_RESUME, PSTR("Pause"), PSTR("Resume")));
- #ifdef ACTION_ON_PAUSE
-     host_action_pause();
+ #ifdef ACTION_ON_PAUSED
+ SERIAL_ECHOLN(" ==== M25 HOST ACTION PAUSE");
+     host_action_paused();
  #endif
  #endif
    }
