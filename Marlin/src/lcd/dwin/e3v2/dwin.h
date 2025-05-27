@@ -186,7 +186,7 @@ enum processID : uint8_t {
   POPUP_OK,// Generic OK Popup
  #if ENABLED(DWIN_CREALITY_LCD) // Enable the M117 string into LCD if LCD and Hosts commands are enabled.
   #if ENABLED(HOST_ACTION_COMMANDS)
-    M117Info,
+    OnlyConfirm,
     O9000Ctrl,
     O9000Tune,
     O9000PrintSpeed,

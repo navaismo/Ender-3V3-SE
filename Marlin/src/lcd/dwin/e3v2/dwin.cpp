@@ -421,7 +421,7 @@ static void Custom_Extrude_Process(uint16_t temp, uint16_t length) // Extrude ma
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, 79, 264); // OK button
 
     SET_HOTEND_TEMP(STOP_TEMPERATURE, 0); // Cool down to 140℃
-    checkkey = M117Info;
+    checkkey = OnlyConfirm;
 }
 
 
@@ -7413,7 +7413,7 @@ void HMI_Control()
 
 #if ENABLED(ADVANCED_HELP_MESSAGES)
     case CONTROL_CASE_BEDVIS: // Bed Level Visualizer
-      checkkey = POPUP_OK;
+      checkkey = OnlyConfirm;
       DWIN_RenderMesh();
       break;
 #endif
@@ -8920,11 +8920,19 @@ void HMI_Ok_Dialog(processID returnTo = ErrNoValue)
   DWIN_UpdateLCD(); // Update LCD
 }
 
-/* M117 Info */
-void HMI_M117Info()
+/* Confirm for OK button and go back main menu */
+void HMI_OnlyConfirm()
 {
-  checkkey = POPUP_OK;
-  HMI_Ok_Dialog(MainMenu);
+  ENCODER_DiffState encoder_diffState = get_encoder_state();
+  if (encoder_diffState == ENCODER_DIFF_NO)
+    return;
+  if (encoder_diffState == ENCODER_DIFF_ENTER)
+  {
+    // If enter go back to main menu
+    Goto_MainMenu();
+    HMI_flag.Refresh_bottom_flag = true; // Flag not to refresh bottom parameters --Flag not to refresh bottom parameters
+  }
+  DWIN_UpdateLCD(); // Update LCD
 }
 
 /* Print Finish */
@@ -11004,8 +11012,8 @@ void DWIN_HandleScreen()
   case POPUP_CONFIRM:
     HMI_Confirm();
     break;       // Interface with a single confirmation button
-  case M117Info: // M117 window fix for HMI
-    HMI_M117Info();
+  case OnlyConfirm: // M117 window fix for HMI
+    HMI_OnlyConfirm();
     break;
   case POPUP_OK: // Handle generic OK button popup
     HMI_Ok_Dialog();
@@ -11362,7 +11370,7 @@ void DWIN_Show_M117(char *str)
 {
   updateOctoData = false;
   clearOctoScrollVars(); // If the OctoPrint-E3v3seprintjobdetails plugin is enable we will receive a cancel M117 so clear vars, if not is safe to clear since no job will be render
-  checkkey = M117Info; // Implement Human Interface Control for M117
+  checkkey = OnlyConfirm; // Implement Human Interface Control for M117
   Clear_Main_Window();
   Draw_Mid_Status_Area(true);                                                                                                    // Draw Status Area, the one with Nozzle and bed temp.
   HMI_flag.Refresh_bottom_flag = false;                                                                                          // Flag not to refresh bottom parameters, we want to refresh here
@@ -11537,7 +11545,7 @@ void DWIN_OctoSetPrintTime(char* print_time){
 
 #if ENABLED(ADVANCED_HELP_MESSAGES)
 void DWIN_RenderMesh(processID returnTo) {
-  checkkey = POPUP_OK;
+  checkkey = OnlyConfirm; // Set the checkkey to OnlyConfirm to avoid returning to the previous screen
   HMI_flag.Refresh_bottom_flag = true;
   Clear_Main_Window();
   Clear_Title_Bar();
@@ -11548,14 +11556,12 @@ void DWIN_RenderMesh(processID returnTo) {
   {
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, OK_BUTTON_X + 10, 275);
   }
-
-  HMI_Ok_Dialog(returnTo);
 }
 #endif // ENABLED(ADVANCED_HELP_MESSAGES)
 
 void DWIN_OctoShowGCodeImage()
 {
-  checkkey = M117Info; // Implement Human Interface Control for M117
+  checkkey = OnlyConfirm; // Implement Human Interface Control for M117
   Clear_Main_Window();
  // Octo dwin preview();
 }
