@@ -3325,6 +3325,12 @@ void Goto_MainMenu()
   TERN(HAS_ONESTEP_LEVELING, ICON_Leveling, ICON_StartInfo)(select_page.now == 3);
 }
 
+void Goto_Leveling()
+{
+  HMI_flag.Edit_Only_flag = true;
+  Popup_Window_Leveling();
+  Refresh_Leveling_Value();   // Flush leveling values ​​and colors to the screen
+}
 
 inline ENCODER_DiffState get_encoder_state()
 {
@@ -6734,12 +6740,14 @@ void Draw_Beeper_Menu(){
   // Title
   Draw_Title(F("Buzzer Settings"));
 
-  DWIN_Draw_Label(MBASE(1), F("Mute/Unmute Buzzer"));
+  DWIN_Draw_Label(MBASE(1), F("Menu feedback"));
   Draw_Menu_Line(1, ICON_Contact);
+  DWIN_ICON_Show(ICON, toggle_LCDBeep ? ICON_LEVEL_CALIBRATION_ON : ICON_LEVEL_CALIBRATION_OFF, 192, MBASE(1) + JPN_OFFSET);
 
   // There's no graphical asset for this label, so we just write it as string
-  DWIN_Draw_Label(MBASE(2), F("Mute/Unmute Heat Alert"));
+  DWIN_Draw_Label(MBASE(2), F("Heat Alert"));
   Draw_Menu_Line(2, ICON_Contact);
+  DWIN_ICON_Show(ICON, toggle_PreHAlert ? ICON_LEVEL_CALIBRATION_ON : ICON_LEVEL_CALIBRATION_OFF, 192, MBASE(2) + JPN_OFFSET);
 
   DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Store, 60, MBASE(3) + JPN_OFFSET);
   Draw_Menu_Line(3, ICON_WriteEEPROM); 
@@ -6830,15 +6838,15 @@ void HMI_Beeper_Menu(){
       break;
     case 1: // Toggle LCD Beeper
       toggle_LCDBeep = !toggle_LCDBeep;
+      Draw_Beeper_Menu();
       break;
     case 2: // Toggle Preheat Aert
-      toggle_PreHAlert = !toggle_PreHAlert;  
-    break; 
+      toggle_PreHAlert = !toggle_PreHAlert;
+      Draw_Beeper_Menu();
+    break;
     case 3:
-      settings.save();  
-      break;  
-  
-
+      settings.save();
+      break;
     }
   }
   DWIN_UpdateLCD();
@@ -7354,7 +7362,6 @@ void HMI_Prepare()
 
 #if ENABLED(DWIN_LCD_BEEP)
     case PREPARE_CASE_DISPLAY: // Toggle LCD sound
-      //toggle_LCDBeep = !toggle_LCDBeep;
       select_display.reset();
       Draw_Display_Menu();
       checkkey = Display_Menu;      
@@ -7642,10 +7649,8 @@ void HMI_Control()
     case CONTROL_CASE_SHOW_DATA:
       HMI_flag.G29_finish_flag = true;
       HMI_flag.Edit_Only_flag = true;
-      Popup_Window_Leveling();
       checkkey = Leveling;
-      Refresh_Leveling_Value(); // Flush leveling values ​​and colors to the screen
-
+      Goto_Leveling();
       break;
 #endif
     case CONTROL_CASE_RESET:
@@ -9193,14 +9198,6 @@ void HMI_Pstats()
 /* Generic OK dialog handling with OK button */
 void HMI_Ok_Dialog(processID returnTo = ErrNoValue)
 {
-  if (backKey != ErrNoValue) {
-    SERIAL_ECHOLNPAIR("checkKey: ", checkkey, " backKey: ", backKey);
-    checkkey = backKey;
-    backKey = ErrNoValue;
-
-    return;
-  }
-
   if (returnTo != ErrNoValue) {
     backKey = returnTo;
   }
@@ -9216,8 +9213,13 @@ void HMI_Ok_Dialog(processID returnTo = ErrNoValue)
     }
 
     // If enter go back to main menu
-    if (checkkey == MainMenu) {
-      Goto_MainMenu();
+    switch (checkkey) {
+      case MainMenu:
+        Goto_MainMenu();
+        break;
+      case Leveling:
+        Goto_Leveling();
+        break;
     }
     HMI_flag.Refresh_bottom_flag = true; // Flag not to refresh bottom parameters
   }
@@ -11860,7 +11862,7 @@ void DWIN_OctoSetPrintTime(char* print_time){
 
 #if ENABLED(ADVANCED_HELP_MESSAGES)
 void DWIN_RenderMesh(processID returnTo) {
-  checkkey = OnlyConfirm; // Set the checkkey to OnlyConfirm to avoid returning to the previous screen
+  checkkey = POPUP_OK; // Set the checkkey to OnlyConfirm to avoid returning to the previous screen
   HMI_flag.Refresh_bottom_flag = true;
   Clear_Main_Window();
   Clear_Title_Bar();
@@ -11871,6 +11873,7 @@ void DWIN_RenderMesh(processID returnTo) {
   {
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, OK_BUTTON_X + 10, 275);
   }
+  HMI_Ok_Dialog(returnTo);
 }
 #endif // ENABLED(ADVANCED_HELP_MESSAGES)
 
@@ -11892,10 +11895,8 @@ void DWIN_CompletedHoming()
     {
       HMI_flag.leveling_edit_home_flag = false;
       checkkey = Level_Value_Edit;
-      Popup_Window_Leveling();
       Draw_Leveling_Highlight(1); // Default edit box
-                                  //  checkkey = Leveling;
-      Refresh_Leveling_Value();   // Flush leveling values ​​and colors to the screen
+      Goto_Leveling();
       select_level.reset();
       xy_int8_t mesh_Count = {0, 0};
 

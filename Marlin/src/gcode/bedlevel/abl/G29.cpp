@@ -974,8 +974,8 @@ G29_TYPE GcodeSuite::G29()
         #if ENABLED(ADVANCED_HELP_MESSAGES)
           if (HMI_flag.advanced_help_enabled_flag) {
             HMI_flag.local_leveling_flag = false;
-            checkkey = POPUP_OK;
-            DWIN_RenderMesh();
+            // checkkey = POPUP_OK;
+            DWIN_RenderMesh(Leveling);
           } else
         #endif
           {
