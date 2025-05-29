@@ -403,6 +403,7 @@ extern enum DC_language current_language;
 #define ICON_NOZZLE_CLEAR 176    //喷嘴清洁未开始
 #define ICON_NOZZLE_CLEAR_HOT 177 //喷嘴清洁完成
 #define ICON_NOZZLE_LINE 178  //一键对高连接线
+// 36x21
 #define ICON_LEVEL_CALIBRATION_OFF 179//调平校准关
 #define ICON_LEVEL_CALIBRATION_ON  180 //调平校准开
 

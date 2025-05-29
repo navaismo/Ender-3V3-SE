@@ -1418,8 +1418,8 @@ inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valr
 // #define CONTROL_CASE_INFO  (CONTROL_CASE_ADVSET + 1)
 #define CONTROL_CASE_INFO (CONTROL_CASE_RESET + 1)
 #define CONTROL_CASE_STATS (CONTROL_CASE_INFO + 1)
-#define CONTROL_CASE_BEDVIS (CONTROL_CASE_STATS + 1)
-#define CONTROL_CASE_TOTAL CONTROL_CASE_BEDVIS
+#define CONTROL_CASE_ADVANCED_HELP (CONTROL_CASE_STATS + 1)
+#define CONTROL_CASE_TOTAL CONTROL_CASE_ADVANCED_HELP
 
 #define TUNE_CASE_SPEED 1
 #define TUNE_CASE_TEMP (TUNE_CASE_SPEED + ENABLED(HAS_HOTEND))
@@ -1925,14 +1925,13 @@ void Item_Control_Stats(const uint16_t line)
   Draw_Menu_Line(line, ICON_Info);
 }
 
-void Item_Control_BedVisualizer(const uint16_t line)
+void Item_Control_AdvancedHelp(const uint16_t y)
 {
   if (HMI_flag.language < Language_Max)
   {
-    DWIN_Draw_Label(line, F("BedLevel Visualizer"));
-    DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(line) - 3);
+    DWIN_Draw_Label(y, F("Advanced help"));
   }
-  Draw_Menu_Line(line, ICON_PrintSize);
+  DWIN_ICON_Show(ICON, HMI_flag.advanced_help_enabled_flag ? ICON_LEVEL_CALIBRATION_ON : ICON_LEVEL_CALIBRATION_OFF, 192, y + JPN_OFFSET);
 }
 
 static void Item_Temp_HMPID(const uint16_t line)
@@ -2003,8 +2002,8 @@ void Draw_Control_Menu()
     Item_Control_Info(CLINE(CONTROL_CASE_INFO));
   if (CVISI(CONTROL_CASE_STATS))
     Item_Control_Stats(CLINE(CONTROL_CASE_STATS)); 
-  if (CVISI(CONTROL_CASE_BEDVIS))
-    Item_Control_BedVisualizer(CLINE(CONTROL_CASE_BEDVIS));     
+  if (CVISI(CONTROL_CASE_ADVANCED_HELP))
+    Item_Control_AdvancedHelp(CLINE(CONTROL_CASE_ADVANCED_HELP));
   if (select_control.now && CVISI(select_control.now))
     Draw_Menu_Cursor(CSCROL(select_control.now));
 
@@ -2033,7 +2032,7 @@ void Draw_Control_Menu()
 #endif
   _TEMP_ICON(CONTROL_CASE_INFO, ICON_Info, true);
   _TEMP_ICON(CONTROL_CASE_STATS, ICON_Info, true);
-  _TEMP_ICON(CONTROL_CASE_BEDVIS, ICON_PrintSize, true);
+  _TEMP_ICON(CONTROL_CASE_ADVANCED_HELP, ICON_PrintSize, true);
 }
 
 static void Show_Temp_Default_Data(const uint8_t line, uint8_t index)
@@ -6804,7 +6803,6 @@ void HMI_Display_Menu(){
   DWIN_UpdateLCD();
 }
 
-
 void HMI_Beeper_Menu(){
   ENCODER_DiffState encoder_diffState = get_encoder_state();
   if (encoder_diffState == ENCODER_DIFF_NO)
@@ -7521,11 +7519,10 @@ void HMI_Control()
           Draw_Menu_Icon(MROWS, ICON_Info);
           DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(MROWS) - 3);
           break;
-        case CONTROL_CASE_BEDVIS: // Printer Statistics >
-          Item_Control_BedVisualizer(MBASE(MROWS));
-          Draw_Menu_Icon(MROWS, ICON_PrintSize);
-          DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(MROWS) - 3);
-          break;  
+        case CONTROL_CASE_ADVANCED_HELP: // Advanced help
+          Erase_Menu_Text(MROWS);
+          Item_Control_AdvancedHelp(MBASE(MROWS));
+          break;
         default:
           break;
         }
@@ -7694,9 +7691,9 @@ void HMI_Control()
       break;      
 
 #if ENABLED(ADVANCED_HELP_MESSAGES)
-    case CONTROL_CASE_BEDVIS: // Bed Level Visualizer
-      checkkey = OnlyConfirm;
-      DWIN_RenderMesh();
+    case CONTROL_CASE_ADVANCED_HELP: // Toggle advanced help messages
+      HMI_flag.advanced_help_enabled_flag = !HMI_flag.advanced_help_enabled_flag;
+      Item_Control_AdvancedHelp(MBASE(MROWS));
       break;
 #endif
     default:
@@ -11887,9 +11884,6 @@ void DWIN_OctoShowGCodeImage()
 void DWIN_CompletedHoming()
 {
   HMI_flag.home_flag = false;
-  #if ENABLED(ADVANCED_HELP_MESSAGES)
-    HMI_flag.advanced_help_enabled_flag = true;
-  #endif
   dwin_zoffset = TERN0(HAS_BED_PROBE, probe.offset.z);
   // Print log("checkkey:",checkkey);
   if (checkkey == Last_Prepare)
