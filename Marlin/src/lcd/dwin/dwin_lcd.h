@@ -206,6 +206,10 @@ void DWIN_Draw_IntValue_N0SPACE(uint8_t bShow, bool zeroFill, uint8_t zeroMode, 
 void DWIN_Draw_FloatValue(uint8_t bShow, bool zeroFill, uint8_t zeroMode, uint8_t size, uint16_t color,
                             uint16_t bColor, uint8_t iNum, uint8_t fNum, uint16_t x, uint16_t y, long value);
 
+void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize,
+                        const char *qrcode_data);
+void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize,
+                        const __FlashStringHelper *qrcode_data);
 /*---------------------------------------- Picture related functions ----------------------------------------*/
 
 // Draw JPG and cached in #0 virtual display area

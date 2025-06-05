@@ -718,8 +718,7 @@ G29_TYPE GcodeSuite::G29()
             TERN_(EXTENSIBLE_UI, ExtUI::onMeshUpdate(abl.meshCount, z));
             #if ENABLED(SHOW_GRID_VALUES)  //显示网格值 
               // PRINT_LOG("abl.meshCount.x = ", abl.meshCount.x, " abl.meshCount.y = ", abl.meshCount.y, " z_values[mesh.x][mesh.y] = ", z_values[abl.meshCount.x][abl.meshCount.y]);  //����ǰֵ��ʾ����Ļ��Ӧ�ĵ�λ
-              if(HMI_flag.Need_boot_flag)Draw_Dots_On_Screen(&abl.meshCount,0,0); //开机引导
-              else Draw_Dots_On_Screen(&abl.meshCount,0,0);//非开机引导调平
+            Draw_Dots_On_Screen(&abl.meshCount, 0, 0);
             #endif 
           #endif
           abl.reenable = false;
@@ -945,22 +944,19 @@ G29_TYPE GcodeSuite::G29()
   process_subcommands_now_P(PSTR("G28"));
   process_subcommands_now_P("G1 Z10");  //调平完成之后上台到10mm
 
- #if DISABLED(SHOW_GRID_VALUES)  //不显示网格值
-  #if ENABLED(DWIN_CREALITY_LCD)
-    DWIN_CompletedLeveling();  
-  #endif
-#else
-     if(((GRID_MAX_POINTS_Y*GRID_MAX_POINTS_X)==G29_level_num)&&(!HMI_flag.G29_level_not_normal))
-     {
-       HMI_flag.G29_finish_flag=true; //如果16点的调平值都正常
-       G29_level_num=0;
-     }
-     else 
-     {
-        G29_level_num=0;
-        //HMI_flag.G29_finish_flag=false; //如果16点的调平值都正常
-     }
-     
+  #if DISABLED(SHOW_GRID_VALUES)  //不显示网格值
+    #if ENABLED(DWIN_CREALITY_LCD)
+      DWIN_CompletedLeveling();  
+    #endif
+  #else
+    if(((GRID_MAX_POINTS_Y*GRID_MAX_POINTS_X)==G29_level_num)&&(!HMI_flag.G29_level_not_normal))
+    {
+      HMI_flag.G29_finish_flag=true; //如果16点的调平值都正常
+    } else {
+      //HMI_flag.G29_finish_flag=false; //如果16点的调平值都正常
+    }
+    G29_level_num=0;
+  
     if(HMI_flag.G29_finish_flag && !HMI_flag.Need_g29_flag && HMI_flag.local_leveling_flag)
     {
       if(HMI_flag.Need_boot_flag)//如果开机引导的调平
@@ -971,17 +967,29 @@ G29_TYPE GcodeSuite::G29()
         
         checkkey=POPUP_CONFIRM;
         //Save_Boot_Step_Value();//保存开机引导步骤
+        DWIN_ICON_Show(HMI_flag.language ,LANGUAGE_LEVEL_FINISH ,  WORD_TITLE_X, WORD_TITLE_Y);  //调平完成标题
       }
-      else 
-      {        
-        DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_LEVELING_EDIT, BUTTON_EDIT_X, BUTTON_EDIT_Y);  //0x97   编辑按钮
-        DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_LEVELING_CONFIRM,BUTTON_OK_X, BUTTON_OK_Y);// 确认按钮
-        Draw_Leveling_Highlight(0); //默认选择0
+      else
+      {
+        #if ENABLED(ADVANCED_HELP_MESSAGES)
+          if (HMI_flag.advanced_help_enabled_flag) {
+            HMI_flag.local_leveling_flag = false;
+            // checkkey = POPUP_OK;
+            DWIN_RenderMesh(Leveling);
+          } else
+        #endif
+          {
+            DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_LEVELING_EDIT, BUTTON_EDIT_X, BUTTON_EDIT_Y);  //0x97   编辑按钮
+            DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_LEVELING_CONFIRM,BUTTON_OK_X, BUTTON_OK_Y);// 确认按钮
+            Draw_Leveling_Highlight(0); //默认选择0
+
+            DWIN_ICON_Show(HMI_flag.language ,LANGUAGE_LEVEL_FINISH ,  WORD_TITLE_X, WORD_TITLE_Y);  //调平完成标题
+
+          }
       }
-      DWIN_ICON_Show(HMI_flag.language ,LANGUAGE_LEVEL_FINISH ,  WORD_TITLE_X, WORD_TITLE_Y);  //调平完成标题
       HMI_flag.local_leveling_flag = false;
     }
-#endif
+  #endif
 
   report_current_position();
 
