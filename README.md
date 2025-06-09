@@ -64,16 +64,17 @@ Also I wanted to go a little bit further, since I'm using [Octoprint](https://oc
 
 <br><br>
 
+
 # Installation:
 > [!TIP]
 >
 >First you need to flash creality firmware version 1.0.6. and the TFT files for the display.
 >If your printer is already in that version you can do it directly.
 >
->From: [Latest Release of Printer's Firmware without Gcode Preview](https://github.com/navaismo/Ender-3V3-SE) download the ZIP that fits your Octoprint configuration, recommended 150000 baud rate.
+>From: [Latest Release of Printer's Firmware without Gcode Preview](https://github.com/navaismo/Ender-3V3-SE/releases) download the ZIP that fits your Octoprint configuration, recommended 150000 baud rate.
 >
 > or
->From: [Latest Release of Printer's Firmware with Gcode Preview](https://github.com/navaismo/Ender-3V3-SE-Gcode-Preview) download the ZIP that fits your Octoprint configuration, recommended 150000 baud rate.
+>From: [Latest Release of Printer's Firmware with Gcode Preview](https://github.com/navaismo/Ender-3V3-SE-Gcode-Preview/releases) download the ZIP that fits your Octoprint configuration, recommended 150000 baud rate.
 >
 >Unzip and:
 >
@@ -164,7 +165,7 @@ Enabled the option in Tune menu to modify the extrusion flow/rate of the printer
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/sWYtlSG.jpeg" align="center" height="576" width="440" ></a>
+<a href=""><img src=https://i.imgur.com/sWYtlSG.jpeg" align="center" height="576" width="440" ></a>
 
 </div>
 
