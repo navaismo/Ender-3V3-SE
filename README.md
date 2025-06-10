@@ -428,7 +428,7 @@ _In this section is **important to add the last M117 command** it will help to c
 
 <br>
 
-* For After Print Job is Resumed
+* For Before Print Job is Resumed
 >
 >```bash
 >{% if pause_position.x is not none %}
