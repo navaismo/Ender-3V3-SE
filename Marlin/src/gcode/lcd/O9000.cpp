@@ -17,14 +17,14 @@
  *    - Progress
  */
 bool O9000_collecting = false;
-char filename[50] = {0};
-char print_time[50] = {0};
-char ptime_left[50] = {0};
-char total_layers[50] = {0};
-char curr_layer[50] = {0};
-char thumbnail[50] = {0};
+char filename[35] = {0};
+char print_time[35] = {0};
+char ptime_left[35] = {0};
+char total_layers[35] = {0};
+char curr_layer[35] = {0};
+// char thumbnail[50] = {0};
 char progress[10] = {0};
-char param_value[50] = {0};
+char param_value[40] = {0};
 
 const char *getParsedValue(char *str)
 {
@@ -58,7 +58,7 @@ void GcodeSuite::O9000()
     if (strcmp(my_string, "SC|") == 0)
     {
       // Received all params lets render
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoPrintJob(filename, print_time, ptime_left, total_layers, curr_layer, thumbnail, progress));
+      TERN_(DWIN_CREALITY_LCD, DWIN_OctoPrintJob(filename, print_time, ptime_left, total_layers, curr_layer, progress));
       SERIAL_ECHOLN("O9000 sc-rendered");
     }
     else if (strstr(my_string, "SFN|") != NULL)

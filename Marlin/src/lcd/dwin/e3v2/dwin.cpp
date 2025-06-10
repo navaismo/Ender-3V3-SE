@@ -246,13 +246,13 @@ uint16_t resume_bed_temp = 0;
 #if ENABLED(DWIN_CREALITY_LCD)
 #if ENABLED(HOST_ACTION_COMMANDS)
 // Beware of OctoprintJobs
-char vvfilename[50];
-char vvprint_time[50];
-char vvptime_left[50];
-char vvtotal_layer[50];
-char vvcurr_layer[50];
-char vvthumb[50];
-char vvprogress[30];
+char vvfilename[35];
+char vvprint_time[35];
+char vvptime_left[35];
+char vvtotal_layer[35];
+char vvcurr_layer[35];
+//char vvthumb[50];
+char vvprogress[20];
 bool updateOctoData = false;
 char Octo_ETA_Global[20];
 char Octo_Progress_Global[20];
@@ -309,7 +309,8 @@ static void pause_resume_feedstock(uint16_t _distance, uint16_t _feedRate)
 
 void In_out_feedtock_level(uint16_t _distance, uint16_t _feedRate, bool dir)
 {
-  char cmd[20], str_1[16];
+  char cmd[20]; 
+  //str_1[16];
   float olde = current_position.e, differ_value = 0;
   if (current_position.e < _distance)
     differ_value = (_distance - current_position.e);
@@ -334,7 +335,8 @@ void In_out_feedtock_level(uint16_t _distance, uint16_t _feedRate, bool dir)
 
 void In_out_feedtock(uint16_t _distance, uint16_t _feedRate, bool dir)
 {
-  char cmd[20], str_1[16];
+  char cmd[20];
+  //str_1[16];
   float olde = current_position.e, differ_value = 0;
   if (current_position.e < _distance)
     differ_value = (_distance - current_position.e);
@@ -2765,7 +2767,7 @@ void Draw_Dots_On_Screen(xy_int8_t *mesh_Count, uint8_t Set_En, uint16_t Set_BG_
   uint16_t rec_LU_x, rec_LU_y, rec_RD_x, rec_RD_y;
   uint16_t rec_fill_color;
   float z_offset_value = 0;
-  static float first_num = 0;
+  // static float first_num = 0;
   if (HMI_flag.Need_boot_flag)
     z_offset_value = G29_level_num;
   else
@@ -6258,7 +6260,7 @@ void HMI_O900PauseOrStop()
           SERIAL_ECHOLN("M79 S2"); // 3:cloud print pause
         }
        
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
 
         // Queue.inject p(pstr("m25"));
         RUN_AND_WAIT_GCODE_CMD("M25", true);
@@ -6268,7 +6270,7 @@ void HMI_O900PauseOrStop()
       else
       {
        
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
       }
     }
     else if (select_print.now == 2)
@@ -6308,7 +6310,7 @@ void HMI_O900PauseOrStop()
       }
       else
         
-      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
       // cancel stop
     }
   }
@@ -9374,8 +9376,8 @@ void HMI_O9000()
       { // Sure
         Show_JPN_print_title();
         ICON_Pause();
-        char cmd[40];
-        cmd[0] = '\0';
+        // char cmd[40];
+        // cmd[0] = '\0';
 #if BOTH(HAS_HEATED_BED, PAUSE_HEAT)
         // if (resume_bed_temp) sprintf_P(cmd, PSTR("M190 S%i\n"), resume_bed_temp); //rock_20210901
 #endif
@@ -9393,7 +9395,7 @@ void HMI_O9000()
         // queue.enqueue_now_P(PSTR("M24"));
         // gcode.process_subcommands_now_P(PSTR("M24"));
         updateOctoData = false;
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
 
       }
       else
@@ -9479,7 +9481,7 @@ void HMI_O9000Tune()
       select_print.set(0);
       // SERIAL_ECHOLNPAIR("returning from Tune menu with FN as: ", vvfilename);
       
-      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
 
     }
     break;
@@ -11718,7 +11720,7 @@ void DWIN_Show_M117(char *str)
 }
 
 // Function to render the print job details from Octoprint in the LCD.
-void DWIN_OctoPrintJob(char *filename, char *print_time, char *ptime_left, char *total_layer, char *curr_layer, char *thumbnail, char *progress)
+void DWIN_OctoPrintJob(char *filename, char *print_time, char *ptime_left, char *total_layer, char *curr_layer, char *progress)
 {
   //updateOctoData = false;
   // verify that none is null or emtpy before printing the values
