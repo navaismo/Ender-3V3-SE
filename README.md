@@ -165,7 +165,7 @@ Enabled the option in Tune menu to modify the extrusion flow/rate of the printer
 
 <div align="center">
 
-<a href=""><img src=https://i.imgur.com/sWYtlSG.jpeg" align="center" height="576" width="440" ></a>
+<a href=""><img src="https://i.imgur.com/sWYtlSG.jpeg" align="center" height="576" width="440" ></a>
 
 </div>
 
