@@ -2960,6 +2960,11 @@ void Popup_window_PauseOrStop()
     {
       DWIN_ICON_Show(HMI_flag.language, LANGUAGE_StopPrint, 14, 45);
     }
+    else if(select_print.now == 20){
+      
+      DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_White, Color_Bg_Window, 14, 45, F("Reset Settings?"));
+     
+    }
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, 26, 194);
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Cancel, 132, 194);
   }
@@ -2969,6 +2974,11 @@ void Popup_window_PauseOrStop()
   Draw_Select_Highlight(true);
 #endif
 }
+
+
+
+
+
 // Boot boot popup
 void Popup_window_boot(uint8_t type_popup)
 {
@@ -6195,12 +6205,34 @@ void HMI_PauseOrStop()
           SERIAL_ECHOLN("M79 S4");
         }
       }
-      else
+      else{
         Goto_PrintProcess(); // cancel stop
+      }
+    }else if(select_print.now == 20){
+        if(HMI_flag.select_flag){
+          // Reset EEPROM
+          settings.reset();
+          // After resetting, the language needs to be refreshed again.
+          Clear_Main_Window();
+          DWIN_ICON_Not_Filter_Show(Background_ICON, Background_reset, 0, 25);
+          settings.save();
+          delay(100);
+          HMI_ResetLanguage();
+          HMI_ValueStruct.Auto_PID_Value[1] = 100; // Pid number reset
+          HMI_ValueStruct.Auto_PID_Value[2] = 260; // Pid number reset
+          Save_Auto_PID_Value();
+          HAL_reboot(); // Mcu resets into bootloader
+
+        } else{
+          // cancel reset
+          Goto_MainMenu();
+        } 
+
     }
   }
   DWIN_UpdateLCD();
 }
+
 
 /* Pause and Stop window */
 void HMI_O900PauseOrStop()
@@ -7706,25 +7738,11 @@ void HMI_Control()
 #endif
     case CONTROL_CASE_RESET:
       // Reset EEPROM
-      settings.reset();
-      HMI_AudioFeedback();
-      // After resetting, the language needs to be refreshed again.
-      // Draw_Control_Menu();
-      Clear_Main_Window();
-#if ENABLED(DWIN_CREALITY_480_LCD)
-      DWIN_ICON_Show(ICON, ICON_LOGO, 71, 52);
-#elif ENABLED(DWIN_CREALITY_320_LCD)
-      // DWIN_ICON_Show(ICON, ICON_LOGO, 72, 36);
-      DWIN_ICON_Not_Filter_Show(Background_ICON, Background_reset, 0, 25);
-#endif
-      settings.save();
-      delay(100);
-      HMI_ResetLanguage();
-      HMI_ValueStruct.Auto_PID_Value[1] = 100; // Pid number reset
-      HMI_ValueStruct.Auto_PID_Value[2] = 260; // Pid number reset
-      Save_Auto_PID_Value();
-      // Dwin show main pic();
-      HAL_reboot(); // Mcu resets into bootloader
+      checkkey = Print_window;
+      select_print.now = 20;
+      HMI_flag.select_flag = true;
+      Popup_window_PauseOrStop();
+
       break;
 #endif
     /*
@@ -11117,7 +11135,7 @@ void DWIN_HandleScreen()
     break;
   case Print_window:
     HMI_PauseOrStop();
-    break;
+    break; 
   case AxisMove:
     HMI_AxisMove();
     break;

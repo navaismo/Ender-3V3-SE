@@ -1967,13 +1967,12 @@ void Temperature::updateTemperaturesFromRawValues() {
   #endif // HAS_HOTEND
 
   #if ENABLED(THERMAL_PROTECTION_BED)
-   // vars to avoid false positives on the bed temperature fault
+    // vars to avoid false positives on the bed temperature fault
     #define BED_TEMP_FAULT_THRESHOLD 10
     static uint8_t bed_temp_fault_counter = 0;
 
     #define BEDCMP(A,B) (TEMPDIR(BED) < 0 ? ((A)<(B)) : ((A)>(B)))
     if (BEDCMP(temp_bed.raw, maxtemp_raw_BED)) max_temp_error(H_BED);
-    
     
     // Check if the bed temperature is below the minimum temp and reached the threshold
     if (temp_bed.target > 0 && BEDCMP(mintemp_raw_BED, temp_bed.raw)) {
@@ -1984,6 +1983,7 @@ void Temperature::updateTemperaturesFromRawValues() {
     else {
       bed_temp_fault_counter = 0; // Reset the counter if the temperature is above the threshold
     } 
+    
   #endif
 
   #if BOTH(HAS_HEATED_CHAMBER, THERMAL_PROTECTION_CHAMBER)
