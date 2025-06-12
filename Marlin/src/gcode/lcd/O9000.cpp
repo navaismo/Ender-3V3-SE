@@ -111,11 +111,7 @@ void GcodeSuite::O9000()
       //SERIAL_ECHOLN("Print Finished");
       TERN_(DWIN_CREALITY_LCD, DWIN_OctoJobFinish());
     }
-    else if (strstr(my_string, "BU1|") != NULL)
-    {
-      
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoShowGCodeImage());
-    }
+  
      else if (strstr(my_string, "OCON|") != NULL)
     {
       serial_connection_active = true;

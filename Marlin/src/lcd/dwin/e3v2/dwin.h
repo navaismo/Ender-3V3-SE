@@ -880,8 +880,7 @@ void DWIN_Show_M117(char* str);
 void DWIN_OctoPrintJob(char* filename, char* print_time, char* ptime_left, char* total_layer, char* curr_layer, char *progress);
 // Octoprint Update status
 void DWIN_OctoUpdate();
-// Function to show Gcode Preview
-void DWIN_OctoShowGCodeImage();
+
 // Fucntion to finish job
 void DWIN_OctoJobFinish();
 // Function to show title

@@ -6254,18 +6254,10 @@ void HMI_O900PauseOrStop()
     { // pause window
       if (HMI_flag.select_flag)
       {
-        HMI_flag.pause_action = true;
-        if (HMI_flag.cloud_printing_flag && !HMI_flag.filement_resume_flag)
-        {
-          SERIAL_ECHOLN("M79 S2"); // 3:cloud print pause
-        }
-       
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
-
-        // Queue.inject p(pstr("m25"));
-        RUN_AND_WAIT_GCODE_CMD("M25", true);
+        HMI_flag.pause_flag = true;
+        SERIAL_ECHOLN("O9000 pause-job"); // send Octo Pause command
         ICON_Continue();
-        // Queue.enqueue now p(pstr("m25"));
+        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
       }
       else
       {
@@ -9371,40 +9363,17 @@ void HMI_O9000()
       index_tune = MROWS;
       Draw_Tune_Menu();
       break;
-    case 1: // Pause
-      if (HMI_flag.pause_flag)
-      { // Sure
-        Show_JPN_print_title();
-        ICON_Pause();
-        // char cmd[40];
-        // cmd[0] = '\0';
-#if BOTH(HAS_HEATED_BED, PAUSE_HEAT)
-        // if (resume_bed_temp) sprintf_P(cmd, PSTR("M190 S%i\n"), resume_bed_temp); //rock_20210901
-#endif
-#if BOTH(HAS_HOTEND, PAUSE_HEAT)
-        // if (resume_hotend_temp) sprintf_P(&cmd[strlen(cmd)], PSTR("M109 S%i\n"), resume_hotend_temp);
-#endif
-        if (HMI_flag.cloud_printing_flag && !HMI_flag.filement_resume_flag)
-        {
-          SERIAL_ECHOLN("M79 S3");
-        }
-        pause_resume_feedstock(FEEDING_DEF_DISTANCE, FEEDING_DEF_SPEED);
-        // strcat_P(cmd, M24_STR);
-        queue.inject("M24");
-        // RUN_AND_WAIT_GCODE_CMD("M24", true);
-        // queue.enqueue_now_P(PSTR("M24"));
-        // gcode.process_subcommands_now_P(PSTR("M24"));
-        updateOctoData = false;
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
+    case 1: // Press Pause
+        if(HMI_flag.pause_flag){ //If already paused
+          SERIAL_ECHOLN("O9000 resume-job");
+          ICON_Pause();
+          HMI_flag.pause_flag = false;
+          DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
 
-      }
-      else
-      {
-        // Cancel
-        HMI_flag.select_flag = true;
-        checkkey = O9000Print_window;
-        Popup_window_PauseOrStop();
-      }
+        }else{
+          checkkey = O9000Print_window;
+          Popup_window_PauseOrStop();
+        }
       break;
     case 2: // Stop
       HMI_flag.select_flag = true;
@@ -11762,10 +11731,8 @@ void DWIN_OctoPrintJob(char *filename, char *print_time, char *ptime_left, char 
   DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 80, 165, F(show_layers));    // Label Print Time
 
   ICON_Tune();
-  if (printingIsPaused() && !HMI_flag.cloud_printing_flag)
-    ICON_Continue();
   // Pause --Pause
-  if (printingIsPaused())
+  if (HMI_flag.pause_flag)
   {
     // Show_JPN_pause_title(); //Show title -Show Title
     ICON_Continue();
@@ -11835,6 +11802,7 @@ void clearOctoScrollVars(){
   visibleText[0] = '\0';      
   scrollOffset = 0;           
   maxOffset = 0;   
+  HMI_flag.pause_flag = false; // Reset pause flag
 }
 // finishc job, clear controls and allow go back main window
 void DWIN_OctoJobFinish()
@@ -11881,12 +11849,6 @@ void DWIN_OctoSetPrintTime(char* print_time){
 
 }
 
-void DWIN_OctoShowGCodeImage()
-{
-  checkkey = M117Info; // Implement Human Interface Control for M117
-  Clear_Main_Window();
- // Octo dwin preview();
-}
 
 void DWIN_CompletedHoming()
 {
