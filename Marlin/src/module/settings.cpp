@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V89"
+#define EEPROM_VERSION "V90"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
@@ -504,6 +504,9 @@ typedef struct SettingsDataStruct {
    int16_t lcddimm;             
    int16_t lcdbright;       
    uint8_t czheight;       
+  #endif
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
+    bool advanced_help_mesasges_enabled;
   #endif
 
 //  uint16_t Auto_PID_Value_set1;
@@ -1513,6 +1516,15 @@ void MarlinSettings::postprocess() {
      }             
      #endif
 
+    #if ENABLED(ADVANCED_HELP_MESSAGES)
+    {
+      bool advanced_help_mesasges_enabled = false;
+
+      advanced_help_mesasges_enabled = HMI_flag.advanced_help_enabled_flag;
+      EEPROM_WRITE(advanced_help_mesasges_enabled);
+    }
+    #endif
+
     // Auto_PID_Value_set[1]=HMI_ValueStruct.Auto_PID_Value[1];
     // Auto_PID_Value_set[2]=HMI_ValueStruct.Auto_PID_Value[2];
     // EEPROM_WRITE(Auto_PID_Value_set[1]);
@@ -2489,7 +2501,16 @@ void MarlinSettings::postprocess() {
       MAX_SCREEN_BRIGHTNESS = ( bright > 230) ? 230 : bright;
       EEPROM_READ(zheight);
       CZ_AFTER_HOMING = (zheight >= 10) ? zheight : 10; //Set default value
-    }             
+    }
+    #endif
+
+    #if ENABLED(ADVANCED_HELP_MESSAGES)
+    {
+      bool advanced_help_mesasges_enabled;
+      EEPROM_READ(advanced_help_mesasges_enabled);
+
+      HMI_flag.advanced_help_enabled_flag = advanced_help_mesasges_enabled;
+    }
     #endif
       //  EEPROM_READ(Auto_PID_Value_set[1]);
       //  if(!Auto_PID_Value_set[1])Auto_PID_Value_set[1]=100;
