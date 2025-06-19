@@ -86,12 +86,12 @@ void Encoder_tick() {
 
 // restore brightness smoothly
 // void restore_brightness() {
-//   const uint16_t step_delay = 10; // Smaller delay for smoother animation
+//   const uint8_t step_delay = 10; // Smaller delay for smoother animation
 //   const uint8_t steps = 15;       // More steps for finer control
 
-//   int16_t current_brightness = DIMM_SCREEN_BRIGHTNESS;
-//   int16_t brightness_range = MAX_SCREEN_BRIGHTNESS - DIMM_SCREEN_BRIGHTNESS;
-//   int16_t step_size = brightness_range / steps; // Automatically adapt to range
+//   uint8_t current_brightness = DIMM_SCREEN_BRIGHTNESS;
+//   uint8_t brightness_range = MAX_SCREEN_BRIGHTNESS - DIMM_SCREEN_BRIGHTNESS;
+//   uint8_t step_size = brightness_range / steps; // Automatically adapt to range
 
 //   // Make sure step size is at least 1 to prevent infinite loop
 //   if (step_size < 1) step_size = 1;
