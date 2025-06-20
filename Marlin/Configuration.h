@@ -175,6 +175,9 @@
 #define WUHAN_CHENGE_PLATFORM   1 // 武汉改平台板  20230913_Rock
 //打开高速打印的宏之后由于震动补偿功能会高温报警
 
+
+#define ADVANCED_HELP_MESSAGES  1 // Enabled advanced help messages
+
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
 //#define MACHINE_UUID "00000000-0000-0000-0000-000000000000"

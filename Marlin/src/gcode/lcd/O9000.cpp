@@ -53,7 +53,7 @@ void GcodeSuite::O9000()
   if (parser.string_arg && parser.string_arg[0] != '\0')
   {
     char *my_string = parser.string_arg;
-    //SERIAL_ECHOLNPAIR("Received: ", my_string);
+    // SERIAL_ECHOLNPAIR("Received: ", my_string);
 
     if (strcmp(my_string, "SC|") == 0)
     {
@@ -65,63 +65,70 @@ void GcodeSuite::O9000()
     {
       // Set FileName
       strncpy(filename, getParsedValue(my_string), sizeof(filename) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 1 filename set: ", filename);
+      // SERIAL_ECHOLNPAIR("Parameter 1 filename set: ", filename);
     }
     else if (strstr(my_string, "SPT|") != NULL)
     {
       // Set Print Time
       strncpy(print_time, getParsedValue(my_string), sizeof(print_time) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 2 print_time set: ", print_time);
-      
+      // SERIAL_ECHOLNPAIR("Parameter 2 print_time set: ", print_time);
     }
     else if (strstr(my_string, "UPT|") != NULL)
     {
       // Update Print Time
       strncpy(print_time, getParsedValue(my_string), sizeof(print_time) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 2 print_time set: ", print_time);
+      // SERIAL_ECHOLNPAIR("Parameter 2 print_time set: ", print_time);
       DWIN_OctoSetPrintTime(print_time);
     }
     else if (strstr(my_string, "SET|") != NULL)
     {
       // Set Print Time Left
       strncpy(ptime_left, getParsedValue(my_string), sizeof(ptime_left) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 3 ptime_left set: ", ptime_left);
+      // SERIAL_ECHOLNPAIR("Parameter 3 ptime_left set: ", ptime_left);
     }
     else if (strstr(my_string, "STL|") != NULL)
     {
       // Set Total Layers
       strncpy(total_layers, getParsedValue(my_string), sizeof(total_layers) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 4  total_layers set: ", total_layers);
+      // SERIAL_ECHOLNPAIR("Parameter 4  total_layers set: ", total_layers);
     }
     else if (strstr(my_string, "SCL|") != NULL)
     {
       // Set Current Layer
       strncpy(curr_layer, getParsedValue(my_string), sizeof(curr_layer) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 5 curr_layer set: ", curr_layer);
+      // SERIAL_ECHOLNPAIR("Parameter 5 curr_layer set: ", curr_layer);
     }
     else if (strstr(my_string, "SPP|") != NULL)
     {
       // Set Progress
       strncpy(progress, getParsedValue(my_string), sizeof(progress) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 6 progress set: ", progress);
+      // SERIAL_ECHOLNPAIR("Parameter 6 progress set: ", progress);
     }
     else if (strstr(my_string, "PF|") != NULL)
     {
       // Print Finished
-      //SERIAL_ECHOLN("Print Finished");
+      // SERIAL_ECHOLN("Print Finished");
       TERN_(DWIN_CREALITY_LCD, DWIN_OctoJobFinish());
-    }
+    
   
-     else if (strstr(my_string, "OCON|") != NULL)
+    }else if (strstr(my_string, "OCON|") != NULL)
+
     {
       serial_connection_active = true;
       TERN_(DWIN_CREALITY_LCD, Goto_MainMenu());
     }
-     else if (strstr(my_string, "OCOFF|") != NULL)
+    else if (strstr(my_string, "OCOFF|") != NULL)
     {
       serial_connection_active = false;
       TERN_(DWIN_CREALITY_LCD, Goto_MainMenu());
     }
+#if ENABLED(ADVANCED_HELP_MESSAGES)
+    else if (strstr(my_string, "MESH|") != NULL)
+    {
+      DWIN_RenderMesh();
+    }
+#endif
+
     else
     {
       SERIAL_ECHOLN("Invalid Command Argument...");

@@ -3,9 +3,12 @@
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/HDJQjH8_d.webp?maxwidth=1520&fidelity=grand" align="center" height="776" width="640"  ></a>
+<!-- <a href=""><img src="https://i.imgur.com/HDJQjH8_d.webp?maxwidth=1520&fidelity=grand" align="center" height="776" width="640"  ></a> -->
+
+![MainPrint](./media/PrintProcess.gif)
 
 </div>
+
 
 <br>
 
@@ -66,6 +69,39 @@ Also I wanted to go a little bit further, since I'm using [Octoprint](https://oc
 
 
 # Installation:
+
+
+## FeedRate Selection:
+The Release of the firmware starting from version 1.0.9.8_1c is compiled with two FeedRates(speed of movements):
+
+### **Normal**: 
+Which uses the same stock's feedrates:
+
+```C++
+    #define HOMING_FEEDRATE_MM_M { (50*60), (50*60), (4*60) }
+    #define MAX_ACCEL_EDIT_VALUES { 8000, 8000, 200, 8000 }
+    #define DEFAULT_MAX_FEEDRATE { 500, 500, 5, 30 }
+    #define MAX_FEEDRATE_EDIT_VALUES { 600, 600, 10, 50 }
+    #define DEFAULT_MAX_ACCELERATION { 2500, 2500, 100, 2500 }
+    #define DEFAULT_ACCELERATION 2500
+```
+
+### **Fast**:
+Which uses bigger values to move faster the printer; but generates more noise.
+
+```C++
+    #define HOMING_FEEDRATE_MM_M { (80*60), (80*60), (80*60) } 
+    #define MAX_ACCEL_EDIT_VALUES { 8000, 8000, 500, 8000 }
+    #define DEFAULT_MAX_FEEDRATE { 600, 600, 12, 30 }
+    #define MAX_FEEDRATE_EDIT_VALUES { 900, 900, 40, 60 }
+    #define DEFAULT_MAX_ACCELERATION { 3500, 3500, 200, 3000 }
+    #define DEFAULT_ACCELERATION 3000" 
+```
+
+
+## Hardware Version CR4NS200320C13(SMT32F103RET6)
+You can find the latest code on the [main branch](https://github.com/navaismo/Ender-3V3-SE/tree/main)
+
 > [!TIP]
 >
 >First you need to flash creality firmware version 1.0.6. and the TFT files for the display.
@@ -95,6 +131,40 @@ Also I wanted to go a little bit further, since I'm using [Octoprint](https://oc
 
 <br><br>
 
+## Hardware Version CR4NS200320C14(SMT32F401RET6)
+You can find the latest code [SMT32F401 branch](https://github.com/navaismo/Ender-3V3-SE/tree/SMT32F401)
+
+> [!TIP]
+>
+>First you need to flash creality firmware version 1.0.9. and the TFT files for the display.
+>If your printer is already in that version you can do it directly.
+>
+>From: [Latest Release of Printer's Firmware without Gcode Preview](https://github.com/navaismo/Ender-3V3-SE/releases) with the SMT32F401 tag on it, download the ZIP that fits your Octoprint configuration, recommended 150000 baud rate.
+>
+> or
+>From: [Latest Release of Printer's Firmware with Gcode Preview](https://github.com/navaismo/Ender-3V3-SE-Gcode-Preview/releases) with the SMT32F401 tag on it, download the ZIP that fits your Octoprint configuration, recommended 150000 baud rate.
+>
+>Unzip and:
+>
+> 1. Turn Off your printer.
+> 2. Format you SD to FAT32 recommended to use MiniTool Partition or Gparted.
+> 3. Create a folder called **"STM32F4_UPDATE"** in the root of the SD Card
+> 4. Rename the bin file to something random, i.E. “OC198B.bin” and copy to the SD inside the **SMT32F4_UPDATE** folder.
+> 5. Put the SD on your Printer SD-Card Reader(Not the LCD).
+> 6. Turn On your printer.
+> 7. Wait for the update to finish - it needs ~10-15 seconds.
+> 8. Run a new Autolevel.
+>
+>For Octoprint:
+>
+> 1. Download the Latest Release plugin: navaismo/OctoPrint-E3v3seprintjobdetails
+> 2. Install it manually using the Plugin Manager.
+> 3. Follow the below section of Octoprint to configure it.
+>
+
+<br><br>
+
+
 # Common Features for the Stand Alone Printer & for Octoprint.
 ## * The  7x7-Mesh:
 Based on the fork of [@aschmitt1909](https://github.com/aschmitt1909/Ender-3V3-SE), and merged with the [PR#18](https://github.com/navaismo/Ender-3V3-SE/pull/18) from [@eduard-sukharev](https://github.com/eduard-sukharev) 
@@ -102,7 +172,8 @@ Based on the fork of [@aschmitt1909](https://github.com/aschmitt1909/Ender-3V3-S
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/RZ7Foci.jpeg" align="center" height="576" width="340" ></a>
+<!-- <a href=""><img src="https://i.imgur.com/RZ7Foci.jpeg" align="center" height="576" width="340" ></a> -->
+![Grid](./media/levelGrid.gif)
 
 </div>
 
@@ -140,11 +211,11 @@ Merged the [PR#22](https://github.com/navaismo/Ender-3V3-SE/pull/22) from [@edua
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/Ocak0dE.jpeg" align="center" height="576" width="340" ></a>
+<!-- <a href=""><img src="https://i.imgur.com/Ocak0dE.jpeg" align="center" height="576" width="340" ></a>
 
 <br>
-<a href=""><img src="https://i.imgur.com/mH1uAC5.jpeg" align="center" height="576" width="340" ></a>
-
+<a href=""><img src="https://i.imgur.com/mH1uAC5.jpeg" align="center" height="576" width="340" ></a> -->
+![InputShaping](./media/InputShaping.gif)
 
 </div>
 
@@ -165,8 +236,8 @@ Enabled the option in Tune menu to modify the extrusion flow/rate of the printer
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/sWYtlSG.jpeg"  align="center" height="576" width="440" ></a>
-
+<!-- <a href=""><img src="https://i.imgur.com/sWYtlSG.jpeg" align="center" height="576" width="440" ></a> -->
+![extrusion](./media/extrusion.gif)
 </div>
 
 
@@ -189,8 +260,8 @@ To preseve the state of the feature go to Menu Control --> Save settings.
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/YUpHKl2.jpeg" align="center" height="676" width="440" ></a>
-
+<!-- <a href=""><img src="https://i.imgur.com/YUpHKl2.jpeg" align="center" height="676" width="440" ></a> -->
+![DisplaySettings](./media/displaySettings.gif)
 </div>
 
 <br>
@@ -222,8 +293,8 @@ Added a quick Linear Advance Menu under Motion Menu from feature request on [Iss
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/MjZFWX0.jpeg" align="center" height="576" width="940" ></a>
-
+<!-- <a href=""><img src="https://i.imgur.com/MjZFWX0.jpeg" align="center" height="576" width="940" ></a> -->
+![LinAdv](./media/linearAdv.gif)
 </div>
 
 <br>
@@ -246,8 +317,8 @@ Added a custom Extrusion Menu under Prepare Menu from feature request on [Issue#
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/fY8wWJA.jpeg" align="center" height="976" width="1140" ></a>
-
+<!-- <a href=""><img src="https://i.imgur.com/fY8wWJA.jpeg" align="center" height="976" width="1140" ></a> -->
+![CustomExtr](./media/CustExtrusion.gif)
 </div>
 
 
@@ -258,8 +329,8 @@ Added Submenu under Control Menu to show the Print Stats gather by Marlin. From 
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/3irzF4E.jpeg" align="center" height="576" width="940" ></a>
-
+<!-- <a href=""><img src="https://i.imgur.com/3irzF4E.jpeg" align="center" height="576" width="940" ></a> -->
+![PrintStats](./media/PrintStats.gif)
 </div>
 
 <br>
@@ -269,8 +340,8 @@ Added options for preheat new Materials: PETG and ABS under Control and Pepare M
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/Q051ckp.jpeg" align="center" height="976" width="940" ></a>
-
+<!-- <a href=""><img src="https://i.imgur.com/Q051ckp.jpeg" align="center" height="976" width="940" ></a> -->
+![PreheatMat](./media/PreHeat.gif)
 </div>
 
 <br>
@@ -281,8 +352,8 @@ Added option to edit the height of the nozzle after homing. From feature request
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/WR7rl8V.jpeg" align="center" height="620" width="440" ></a>
-
+<!-- <a href=""><img src="https://i.imgur.com/WR7rl8V.jpeg" align="center" height="620" width="440" ></a> -->
+![HomeH](./media/HomeHeight.gif)
 </div>
 
 <br>
@@ -293,11 +364,23 @@ Added option to test the probe to deploay and stow inside Move Menu. From featur
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/0qEBfUl.jpeg" align="center" height="620" width="440" ></a>
-
+<!-- <a href=""><img src="https://i.imgur.com/0qEBfUl.jpeg" align="center" height="620" width="440" ></a> -->
+![Probe](./media/probe.gif)
 </div>
 
 <br>
+
+## * Bed Level Visualizer:
+Added option to see the Bed level iso view along the QR code to get help, this is part of the [PR #52](https://github.com/navaismo/Ender-3V3-SE/pull/52) which enable Advanced help messages by [@eduard-sukharev](https://github.com/eduard-sukharev)
+
+<div align="center">
+
+<!-- <a href=""><img src="https://i.imgur.com/0qEBfUl.jpeg" align="center" height="620" width="440" ></a> -->
+![BedQR](./media/bedLevel.gif)
+</div>
+
+<br>
+
 
 ----------
 
