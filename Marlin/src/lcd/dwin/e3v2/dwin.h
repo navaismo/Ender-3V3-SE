@@ -58,13 +58,21 @@
   #define Flat_Color        0x7FE0  //草坪绿 -->平坦颜色
   #define Relatively_Flat   0x1C9F  //道奇蓝色 --> 较平坦颜色
   // #define Slope_Small       0xF81F  //洋红色 -->小倾斜
-  #define Slope_Small       0xFFE0  //黄色 -->小倾斜 
+  #define Slope_Small       0xFFE0  //黄色 -->小倾斜
   #define Slope_Big         0xF800  //深红色 -->大倾斜
-  
+
+  #define HeightColor_VeryLow  0x909e
+  #define HeightColor_Low      0x1aff
+  #define HeightColor_FlatLow  0x04cc
+  #define HeightColor_Flat     0xffff
+  #define HeightColor_FlatHigh 0x5d20
+  #define HeightColor_High     0xed80
+  #define HeightColor_VeryHigh 0xf240
+
   #define  Select_Block_Color 0xFFE0 //黄色色 选中块颜色
 
-  #define Slope_Big_Max        2.0  //大倾斜上边界值
-  #define Slope_Big_Min       -2.0  //大倾斜下边界值
+  #define Slope_Big_Max        1.5  //大倾斜上边界值
+  #define Slope_Big_Min       -1.5  //大倾斜下边界值
   #define Slope_Small_Max      1.0  //小倾斜上边界值
   #define Slope_Small_Min     -1.0  //小倾斜下边界值
   #define Relatively_Flat_Max  0.5  //较平坦上边界值
@@ -177,10 +185,10 @@ enum processID : uint8_t {
   Change_Level_Value, //改变调平值
   ONE_HIGH, //一键对高页面
   POPUP_CONFIRM,//弹窗确定界面
-  Max_GUI,
+  POPUP_OK,// Generic OK Popup
  #if ENABLED(DWIN_CREALITY_LCD) // Enable the M117 string into LCD if LCD and Hosts commands are enabled.
   #if ENABLED(HOST_ACTION_COMMANDS)
-    M117Info,
+    OnlyConfirm,
     O9000Ctrl,
     O9000Tune,
     O9000PrintSpeed,
@@ -192,7 +200,8 @@ enum processID : uint8_t {
     O9000Print_window,
     OctoFinish,
   #endif
- #endif  
+ #endif
+  ErrNoValue,
 };
 
 enum DC_language{
@@ -394,6 +403,7 @@ extern enum DC_language current_language;
 #define ICON_NOZZLE_CLEAR 176    //喷嘴清洁未开始
 #define ICON_NOZZLE_CLEAR_HOT 177 //喷嘴清洁完成
 #define ICON_NOZZLE_LINE 178  //一键对高连接线
+// 36x21
 #define ICON_LEVEL_CALIBRATION_OFF 179//调平校准关
 #define ICON_LEVEL_CALIBRATION_ON  180 //调平校准开
 
@@ -758,6 +768,9 @@ typedef struct {
     bool leveling_edit_home_flag :1; //调平编辑页面回零是否完成
     bool cr_touch_error_flag :1; //CR_Touch错误标志位
   #endif
+  #if ENABLED(ADVANCED_HELP_MESSAGES)
+    bool advanced_help_enabled_flag:1;
+  #endif
   AxisEnum feedspeed_axis, acc_axis, jerk_axis, step_axis;
   uint8_t HM_PID_ROW,Auto_PID_ROW;
   uint8_t PID_ERROR_FLAG;
@@ -768,22 +781,22 @@ extern HMI_value_t HMI_ValueStruct;
 extern HMI_Flag_t HMI_flag;
 extern bool end_flag; //防止反复刷新曲线完成指令
 // Show ICO
-void ICON_Print(bool show);
-void ICON_Prepare(bool show);
-void ICON_Control(bool show);
+// void ICON_Print(bool show);
+// void ICON_Prepare(bool show);
+// void ICON_Control(bool show);
 void ICON_Leveling(bool show);
 void ICON_StartInfo(bool show);
 
-void ICON_Setting(bool show);
+// void ICON_Setting(bool show);
 // void ICON_Pause(bool show);
 // void ICON_Continue(bool show);
 void ICON_Pause();
 void ICON_Continue();
-void ICON_Stop(bool show);
+// void ICON_Stop(bool show);
 
 #if HAS_HOTEND || HAS_HEATED_BED
   // Popup message window
-  void DWIN_Popup_Temperature(const bool toohigh);
+  // void DWIN_Popup_Temperature(const bool toohigh);
   void DWIN_Popup_Temperature(const bool toohigh,int8_t Error_id);
 #endif
 
@@ -831,10 +844,10 @@ void HMI_SDCardInit();
 void HMI_SDCardUpdate();
 
 // Main Process
-void Icon_print(bool value);
-void Icon_control(bool value);
-void Icon_temperature(bool value);
-void Icon_leveling(bool value);
+// void Icon_print(bool value);
+// void Icon_control(bool value);
+// void Icon_temperature(bool value);
+// void Icon_leveling(bool value);
 
 // Other
 void Draw_Status_Area(const bool with_update); // Status Area
@@ -890,11 +903,13 @@ void octoUpdateScroll();
 void clearOctoScrollVars();
 // Set Values for updates
 void DWIN_SetPrintingDetails(const char *eta, const char *progress, const char *current_layer);
-
 // Update print time
 void DWIN_OctoSetPrintTime(char* print_time);
 
-
+#if ENABLED(ADVANCED_HELP_MESSAGES)
+  void render_bed_mesh_3D();
+  void DWIN_RenderMesh(processID returnTo = MainMenu);
+#endif
 
 void DWIN_CompletedHoming();
 void DWIN_CompletedHeight();

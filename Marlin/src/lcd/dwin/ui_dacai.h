@@ -16,8 +16,8 @@
 #define StartSoundSet       ((unsigned long)0x060480A0)
 #define ExchangepageAddr    0x0084
 
-#define DACAI_JPG_BYTES_PER_FRAME (2048)    //下载包大小
-#define DACAI_JPG_BYTES_PER_BUF (DACAI_JPG_BYTES_PER_FRAME + 4)    //下载包大小
+// #define DACAI_JPG_BYTES_PER_FRAME (2048)    //下载包大小
+// #define DACAI_JPG_BYTES_PER_BUF (DACAI_JPG_BYTES_PER_FRAME + 4)    //下载包大小
 
 // 这部分为“命令类型 ”
 #define NOTIFY_TOUCH_PRESS         0X01  // 屏幕按下通知
@@ -63,15 +63,15 @@
 
 #define VAL_DEFAILT 0xFFFF
 
-#define SizeofDatabuf    300
+// #define SizeofDatabuf    300
 
 /* 文字颜色定义 */
 #define COLOE_WHITE 0xFFFF
 #define COLOR_GREY  0x8410
 
 /* JPG 图片显示相关定义 */
-#define DACAI_JPG_BYTES_PER_PACKET 240   // 每一帧发送的字节数（图片数据）
-#define DACAI_JPG_WORD_PER_PACKET  DACAI_JPG_BYTES_PER_PACKET/2   //每一帧发送的字数（图片数据）
+// #define DACAI_JPG_BYTES_PER_PACKET 240   // 每一帧发送的字节数（图片数据）
+// #define DACAI_JPG_WORD_PER_PACKET  DACAI_JPG_BYTES_PER_PACKET/2   //每一帧发送的字数（图片数据）
 
 #pragma pack(1)
 typedef struct DacaiDataBuf
@@ -142,48 +142,48 @@ enum UnitType
 //     unsigned int  RightDown_Y;  // 显示区域的右下角Y
 // }DwinBrightness_t;
 
-class UI_SHOW_t {
-  public:
-    uint8_t IsDacaiScreenConnect;
-    UI_SHOW_t();
-    void RTS_Init(void);
+// class UI_SHOW_t {
+//   public:
+//     uint8_t IsDacaiScreenConnect;
+//     UI_SHOW_t();
+//     void RTS_Init(void);
 
-    void RTS_SndData(void);
-    void RTS_SndData(const String &, unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(const char[],   unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(char,           unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(unsigned char*, unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(int,            unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(unsigned int,   unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(float,          unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(long,           unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(unsigned long,  unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
-    void RTS_SndData(int,            unsigned long = CMD_GOTO_SCREEN);
+//     void RTS_SndData(void);
+//     void RTS_SndData(const String &, unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(const char[],   unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(char,           unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(unsigned char*, unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(int,            unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(unsigned int,   unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(float,          unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(long,           unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(unsigned long,  unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);
+//     void RTS_SndData(int,            unsigned long = CMD_GOTO_SCREEN);
 
-    bool UI_Handshake(void);
-    void UI_GotoScreen(int);  // 切换界面
-    void UI_ShowIcon(int,               unsigned long, unsigned long, unsigned long = CMD_ICON_SET_FRAME);                   // 图标控件显示、动画控件显示某一帧;图标动画控件 开始、停止、暂停等
-    void UI_ShowOrHideConctrols(bool,        unsigned long, unsigned long, unsigned long = CMD_ICON_SHOW_HIDE);              // 显示、隐藏控件
-    void UI_ShowText(char*,             unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);                   // 发送文本数据
-    void UI_ShowText(int,               unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN, uint8_t = U_NULL); // 发送文本数据
-    void UI_ShowText(float, uint8_t,    unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN, uint8_t = U_NULL); // 发送文本数据
-    void UI_ShowTextClear(              unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);                   // 发送清空文本数据
+//     bool UI_Handshake(void);
+//     void UI_GotoScreen(int);  // 切换界面
+//     void UI_ShowIcon(int,               unsigned long, unsigned long, unsigned long = CMD_ICON_SET_FRAME);                   // 图标控件显示、动画控件显示某一帧;图标动画控件 开始、停止、暂停等
+//     void UI_ShowOrHideConctrols(bool,        unsigned long, unsigned long, unsigned long = CMD_ICON_SHOW_HIDE);              // 显示、隐藏控件
+//     void UI_ShowText(char*,             unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);                   // 发送文本数据
+//     void UI_ShowText(int,               unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN, uint8_t = U_NULL); // 发送文本数据
+//     void UI_ShowText(float, uint8_t,    unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN, uint8_t = U_NULL); // 发送文本数据
+//     void UI_ShowTextClear(              unsigned long, unsigned long, unsigned long = CMD_SEND_TO_SCREEN);                   // 发送清空文本数据
 
-    void UI_ShowTextUnicode(const char* , const int, unsigned long , unsigned long , unsigned long = CMD_SEND_TO_SCREEN);
+//     void UI_ShowTextUnicode(const char* , const int, unsigned long , unsigned long , unsigned long = CMD_SEND_TO_SCREEN);
 
-    bool UI_SendJpegDateHandshake(unsigned long size, const char *path);
-    bool UI_SendJpegDate(const char *jpeg, unsigned long size);
-    void UI_DisplayJpegDate(unsigned long _screen_id);
-    void UI_ChangeLanguage(unsigned int lang);
+//     bool UI_SendJpegDateHandshake(unsigned long size, const char *path);
+//     bool UI_SendJpegDate(const char *jpeg, unsigned long size);
+//     void UI_DisplayJpegDate(unsigned long _screen_id);
+//     void UI_ChangeLanguage(unsigned int lang);
 
-    DDB recdat;
-    DDB snddat;
-    private:
-    unsigned char databuf[SizeofDatabuf];
-    unsigned char frameEnd[4];
-  };
+//     DDB recdat;
+//     DDB snddat;
+//     private:
+//     // unsigned char databuf[SizeofDatabuf];
+//     unsigned char frameEnd[4];
+//   };
 
-extern UI_SHOW_t uiShow;
+// extern UI_SHOW_t uiShow;
 
 // #define DWIN_DEBUG
 #endif
