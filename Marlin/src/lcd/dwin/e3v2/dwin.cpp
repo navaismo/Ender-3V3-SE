@@ -6757,12 +6757,12 @@ void Draw_Display_Menu(){
   // There's no graphical asset for this label, so we just write it as string
   DWIN_Draw_Label(MBASE(2), F("Max Brightness(%)"));
   Draw_Menu_Line(2, ICON_PrintSize);
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2) + 3 , ((MAX_SCREEN_BRIGHTNESS-164)*100)/66);
+  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2) + 3 , (MAX_SCREEN_BRIGHTNESS*100)/64);
 
   // There's no graphical asset for this label, so we just write it as string
   DWIN_Draw_Label(MBASE(3), F("Dimm Brightness(%)"));
   Draw_Menu_Line(3, ICON_Hardware_version);
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3) + 3 , ((DIMM_SCREEN_BRIGHTNESS-164)*100)/66);
+  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3) + 3 , (DIMM_SCREEN_BRIGHTNESS*100)/64);
 
   // There's no graphical asset for this label, so we just write it as string
   DWIN_Draw_Label(MBASE(4), F(" Mins Before Dimm"));
@@ -6831,13 +6831,13 @@ void HMI_Display_Menu(){
     case 2: // Max Brightness
       checkkey = Max_LCD_Bright;
       //LIMIT(HMI_ValueStruct.LCD_MaxBright, 0, 100);
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(2) + 3, ((MAX_SCREEN_BRIGHTNESS-164)*100)/66);
+      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(2) + 3, (MAX_SCREEN_BRIGHTNESS*100)/64);
       EncoderRate.enabled = true;
       break;
     case 3: // Dim Brightness
       checkkey = Dimm_Bright;
       //LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(3) + 3, ((DIMM_SCREEN_BRIGHTNESS-164)*100)/66);
+      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(3) + 3, (DIMM_SCREEN_BRIGHTNESS*100)/64);
       EncoderRate.enabled = true;
       break;
     case 4: // Dim Time
@@ -6909,9 +6909,8 @@ void HMI_LCDBright(){
     LIMIT(HMI_ValueStruct.LCD_MaxBright, 5, 100);
     checkkey = Display_Menu;
     DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2)+3 , HMI_ValueStruct.LCD_MaxBright);
-    int16_t luminance = 164 + ((HMI_ValueStruct.LCD_MaxBright * 66) / 100);
-    MAX_SCREEN_BRIGHTNESS = luminance;
-    DWIN_Backlight_SetLuminance(luminance);
+    MAX_SCREEN_BRIGHTNESS = (uint8_t)(((uint16_t)HMI_ValueStruct.LCD_MaxBright * 64) / 100);
+    DWIN_Backlight_SetLuminance(MAX_SCREEN_BRIGHTNESS);
     //save to eeprom
     return;
   }
@@ -6931,8 +6930,7 @@ void HMI_LCDDimm(){
     LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
     checkkey = Display_Menu;
     DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3)+3 , HMI_ValueStruct.LCD_DimmBright);
-    int16_t luminance = 164 + ((HMI_ValueStruct.LCD_DimmBright * 66) / 100);
-    DIMM_SCREEN_BRIGHTNESS = luminance;
+    DIMM_SCREEN_BRIGHTNESS = (uint8_t)(((uint16_t)HMI_ValueStruct.LCD_DimmBright * 64) / 100);
     //save to eeprom
     return;
   }

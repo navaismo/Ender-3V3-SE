@@ -682,8 +682,8 @@ typedef struct
     celsius_t E_Temp = 0;
     int16_t E_Flow = 0;
     int16_t Extrusion_Length = 0;
-    int16_t LCD_MaxBright  = MAX_SCREEN_BRIGHTNESS;
-    int16_t LCD_DimmBright = DIMM_SCREEN_BRIGHTNESS;
+    uint8_t LCD_MaxBright  = MAX_SCREEN_BRIGHTNESS;
+    uint8_t LCD_DimmBright = DIMM_SCREEN_BRIGHTNESS;
     uint8_t Dimm_Time = TURN_OFF_TIME;
     uint8_t Z_height = CZ_AFTER_HOMING;
   #endif

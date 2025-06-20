@@ -1685,9 +1685,10 @@ uint8_t CZ_AFTER_HOMING = 10;
 
 
 #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)
-int16_t DIMM_SCREEN_BRIGHTNESS = 175;
-int16_t MAX_SCREEN_BRIGHTNESS = 230;
-int16_t TURN_OFF_TIME = 5;
+// Maximum value supported by screen is 0x40 (64)
+uint8_t DIMM_SCREEN_BRIGHTNESS = 44;
+uint8_t MAX_SCREEN_BRIGHTNESS = 57;
+uint8_t TURN_OFF_TIME = 5;
 
 // Smoothly dim brightness
 // void dimm_brightness() {
