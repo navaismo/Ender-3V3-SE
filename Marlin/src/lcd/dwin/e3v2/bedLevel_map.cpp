@@ -185,7 +185,7 @@ void render_bed_mesh_3D()
 
     char delta_str[15];
     char stddev_str[15];
-    char score_str[22];
+    // char score_str[22];
 
     sprintf(delta_str, "Delta: %.2f", result.delta);
     sprintf(stddev_str, "StdDev: %.3f", result.stddev);

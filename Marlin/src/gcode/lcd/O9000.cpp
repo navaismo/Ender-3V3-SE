@@ -111,7 +111,7 @@ void GcodeSuite::O9000()
       TERN_(DWIN_CREALITY_LCD, DWIN_OctoJobFinish());
     
   
-     else if (strstr(my_string, "OCON|") != NULL)
+    }else if (strstr(my_string, "OCON|") != NULL)
 
     {
       serial_connection_active = true;

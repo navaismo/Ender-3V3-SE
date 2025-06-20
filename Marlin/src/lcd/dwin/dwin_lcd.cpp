@@ -646,13 +646,13 @@ void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const ui
 
 // Draw JPG and cached in #0 virtual display area
 // id: Picture ID
-void DWIN_JPG_ShowAndCache(const uint8_t id)
-{
-  size_t i = 0;
-  DWIN_Word(i, 0x2200);
-  DWIN_Byte(i, id);
-  DWIN_Send(i);     // AA 23 00 00 00 00 08 00 01 02 03 CC 33 C3 3C
-}
+// void DWIN_JPG_ShowAndCache(const uint8_t id)
+// {
+//   size_t i = 0;
+//   DWIN_Word(i, 0x2200);
+//   DWIN_Byte(i, id);
+//   DWIN_Send(i);     // AA 23 00 00 00 00 08 00 01 02 03 CC 33 C3 3C
+// }
 
 // Draw an Icon
 //  libID: Icon library ID
@@ -695,14 +695,14 @@ void DWIN_ICON_Show(uint8_t libID, uint8_t picID, uint16_t x, uint16_t y)
 // Unzip the JPG picture to a virtual display area
 //  n: Cache index
 //  id: Picture ID
-void DWIN_JPG_CacheToN(uint8_t n, uint8_t id)
-{
-  size_t i = 0;
-  DWIN_Byte(i, 0x25);
-  DWIN_Byte(i, n);
-  DWIN_Byte(i, id);
-  DWIN_Send(i);
-}
+// void DWIN_JPG_CacheToN(uint8_t n, uint8_t id)
+// {
+//   size_t i = 0;
+//   DWIN_Byte(i, 0x25);
+//   DWIN_Byte(i, n);
+//   DWIN_Byte(i, id);
+//   DWIN_Send(i);
+// }
 
 // Copy area from virtual display area to current screen
 //  cacheID: virtual area number
@@ -770,26 +770,26 @@ void DWIN_ICON_AnimationControl(uint16_t state) {
   DWIN_Send(i);
 }
 
-void DWIN_ICON_WR_SRAM(uint16_t data)
-{
-  size_t i = 0;
-  DWIN_Byte(i, 0x31);
-  DWIN_Byte(i, 0x5A);
-  DWIN_Word(i, data);
-  DWIN_Send(i);
-}
+// void DWIN_ICON_WR_SRAM(uint16_t data)
+// {
+//   size_t i = 0;
+//   DWIN_Byte(i, 0x31);
+//   DWIN_Byte(i, 0x5A);
+//   DWIN_Word(i, data);
+//   DWIN_Send(i);
+// }
 
-void DWIN_ICON_SHOW_SRAM(uint16_t x,uint16_t y,uint16_t addr)
-{
-  size_t i = 0;
-  DWIN_Byte(i, 0xC1);
-  DWIN_Byte(i, 0x12);
-  DWIN_Word(i, x);
-  DWIN_Word(i, y);
-  DWIN_Byte(i, 0);
-  DWIN_Word(i, addr);
-  DWIN_Send(i);
-}
+// void DWIN_ICON_SHOW_SRAM(uint16_t x,uint16_t y,uint16_t addr)
+// {
+//   size_t i = 0;
+//   DWIN_Byte(i, 0xC1);
+//   DWIN_Byte(i, 0x12);
+//   DWIN_Word(i, x);
+//   DWIN_Word(i, y);
+//   DWIN_Byte(i, 0);
+//   DWIN_Word(i, addr);
+//   DWIN_Send(i);
+// }
 
 /*---------------------------------------- Memory functions ----------------------------------------*/
 // The LCD has an additional 32KB SRAM and 16KB Flash

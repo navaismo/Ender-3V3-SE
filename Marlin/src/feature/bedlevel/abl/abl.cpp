@@ -274,7 +274,7 @@ void refresh_bed_level() {
 */
 static float Level_Compensation_Algorithm(float offset_value,xy_pos_t &raw_xy,xy_pos_t &ratio_xy)
 {
-   int temp_y=ratio_xy.y,temp_x=ratio_xy.x;   //取整数
+  //  int temp_y=ratio_xy.y,temp_x=ratio_xy.x;   //取整数
     //如果斜率太大就取消补偿,防止补偿过大。
     if((offset_value>LEVEL_ALGORITHM_MAX)|| (offset_value< LEVEL_ALGORITHM_MIN)) return offset_value;
     if ((ratio_xy.y>=1.0)||(ratio_xy.x>=1.0))   //在边界外

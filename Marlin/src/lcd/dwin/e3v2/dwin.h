@@ -781,22 +781,22 @@ extern HMI_value_t HMI_ValueStruct;
 extern HMI_Flag_t HMI_flag;
 extern bool end_flag; //防止反复刷新曲线完成指令
 // Show ICO
-void ICON_Print(bool show);
-void ICON_Prepare(bool show);
-void ICON_Control(bool show);
+// void ICON_Print(bool show);
+// void ICON_Prepare(bool show);
+// void ICON_Control(bool show);
 void ICON_Leveling(bool show);
 void ICON_StartInfo(bool show);
 
-void ICON_Setting(bool show);
+// void ICON_Setting(bool show);
 // void ICON_Pause(bool show);
 // void ICON_Continue(bool show);
 void ICON_Pause();
 void ICON_Continue();
-void ICON_Stop(bool show);
+// void ICON_Stop(bool show);
 
 #if HAS_HOTEND || HAS_HEATED_BED
   // Popup message window
-  void DWIN_Popup_Temperature(const bool toohigh);
+  // void DWIN_Popup_Temperature(const bool toohigh);
   void DWIN_Popup_Temperature(const bool toohigh,int8_t Error_id);
 #endif
 
@@ -844,10 +844,10 @@ void HMI_SDCardInit();
 void HMI_SDCardUpdate();
 
 // Main Process
-void Icon_print(bool value);
-void Icon_control(bool value);
-void Icon_temperature(bool value);
-void Icon_leveling(bool value);
+// void Icon_print(bool value);
+// void Icon_control(bool value);
+// void Icon_temperature(bool value);
+// void Icon_leveling(bool value);
 
 // Other
 void Draw_Status_Area(const bool with_update); // Status Area

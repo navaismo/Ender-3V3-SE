@@ -2178,7 +2178,7 @@
 #if BOTH(SDSUPPORT, DIRECT_STEPPING)
   #define BLOCK_BUFFER_SIZE  16
 #elif ENABLED(SDSUPPORT)
-  #define BLOCK_BUFFER_SIZE 16
+  #define BLOCK_BUFFER_SIZE 8
 #else
   #define BLOCK_BUFFER_SIZE 16
 #endif
@@ -2186,8 +2186,8 @@
 // @section serial
 
 // The ASCII buffer for serial input
-#define MAX_CMD_SIZE 96
-#define BUFSIZE 64
+#define MAX_CMD_SIZE 48
+#define BUFSIZE 32
 
 // Transmission to Host Buffer Size
 // To save 386 bytes of PROGMEM (and TX_BUFFER_SIZE+3 bytes of RAM) set to 0.
@@ -2196,7 +2196,7 @@
 // For debug-echo: 128 bytes for the optimal speed.
 // Other output doesn't need to be that speedy.
 // :[0, 2, 4, 8, 16, 32, 64, 128, 256]
-#define TX_BUFFER_SIZE 64
+#define TX_BUFFER_SIZE 32
 
 // Host Receive Buffer Size
 // Without XON/XOFF flow control (see SERIAL_XON_XOFF below) 32 bytes should be enough.
@@ -2204,21 +2204,21 @@
 // :[0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
 //#define RX_BUFFER_SIZE 1024
 
-#if RX_BUFFER_SIZE >= 1024
-  // Enable to have the controller send XON/XOFF control characters to
-  // the host to signal the RX buffer is becoming full.
-  //#define SERIAL_XON_XOFF
-#endif
+// #if RX_BUFFER_SIZE >= 1024
+//   // Enable to have the controller send XON/XOFF control characters to
+//   // the host to signal the RX buffer is becoming full.
+//   //#define SERIAL_XON_XOFF
+// #endif
 
-#if ENABLED(SDSUPPORT)
-  // Enable this option to collect and display the maximum
-  // RX queue usage after transferring a file to SD.
-  //#define SERIAL_STATS_MAX_RX_QUEUED
+// #if ENABLED(SDSUPPORT)
+//   // Enable this option to collect and display the maximum
+//   // RX queue usage after transferring a file to SD.
+//   //#define SERIAL_STATS_MAX_RX_QUEUED
 
-  // Enable this option to collect and display the number
-  // of dropped bytes after a file transfer to SD.
-  //#define SERIAL_STATS_DROPPED_RX
-#endif
+//   // Enable this option to collect and display the number
+//   // of dropped bytes after a file transfer to SD.
+//   //#define SERIAL_STATS_DROPPED_RX
+// #endif
 
 // Monitor RX buffer usage
 // Dump an error to the serial port if the serial receive buffer overflows.
@@ -2252,9 +2252,9 @@
  * - Enable NANODLP_Z_SYNC and NANODLP_ALL_AXIS for move command end-state reports.
  */
 //#define REALTIME_REPORTING_COMMANDS
-#if ENABLED(REALTIME_REPORTING_COMMANDS)
-  //#define FULL_REPORT_TO_HOST_FEATURE   // Auto-report the machine status like Grbl CNC
-#endif
+// #if ENABLED(REALTIME_REPORTING_COMMANDS)
+//   //#define FULL_REPORT_TO_HOST_FEATURE   // Auto-report the machine status like Grbl CNC
+// #endif
 
 // Bad Serial-connections can miss a received command by sending an 'ok'
 // Therefore some clients abort after 30 seconds in a timeout.

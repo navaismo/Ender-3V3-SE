@@ -480,11 +480,11 @@ void HMI_ResetLanguage()
   BL24CXX::write(DWIN_LANGUAGE_EEPROM_ADDRESS, (uint8_t *)&HMI_flag.language, sizeof(HMI_flag.language));
   HMI_SetLanguageCache();
 }
-static void HMI_ResetDevice()
-{
-  // uint8_t current_device = DEVICE_UNKNOWN; //Add this way temporarily
-  // BL24CXX::write(LASER_FDM_ADDR, (uint8_t *)&current_device, 1);
-}
+// static void HMI_ResetDevice()
+// {
+//   // uint8_t current_device = DEVICE_UNKNOWN; //Add this way temporarily
+//   // BL24CXX::write(LASER_FDM_ADDR, (uint8_t *)&current_device, 1);
+// }
 static void Read_Boot_Step_Value()
 {
 #if BOTH(EEPROM_SETTINGS, IIC_BL24CXX_EEPROM)
@@ -1225,23 +1225,23 @@ static xy_int8_t Converted_Grid_Point(uint8_t select_num)
   grid_point.y = select_num % GRID_MAX_POINTS_Y;
   return grid_point;
 }
-static void Toggle_Checkbox(xy_int8_t mesh_Curr, xy_int8_t mesh_Last, uint8_t dir)
-{
-  if (dir == DWIN_SCROLL_DOWN)
-  {
-    // Set the background of the previous point to the corresponding color
-    // Display the data of the previous point again
-    // Change the current box background to black
-    // Display the current point data again
-  }
-  else // Dir==dwin scroll up
-  {
-    // Set the background of the previous point to the corresponding color
-    // Display the data of the previous point again
-    // Change the current box background to black
-    // Display the current point data again
-  }
-}
+// static void Toggle_Checkbox(xy_int8_t mesh_Curr, xy_int8_t mesh_Last, uint8_t dir)
+// {
+//   if (dir == DWIN_SCROLL_DOWN)
+//   {
+//     // Set the background of the previous point to the corresponding color
+//     // Display the data of the previous point again
+//     // Change the current box background to black
+//     // Display the current point data again
+//   }
+//   else // Dir==dwin scroll up
+//   {
+//     // Set the background of the previous point to the corresponding color
+//     // Display the data of the previous point again
+//     // Change the current box background to black
+//     // Display the current point data again
+//   }
+// }
 // Leveling interface switches selected state
 static void Level_Scroll_Menu(const uint8_t dir, uint8_t select_num)
 {
@@ -1336,14 +1336,14 @@ void Draw_Back_First(const bool is_sel = true)
 }
 
 // Draw "temp" line at the top
-static void Draw_Nozzle_Temp_Label(const bool is_sel = true)
-{
-  Draw_Menu_Line(0, ICON_SetEndTemp);
-  HMI_ValueStruct.E_Temp = thermalManager.degTargetHotend(0);
-  LIMIT(HMI_ValueStruct.E_Temp, HEATER_0_MINTEMP, thermalManager.hotend_max_target(0));
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(0) + TEMP_SET_OFFSET, HMI_ValueStruct.E_Temp);
-  DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Hotend, 42, MBASE(0) + JPN_OFFSET);
-}
+// static void Draw_Nozzle_Temp_Label(const bool is_sel = true)
+// {
+//   Draw_Menu_Line(0, ICON_SetEndTemp);
+//   HMI_ValueStruct.E_Temp = thermalManager.degTargetHotend(0);
+//   LIMIT(HMI_ValueStruct.E_Temp, HEATER_0_MINTEMP, thermalManager.hotend_max_target(0));
+//   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(0) + TEMP_SET_OFFSET, HMI_ValueStruct.E_Temp);
+//   DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Hotend, 42, MBASE(0) + JPN_OFFSET);
+// }
 
 inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valref)
 {
@@ -5113,14 +5113,14 @@ void SDCard_Folder(char *const dirname)
 void HMI_SDCardUpdate()
 {
   // The card pulling action is not detected when the interface returns to home, add ||HMI_flag.disallow_recovery_flag
-  static uint8_t stat = false;
+  // static uint8_t stat = false;
   if (HMI_flag.home_flag || HMI_flag.disallow_recovery_flag)
   {
     return;
   }
   if (DWIN_lcd_sd_status != card.isMounted()) // Flag.mounted
   {
-    stat = false;
+    // stat = false;
     DWIN_lcd_sd_status = card.isMounted();
     if (DWIN_lcd_sd_status)
     {
@@ -6058,8 +6058,8 @@ void HMI_Printing()
       { // Sure
         Show_JPN_print_title();
         ICON_Pause();
-        char cmd[40];
-        cmd[0] = '\0';
+        // char cmd[40];
+        // cmd[0] = '\0';
 #if BOTH(HAS_HEATED_BED, PAUSE_HEAT)
         // if (resume_bed_temp) sprintf_P(cmd, PSTR("M190 S%i\n"), resume_bed_temp); //rock_20210901
 #endif
@@ -8369,7 +8369,7 @@ void HMI_Temperature()
        if (HMI_flag.language < Language_Max)
        {
          Clear_Title_Bar(); // Clear title bar
-         DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_White, Color_Bg_Blue, 60, 4, "PETG SETTINGS"); // Draw title
+         DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_White, Color_Bg_Blue, 60, 4, F("PETG SETTINGS")); // Draw title
          DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Back, 42, 26);                     // return
          //DWIN_ICON_Show(HMI_flag.language, LANGUAGE_ABS_NOZZLE, 42, 84 - font_offset); // +jpn offset
          DWIN_Draw_Label(MBASE(1), F("PETG Nozzle Temp"));
@@ -8420,7 +8420,7 @@ void HMI_Temperature()
       if (HMI_flag.language < Language_Max)
       {
         Clear_Title_Bar(); // Clear title bar
-        DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_White, Color_Bg_Blue, 60, 4, "ABS SETTINGS"); // Draw title
+        DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_White, Color_Bg_Blue, 60, 4, F("ABS SETTINGS")); // Draw title
         DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Back, 42, 26);                     // return
         //DWIN_ICON_Show(HMI_flag.language, LANGUAGE_ABS_NOZZLE, 42, 84 - font_offset); // +jpn offset
         DWIN_Draw_Label(MBASE(1), F("ABS Nozzle Temp"));
@@ -10382,7 +10382,7 @@ void Remove_card_window_check(void)
 
 void EachMomentUpdate()
 {
-  static float card_Index = 0;
+  // static float card_Index = 0;
   static bool heat_dir = false, heat_dir_bed = false, high_dir = false;
   static uint8_t heat_index = BG_NOZZLE_MIN, bed_heat_index = BG_BED_MIN;
   static millis_t next_var_update_ms = 0, next_rts_update_ms = 0, next_heat_flash_ms = 0, next_heat_bed_flash_ms = 0, next_high_ms = 0, next_move_file_name_ms = 0;
