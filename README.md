@@ -19,28 +19,40 @@
 - [Background](#background)
 - [Special thanks to all the contributors](#special-thanks-to-all-the-contributors)
 - [Installation](#installation)
+  - [FeedRate Selection](#feedrate-selection)
+    - [Normal](#normal)
+    - [Fast](#fast)
+  - [Hardware Version CR4NS200320C13 (SMT32F103RET6)](#hardware-version-cr4ns200320c13smt32f103ret6)
+  - [Hardware Version CR4NS200320C14 (SMT32F401RET6)](#hardware-version-cr4ns200320c14smt32f401ret6)
 - [Common Features for the Stand Alone Printer & for Octoprint](#common-features-for-the-stand-alone-printer--for-octoprint)
-  - [The 7x7-Mesh](#the-7x7-mesh)
-  - [Linear Advance](#linear-advance)
-  - [Hosts Commands and Support for Runnout Sensor](#hosts-commands-and-support-for-runnout-sensor)
-  - [Input Shaping Menu](#input-shaping-menu)
-  - [Added Extrusion Flow Item to the Tune Menu](#added-extrusion-flow-item-to-the-tune-menu)
-  - [Added Mute/Unmute LCD Buzzer to the Prepare Menu](#added-muteunmute-lcd-buzzer-to-the-prepare-menu)
-  - [Improved M600 feature](#improved-m600-feature)
-  - [Raised Max Temperatures Values](#raised-max-temperatures-values)
-  - [Fixed Print Information details for SD Print](#fixed-print-information-details-for-sd-print)
-  - [Linear Advance quick Menu](#linear-advance-quick-menu)
-  - [Custom Extrusion Menu](#custom-extrusion-menu)
+  - [The 7x7-Mesh](#-the--7x7-mesh)
+  - [Linear Advance](#-linear-advance)
+  - [Hosts Commands and Support for Runnout Sensor](#-hosts-commands-and-support-for-runnout-sensor)
+  - [Raised Max Temperatures Values](#-raised-max-temperatures-values)
+  - [Software protection against false positive reading of HotBed Termistor](#-software-protection-against-false-positive-reading-of-hotbed-termistor)
+  - [Input Shaping Menu](#-input-shaping-menu)
+  - [Added Extrusion Flow Item to the Tune Menu](#-added-extrusion-flow-item-to-the-tune-menu)
+  - [Added a Display Settings subMenu to the Prepare Menu](#-added-a-display-settings-submenu-to-the-prepare-menu)
+  - [Improved M600 feature](#-improved-m600-feature)
+  - [Fixed Print Information details for SD Print](#-fixed-print-information-details-for-sd-print)
+  - [Linear Advance quick Menu](#-linear-advance-quick-menu)
+  - [Custom Extrusion Menu](#-custom-extrusion-menu)
+  - [Printer Statistics](#-printer-statistics)
+  - [PETG/ABS Preheat Settings](#-petgabs-preheat-settings)
+  - [Custom Height after Homing](#-custom-height-after-homing)
+  - [CRTouch Probe tests](#-crtouch-probe-tests)
+  - [Bed Level Visualizer](#-bed-level-visualizer)
 - [Features for Octoprint](#features-for-octoprint)
   - [Configure the plugin](#configure-the-plugin)
-    - [Install Plugin's Dependencies](#install-plugins-dependencies)
-    - [Set Correct Baud Rate](#set-correct-baud-rate)
-    - [Add GCODE SCRIPTS](#add-gcode-scripts)
-    - [Configure O9000 commands](#configure-o9000-commands)
-    - [Configure The GCODE Preview transmission](#configure-the-gcode-preview-transmission)
-    - [Select the Based Progress Type for the Percentage](#select-the-based-progress-type-for-the-percentage)
+    - [Install Plugin's Dependencies](#-install-plugins-dependencies)
+    - [Set Correct Baud Rate](#-set-correct-baud-rate)
+    - [Add GCODE SCRIPTS](#-add-gcode-scripts)
+    - [Configure O9000 commands](#-configure-o9000-commands)
+    - [Configure The GCODE Preview transmission](#-configure-the-gcode-preview-transmission)
+    - [Select the Based Progress Type for the Percentage](#-select-the-based-progress-type-for-the-percentage)
+    - [Receiving & Rendering Thumbnail](#receiving--rendering-thumbnail)
+    - [New Tune Layout](#new-tune-layout)
 - [FAQS](#faqs)
-----------
 <br><br><br>
 
 # Background.
@@ -205,6 +217,15 @@ Based in the fork of [TomasekJ](https://github.com/TomasekJ)
 _Be careful with the Nozzle Temperature because the PTFE Tube from extruder will deform startint at 260°C_
 
 <br>
+
+## * Software protection against false positive reading of HotBed Termistor.
+Starting last month(20205-06-01) my printer sometimes had a bad reading on the bed termistor causing crash on prints with several hours running, and these readings were randomly and during a short period but the printer still cancelled a job.
+So beacuse of that I added in the Firmware a protection for small readings to ignore it unless we have confirmation and get the same temp several times.
+
+<div align="center">
+
+![BedTooLow](./media/BedtooLow.png)
+</div>
 
 ## * Input Shaping Menu:
 Merged the [PR#22](https://github.com/navaismo/Ender-3V3-SE/pull/22) from [@eduard-sukharev](https://github.com/eduard-sukharev) to Enable the Input Shaping Menu in the LCD.
@@ -621,37 +642,15 @@ If you installed the firmware from the [Repo that Enable the Gcode Preview Using
 <br>
 
 
-### Receiving Thumbnail.
+### Receiving & Rendering Thumbnail.
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/OG4TiIl.jpeg" align="center" height="576" width="440" ></a>
+![thumb](./media/thumb.gif)
 
 </div>
 
 <br>
-
-### Rendering Thumbnail.
-
-<div align="center">
-
-<a href=""><img src="https://i.imgur.com/XQXIhTd.jpeg" align="center" height="576" width="440"  ></a>
-
-</div>
-
-<br>
-
-### Loaded Thumbnail.
-
-<div align="center">
-
-<a href=""><img src="https://i.imgur.com/HrwsfDM.jpeg" align="center" height="576" width="440"  ></a>
-
-</div>
-
-<br>
-
-
 
 
 ### New Tune Layout.
@@ -660,20 +659,12 @@ If you installed the firmware from the [Repo that Enable the Gcode Preview Using
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/Q5CJWSB.jpeg" align="center" height="576" width="440" ></a>
+![Tune2](./media/tune2.gif)
 
 </div>
 
 <br>
 
-
-<div align="center">
-
-<a href=""><img src="https://i.imgur.com/J2r8VFr.jpeg" align="center" height="576" width="440" ></a>
-
-</div>
-
-<br>
 
 
 #### If you disable the Thumbnail in the plugin's configuration or using the [Firmware from this REPO](https://github.com/navaismo/Ender-3V3-SE), the default Creality Image will be rendered:
