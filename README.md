@@ -621,37 +621,15 @@ If you installed the firmware from the [Repo that Enable the Gcode Preview Using
 <br>
 
 
-### Receiving Thumbnail.
+### Receiving & Rendering Thumbnail.
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/OG4TiIl.jpeg" align="center" height="576" width="440" ></a>
+![thumb](./media/thumb.gif)
 
 </div>
 
 <br>
-
-### Rendering Thumbnail.
-
-<div align="center">
-
-<a href=""><img src="https://i.imgur.com/XQXIhTd.jpeg" align="center" height="576" width="440"  ></a>
-
-</div>
-
-<br>
-
-### Loaded Thumbnail.
-
-<div align="center">
-
-<a href=""><img src="https://i.imgur.com/HrwsfDM.jpeg" align="center" height="576" width="440"  ></a>
-
-</div>
-
-<br>
-
-
 
 
 ### New Tune Layout.
@@ -660,20 +638,12 @@ If you installed the firmware from the [Repo that Enable the Gcode Preview Using
 
 <div align="center">
 
-<a href=""><img src="https://i.imgur.com/Q5CJWSB.jpeg" align="center" height="576" width="440" ></a>
+![Tune2](./media/tune2.gif)
 
 </div>
 
 <br>
 
-
-<div align="center">
-
-<a href=""><img src="https://i.imgur.com/J2r8VFr.jpeg" align="center" height="576" width="440" ></a>
-
-</div>
-
-<br>
 
 
 #### If you disable the Thumbnail in the plugin's configuration or using the [Firmware from this REPO](https://github.com/navaismo/Ender-3V3-SE), the default Creality Image will be rendered:
