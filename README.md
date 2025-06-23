@@ -111,6 +111,16 @@ Which uses bigger values to move faster the printer; but generates more noise.
 ```
 
 
+> [!IMPORTANT]
+>
+> - [x]  When choosing betwen Fast or Normal FeedRates, after flashing the new firmware **YOU MUST** reset the printer so the default values are loaded again.
+> 
+> - [x] All issues opened without reading release notes are going to be closed automatically. 
+>
+
+<br>
+
+
 ## Hardware Version CR4NS200320C13(SMT32F103RET6)
 You can find the latest code on the [main branch](https://github.com/navaismo/Ender-3V3-SE/tree/main)
 
