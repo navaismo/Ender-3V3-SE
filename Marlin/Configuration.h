@@ -207,9 +207,9 @@
  */
 #define ENABLE_AUTO_OFF_DISPLAY
   #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)
-  extern uint8_t TURN_OFF_TIME;                // turn-off time: 5min
-  extern uint8_t DIMM_SCREEN_BRIGHTNESS;             // brightness 0x00-0xff:0
-  extern uint8_t MAX_SCREEN_BRIGHTNESS;              // brightness 0x00-0xff:0
+  extern int16_t TURN_OFF_TIME;                // turn-off time: 5min
+  extern int16_t DIMM_SCREEN_BRIGHTNESS;             // brightness 0x00-0xff:0
+  extern int16_t MAX_SCREEN_BRIGHTNESS;              // brightness 0x00-0xff:0
 #endif
 
 /**
