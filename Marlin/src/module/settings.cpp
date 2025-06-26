@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V91"
+#define EEPROM_VERSION "V90"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
@@ -1503,23 +1503,18 @@ void MarlinSettings::postprocess() {
     #endif
 
      //Save LCD Brightness settings
-    #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)
-    {
-      uint8_t sleep = TURN_OFF_TIME;
-      uint8_t dimmBright = DIMM_SCREEN_BRIGHTNESS;
-      uint8_t bright = MAX_SCREEN_BRIGHTNESS;
-      EEPROM_WRITE(sleep);
-      EEPROM_WRITE(dimmBright);
-      EEPROM_WRITE(bright);
-    }
-    #endif
-
-    #if HAS_HOTEND
-    {
-      uint8_t zheight = CZ_AFTER_HOMING;
-      EEPROM_WRITE(zheight);
-    }
-    #endif
+     #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)
+     {
+       uint8_t sleep = TURN_OFF_TIME;                
+       int16_t dimmBright = DIMM_SCREEN_BRIGHTNESS;
+       int16_t bright = MAX_SCREEN_BRIGHTNESS;
+       uint8_t zheight = CZ_AFTER_HOMING;
+       EEPROM_WRITE(sleep);              
+       EEPROM_WRITE(dimmBright);         
+       EEPROM_WRITE(bright);             
+       EEPROM_WRITE(zheight); 
+     }             
+     #endif
 
     #if ENABLED(ADVANCED_HELP_MESSAGES)
     {
@@ -2495,20 +2490,15 @@ void MarlinSettings::postprocess() {
     #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)
     {
       uint8_t sleep;                 
-      uint8_t dimmBright;
-      uint8_t bright;
+      int16_t dimmBright;
+      int16_t bright;
+      uint8_t zheight;
       EEPROM_READ(sleep);
       TURN_OFF_TIME = (sleep > 60) ? 5 : sleep;              
       EEPROM_READ(dimmBright);
       DIMM_SCREEN_BRIGHTNESS = (dimmBright > 175) ? 175  : dimmBright;         
       EEPROM_READ(bright);             
       MAX_SCREEN_BRIGHTNESS = ( bright > 230) ? 230 : bright;
-    }
-    #endif
-
-    #if HAS_HOTEND
-    {
-      uint8_t zheight;
       EEPROM_READ(zheight);
       CZ_AFTER_HOMING = (zheight >= 10) ? zheight : 10; //Set default value
     }
@@ -4129,11 +4119,11 @@ void MarlinSettings::reset() {
 
     #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)  
       SERIAL_ECHOLN("DISPLAY Settings:");
-      SERIAL_ECHOLNPAIR("Buzzer ON/OFF: ", toggle_LCDBeep);
-      SERIAL_ECHOLNPAIR("Preheat Alert ON/OFF: ", toggle_PreHAlert);
-      SERIAL_ECHOLNPAIR("MAX BRIGHTNESS: ", MAX_SCREEN_BRIGHTNESS);
-      SERIAL_ECHOLNPAIR("DIMM BRIGHTNESS: ", DIMM_SCREEN_BRIGHTNESS);
-      SERIAL_ECHOLNPAIR("AUTO OFF TIME: ", TURN_OFF_TIME);
+      SERIAL_ECHOLNPAIR("   Buzzer ON/OFF: ", toggle_LCDBeep);
+      SERIAL_ECHOLNPAIR("   Preheat Alert ON/OFF: ", toggle_PreHAlert);
+      SERIAL_ECHOLNPAIR("   MAX BRIGHTNESS: ", ((MAX_SCREEN_BRIGHTNESS-164)*100)/66);
+      SERIAL_ECHOLNPAIR("   DIMM BRIGHTNESS: ", ((DIMM_SCREEN_BRIGHTNESS-164)*100)/66);
+      SERIAL_ECHOLNPAIR("   AUTO OFF TIME: ", TURN_OFF_TIME);
       SERIAL_ECHOLNPAIR("CUSTOM Z Height After Homing: ", CZ_AFTER_HOMING);
     #endif
 
