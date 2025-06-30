@@ -2917,18 +2917,29 @@ void Popup_window_PauseOrStop()
     }
     else if (select_print.now == 2)
     {
-      DWIN_ICON_Show(HMI_flag.language, LANGUAGE_StopPrint, 14, 45);
+      #if ENABLED(ADVANCED_HELP_MESSAGES)
+        if (HMI_flag.advanced_help_enabled_flag)
+        {
+          if (ui.get_progress_percent() < 1) {
+            DWIN_Draw_qrcode(10, 60, 3, "https://bit.ly/NAVAISMO-BED-ADHESION");
+            DWIN_Draw_MultilineString(false, false, font8x16, Color_White, Color_Bg_Window, 92, 60, 17, 17, "Having issues with bed adhesion? See our community Wiki for help");
+          } else {
+            DWIN_Draw_qrcode(10, 60, 3, "https://bit.ly/NAVAISMO-PRINT-FAILS");
+            DWIN_Draw_MultilineString(false, false, font8x16, Color_White, Color_Bg_Window, 92, 60, 17, 17, "Did your print fail? See our community Wiki for common issues");
+          }
+        }
+        else
+      #endif
+      {
+        DWIN_ICON_Show(HMI_flag.language, LANGUAGE_StopPrint, 14, 45);
+      }
     }
-    else if(select_print.now == 20){
-      
+    else if(select_print.now == 20)
+    {
       DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_White, Color_Bg_Window, 14, 45, F("Reset Settings?"));
-     
     }
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, 26, 194);
     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Cancel, 132, 194);
-  }
-  else
-  {
   }
   Draw_Select_Highlight(true);
 #endif
