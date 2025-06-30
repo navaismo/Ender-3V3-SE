@@ -115,6 +115,8 @@ Which uses bigger values to move faster the printer; but generates more noise.
 >
 > - [x]  When choosing betwen Fast or Normal FeedRates, after flashing the new firmware **YOU MUST** reset the printer so the default values are loaded again.
 > 
+> - [x] Take a look on this [Discussion Topic](#138) to understand why you perceive more Noise when using the firmware. 
+>
 > - [x] All issues opened without reading release notes are going to be closed automatically. 
 >
 
