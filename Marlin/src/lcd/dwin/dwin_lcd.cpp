@@ -577,12 +577,11 @@ void DWIN_Draw_FloatValue(uint8_t bShow, bool zeroFill, uint8_t zeroMode, uint8_
   DWIN_Send(i);
 }
 
-void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const char *qrcode_data) {
+void DWIN_Draw_qrcode(uint16_t topLeftX, uint16_t topLeftY, const uint8_t moduleSize, const char *qrcode_data) {
   // The structure to manage the QR code
   QRCode qrcode;
 
   // QR version 2 allows strings up to 47 uppercase chars, e.g. "https://bit.ly/qwertyuiop_asdfghjkl_zxcvbnm_123"
-  uint8_t QR_VERSION = 2;
   char uppercase_data[48];
 
   size_t i = 0;
@@ -597,7 +596,9 @@ void DWIN_Draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const ui
 
   qrcode_initText(&qrcode, qrcodeBytes, QR_VERSION, ECC_LOW, uppercase_data);
 
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX, topLeftY, topLeftX + qrcode.size * moduleSize, topLeftY + qrcode.size * moduleSize);
+  DWIN_Draw_Rectangle(1, Color_White, topLeftX, topLeftY, topLeftX + (qrcode.size + QUIET_ZONE_SIZE * 2) * moduleSize, topLeftY + (qrcode.size + QUIET_ZONE_SIZE * 2) * moduleSize);
+  topLeftX = topLeftX + moduleSize * QUIET_ZONE_SIZE;
+  topLeftY = topLeftY + moduleSize * QUIET_ZONE_SIZE;
 
   // top left position marker
   DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY, topLeftX + moduleSize * 7, topLeftY + moduleSize * 7);
