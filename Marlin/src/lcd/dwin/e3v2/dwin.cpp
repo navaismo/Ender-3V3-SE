@@ -2921,11 +2921,11 @@ void Popup_window_PauseOrStop()
         if (HMI_flag.advanced_help_enabled_flag)
         {
           if (ui.get_progress_percent() < 1) {
-            DWIN_Draw_qrcode(10, 60, 3, "https://bit.ly/NAVAISMO-BED-ADHESION");
-            DWIN_Draw_MultilineString(false, false, font8x16, Color_White, Color_Bg_Window, 92, 60, 17, 17, "Having issues with bed adhesion? See our community Wiki for help");
+            DWIN_Draw_qrcode(DWIN_WIDTH / 2 - ((QR_SIZE * QR_MODULE_SIZE_M) / 2), 40, QR_MODULE_SIZE_M, "https://bit.ly/NAVAISMO-BED-ADHESION");
+            DWIN_Draw_MultilineString(false, false, font8x16, Color_White, Color_Bg_Window, 12, 140, 25, 17, "Having issues with bed adhesion? See our community Wiki for help");
           } else {
-            DWIN_Draw_qrcode(10, 60, 3, "https://bit.ly/NAVAISMO-PRINT-FAILS");
-            DWIN_Draw_MultilineString(false, false, font8x16, Color_White, Color_Bg_Window, 92, 60, 17, 17, "Did your print fail? See our community Wiki for common issues");
+            DWIN_Draw_qrcode(DWIN_WIDTH / 2 - ((QR_SIZE * QR_MODULE_SIZE_M) / 2), 40, QR_MODULE_SIZE_M, "https://bit.ly/NAVAISMO-PRINT-FAILS");
+            DWIN_Draw_MultilineString(false, false, font8x16, Color_White, Color_Bg_Window, 12, 140, 25, 17, "Did your print fail? See our community Wiki for common issues");
           }
         }
         else
