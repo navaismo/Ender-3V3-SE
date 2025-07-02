@@ -1518,7 +1518,7 @@ void MarlinSettings::postprocess() {
 
     #if ENABLED(ADVANCED_HELP_MESSAGES)
     {
-      bool advanced_help_mesasges_enabled = false;
+      bool advanced_help_mesasges_enabled = true;
 
       advanced_help_mesasges_enabled = HMI_flag.advanced_help_enabled_flag;
       EEPROM_WRITE(advanced_help_mesasges_enabled);
