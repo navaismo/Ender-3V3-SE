@@ -107,8 +107,20 @@ Which uses bigger values to move faster the printer; but generates more noise.
     #define DEFAULT_MAX_FEEDRATE { 600, 600, 12, 30 }
     #define MAX_FEEDRATE_EDIT_VALUES { 900, 900, 40, 60 }
     #define DEFAULT_MAX_ACCELERATION { 3500, 3500, 200, 3000 }
-    #define DEFAULT_ACCELERATION 3000" 
+    #define DEFAULT_ACCELERATION 3000
 ```
+
+
+> [!IMPORTANT]
+>
+> - [x]  When choosing betwen Fast or Normal FeedRates, after flashing the new firmware **YOU MUST** reset the printer so the default values are loaded again.
+> 
+> - [x] Take a look on this [Discussion Topic](https://github.com/navaismo/Ender-3V3-SE/discussions/138) to understand why you perceive more Noise when using the firmware. 
+>
+> - [x] All issues opened without reading release notes are going to be closed automatically. 
+>
+
+<br>
 
 
 ## Hardware Version CR4NS200320C13(SMT32F103RET6)
@@ -219,7 +231,7 @@ _Be careful with the Nozzle Temperature because the PTFE Tube from extruder will
 <br>
 
 ## * Software protection against false positive reading of HotBed Termistor.
-Starting last month(20205-06-01) my printer sometimes had a bad reading on the bed termistor causing crash on prints with several hours running, and these readings were randomly and during a short period but the printer still cancelled a job.
+Starting last month(2025-06-01) my printer sometimes had a bad reading on the bed termistor causing crash on prints with several hours running, and these readings were randomly and during a short period but the printer still cancelled a job.
 So beacuse of that I added in the Firmware a protection for small readings to ignore it unless we have confirmation and get the same temp several times.
 
 <div align="center">
@@ -747,6 +759,25 @@ This is a personal decision, I like a lot to see how the Creality Man dissapear 
 This is beacuse the encoder/Knob is moved too fast and enter in an unknow state that by default try to render the lower info area. If you move it slowly this will no appear.
 
 
+```diff
++ 9. My motors sound different, are it dying. Was the current increased?
+```
+No, none of the above take a look on [this disscusion topic](https://github.com/navaismo/Ender-3V3-SE/discussions/138) to find more baout it
+
+
+<br>
+
+---
+
+## Disclaimer
+
+**BAU:**  
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+**TL;DR:**  
+If your house burns down because this app malfunctioned, you cannot sue me.
+
+---
 
 <br><br><br>
 ____________________________________________________________________________________________

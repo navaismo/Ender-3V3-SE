@@ -39,6 +39,13 @@
 #define DWIN_SCROLL_UP   2
 #define DWIN_SCROLL_DOWN 3
 
+#define QR_VERSION 2
+#define QUIET_ZONE_SIZE 3 // quiet zone size in modules
+#define QR_SIZE (QUIET_ZONE_SIZE * 2 + 25) // qr code size in modules
+#define QR_MODULE_SIZE_S 2
+#define QR_MODULE_SIZE_M 3
+#define QR_MODULE_SIZE_L 4
+
 // #define DWIN_CREALITY_480_LCD
 #define DWIN_CREALITY_320_LCD
 

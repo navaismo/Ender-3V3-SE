@@ -216,7 +216,7 @@ void render_bed_mesh_3D()
             break;
     }
     delay(3);
-    DWIN_Draw_qrcode(155, 40, 3, "https://bit.ly/navaismo-bed-leveling");
+    DWIN_Draw_qrcode(DWIN_WIDTH - (QR_SIZE * QR_MODULE_SIZE_M) - 6, 40, QR_MODULE_SIZE_M, "https://bit.ly/NAVAISMO-BED-LEVELING");
     SERIAL_ECHOLN("FINISHED BED MESH 3D LINES");
 }
 
