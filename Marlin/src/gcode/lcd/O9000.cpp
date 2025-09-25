@@ -5,136 +5,105 @@
 #include "../../lcd/marlinui.h"
 
 /**
- * M5000: Set Printing Details JOB from OctoPrint in LCD
+ * O9000: Octoprint Plugin to Set the LCD Print Job Details
  *
- * Params:
- *    - Filename
- *    - Print Time
- *    - Print Time Left
- *    - Total Layers
- *    - Current Layer
- *    - B64 thumbnail
- *    - Progress
- */
-bool O9000_collecting = false;
-char filename[50] = {0};
-char print_time[50] = {0};
-char ptime_left[50] = {0};
-char total_layers[50] = {0};
-char curr_layer[50] = {0};
-char thumbnail[50] = {0};
-char progress[10] = {0};
-char param_value[50] = {0};
+ * Parameters:
+ *   - A{0|1}          : mark serial connection active/inactive (toggles main menu)
+ *   - R1              : render the job card immediately (was "SC|")
+ *   - F1              : mark job as finished (was "PF|")
+ *   - K1 S"..."       : set string #1 (filename)
+ *   - K2 S"..."       : set string #2 (print_time) and update UI time label
+ *   - K3 S"..."       : set string #3 (ptime_left)
+ *   - K4 S"..."       : set string #4 (total_layers)
+ *   - K5 S"..."       : set string #5 (curr_layer)
+ *   - K6 S"..."       : set string #6 (progress)
+ *
+**/
 
-const char *getParsedValue(char *str)
-{
-  const char delimiter[] = "|";
-  char *token;
+char filename[35]     = {0};
+char print_time[10]   = {0};   
+char ptime_left[10]   = {0};   
+char total_layers[10] = {0};
+char curr_layer[10]   = {0};
+char progress[10]     = {0};
 
-  // Split the string to get the first part (before '|')
-  token = strtok(str, delimiter);
 
-  // Split again to get the second part (after '|')
-  token = strtok(NULL, delimiter); // NULL tells strtok to continue with the same string
+// Safe copy from parser string (S"...") to fixed-size buffer, handling escapes
+static inline void safe_copy(char *dst, size_t dstlen, const char *src) {
+  if (!dst || !dstlen) return;
+  dst[0] = '\0';
+  if (!src) return;
 
-  if (token != NULL)
-  {
-    // Copy the second part into the param_value variable
-    strncpy(param_value, token, sizeof(param_value) - 1);
-    param_value[sizeof(param_value) - 1] = '\0'; // Ensure null termination
+  const char *p = src;
+
+  // Some Marlin builds return S"...", others return "...", others the bare content.
+  if (p[0] == 'S' && p[1] == '"') p += 2;     // skip S"
+  else if (p[0] == '"')            p += 1;     // skip leading "
+
+  size_t i = 0;
+  for (; *p && *p != '"' && i < dstlen - 1; ++p) {
+    if (*p == '\\' && p[1] == '"') {           // unescape \" -> "
+      dst[i++] = '"';
+      ++p;                                     // skip the escaped quote
+    } else {
+      dst[i++] = *p;
+    }
   }
-
-  return param_value;
+  dst[i] = '\0';
 }
 
-void GcodeSuite::O9000()
-{
-
-  if (parser.string_arg && parser.string_arg[0] != '\0')
-  {
-    char *my_string = parser.string_arg;
-    //SERIAL_ECHOLNPAIR("Received: ", my_string);
-
-    if (strcmp(my_string, "SC|") == 0)
-    {
-      // Received all params lets render
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoPrintJob(filename, print_time, ptime_left, total_layers, curr_layer, thumbnail, progress));
-      SERIAL_ECHOLN("O9000 sc-rendered");
-    }
-    else if (strstr(my_string, "SFN|") != NULL)
-    {
-      // Set FileName
-      strncpy(filename, getParsedValue(my_string), sizeof(filename) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 1 filename set: ", filename);
-    }
-    else if (strstr(my_string, "SPT|") != NULL)
-    {
-      // Set Print Time
-      strncpy(print_time, getParsedValue(my_string), sizeof(print_time) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 2 print_time set: ", print_time);
-      
-    }
-    else if (strstr(my_string, "UPT|") != NULL)
-    {
-      // Update Print Time
-      strncpy(print_time, getParsedValue(my_string), sizeof(print_time) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 2 print_time set: ", print_time);
-      DWIN_OctoSetPrintTime(print_time);
-    }
-    else if (strstr(my_string, "SET|") != NULL)
-    {
-      // Set Print Time Left
-      strncpy(ptime_left, getParsedValue(my_string), sizeof(ptime_left) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 3 ptime_left set: ", ptime_left);
-    }
-    else if (strstr(my_string, "STL|") != NULL)
-    {
-      // Set Total Layers
-      strncpy(total_layers, getParsedValue(my_string), sizeof(total_layers) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 4  total_layers set: ", total_layers);
-    }
-    else if (strstr(my_string, "SCL|") != NULL)
-    {
-      // Set Current Layer
-      strncpy(curr_layer, getParsedValue(my_string), sizeof(curr_layer) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 5 curr_layer set: ", curr_layer);
-    }
-    else if (strstr(my_string, "SPP|") != NULL)
-    {
-      // Set Progress
-      strncpy(progress, getParsedValue(my_string), sizeof(progress) - 1);
-      //SERIAL_ECHOLNPAIR("Parameter 6 progress set: ", progress);
-    }
-    else if (strstr(my_string, "PF|") != NULL)
-    {
-      // Print Finished
-      //SERIAL_ECHOLN("Print Finished");
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoJobFinish());
-    }
-    else if (strstr(my_string, "BU1|") != NULL)
-    {
-      
-      TERN_(DWIN_CREALITY_LCD, DWIN_OctoShowGCodeImage());
-    }
-     else if (strstr(my_string, "OCON|") != NULL)
-    {
-      serial_connection_active = true;
-      TERN_(DWIN_CREALITY_LCD, Goto_MainMenu());
-    }
-     else if (strstr(my_string, "OCOFF|") != NULL)
-    {
-      serial_connection_active = false;
-      TERN_(DWIN_CREALITY_LCD, Goto_MainMenu());
-    }
-    else
-    {
-      SERIAL_ECHOLN("Invalid Command Argument...");
-    }
-  }
-  else
-  {
-    SERIAL_ECHOLN("Empty Command Argument...");
+void GcodeSuite::O9000() {
+  // A{0|1}: mark connection active/inactive and go to main menu
+  if (parser.seen('A')) {
+    serial_connection_active = parser.value_bool();
+    Goto_MainMenu();
   }
 
-  // TODO THUMBNAIL RECBUFFER
+   // G{0|1}: Enable/Disable the Receiving Thumbnail
+  if (parser.seen('G')) {
+    Show_Default_IMG = parser.value_bool();
+  }
+
+  // R1: render job card immediately ("SC|")
+  if (parser.boolval('R')) {
+    DWIN_OctoPrintJob(filename, print_time, ptime_left, total_layers, curr_layer, progress);
+    SERIAL_ECHOLNPGM("O9000 sc-rendered");
+  }
+
+  // F1: mark job finished ("PF|")
+  if (parser.boolval('F')) {
+    DWIN_OctoJobFinish();
+  }
+
+  // K{n} S"...": set string values (K1..K6 mapped to your legacy fields)
+  if (parser.seen('K')) {
+    const int key = parser.value_int();
+    if (parser.seen('S')) {
+      const char* s = parser.string_arg;  // S"...", preserved by Marlin parser
+      switch (key) {
+        case 1: // filename
+          safe_copy(filename, sizeof(filename), s);
+          break;
+        case 2: // print_time ("UPT|")
+          safe_copy(print_time, sizeof(print_time), s);
+          DWIN_OctoSetPrintTime(print_time);
+          break;
+        case 3: // ptime_left
+          safe_copy(ptime_left, sizeof(ptime_left), s);
+          break;
+        case 4: // total_layers
+          safe_copy(total_layers, sizeof(total_layers), s);
+          break;
+        case 5: // curr_layer
+          safe_copy(curr_layer, sizeof(curr_layer), s);
+          break;
+        case 6: // progress
+          safe_copy(progress, sizeof(progress), s);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
 }
