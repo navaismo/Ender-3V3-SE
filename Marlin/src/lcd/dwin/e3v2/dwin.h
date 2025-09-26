@@ -652,7 +652,7 @@ extern enum DC_language current_language;
 #define Button_Select_Color 0xFFFF  // Selected color
 #define All_Black         0x0000  // Selected color
 
-
+extern bool Show_Default_IMG;
 extern volatile uint8_t checkkey;
 extern float zprobe_zoffset;
 extern char print_filename[16];
