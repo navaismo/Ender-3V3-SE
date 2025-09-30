@@ -71,7 +71,7 @@ lin 3D Printer Firmware
 #include "lcd_rts.h"
 #include "../../../module/AutoOffset.h"
 
-#include <QRCodeGenerator.h>
+// #include <QRCodeGenerator.h>
 
 
 #ifndef MACHINE_SIZE
@@ -152,7 +152,7 @@ int8_t shift_amt;  // = 0
 millis_t shift_ms; // = 0
 static uint8_t left_move_index = 0;
 
-bool qrShown = false;
+// bool qrShown = false;
 
 /* Value Init */
 HMI_value_t HMI_ValueStruct;
@@ -199,7 +199,7 @@ typedef struct
   char longfilename[LONG_FILENAME_LENGTH];
 } PrintFile_InfoTypeDef;
 
-select_t select_page{0}, select_file{0}, select_print{0}, select_prepare{0}, select_control{0}, select_axis{0}, select_temp{0}, select_motion{0}, select_tune{0}, select_advset{0}, select_PLA{0}, select_ABS{0},select_TPU{0},select_PETG{0}, select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_input_shaping{0}, select_linear_adv{0}, select_cextr{0},select_display{0}, select_item{0}, select_language{0}, select_hm_set_pid{0}, select_set_pid{0}, select_level{0}, select_show_pic{0};
+select_t select_page{0}, select_file{0}, select_print{0}, select_prepare{0}, select_control{0}, select_axis{0}, select_temp{0}, select_motion{0}, select_tune{0}, select_advset{0}, select_PLA{0}, select_ABS{0},select_TPU{0},select_PETG{0}, select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_input_shaping{0}, select_cextr{0},select_display{0}, select_item{0}, select_language{0}, select_hm_set_pid{0}, select_set_pid{0}, select_level{0}, select_show_pic{0};
 
 uint8_t index_file = MROWS,
         index_prepare = MROWS,
@@ -243,18 +243,18 @@ uint16_t resume_bed_temp = 0;
 #if ENABLED(DWIN_CREALITY_LCD)
 #if ENABLED(HOST_ACTION_COMMANDS)
 // Beware of OctoprintJobs
-char vvfilename[50];
-char vvprint_time[50];
-char vvptime_left[50];
-char vvtotal_layer[50];
-char vvcurr_layer[50];
-char vvthumb[50];
-char vvprogress[30];
+char vvfilename[35];
+char vvprint_time[10];
+char vvptime_left[10];
+char vvtotal_layer[10];
+char vvcurr_layer[10];
+// char vvthumb[50];
+char vvprogress[10];
 bool updateOctoData = false;
-char Octo_ETA_Global[20];
-char Octo_Progress_Global[20];
-char Octo_CL_Global[20];
-  
+char Octo_ETA_Global[10];
+char Octo_Progress_Global[10];
+char Octo_CL_Global[10];
+
 #endif
 #endif
 
@@ -404,11 +404,11 @@ static void Custom_Extrude_Process(uint16_t temp, uint16_t length) // Extrude ma
     char str[25];  // Sufficient buffer for string and number
     snprintf(str, sizeof(str), "Extruding %u mm", length);
     Popup_Window_Feedstork_Tip(1); // Feeding tips
-    SERIAL_ECHOLNPAIR("Extruding: ", str);
-    SERIAL_ECHOLNPAIR("CurrTEMP: ", thermalManager.degHotend(0));
-    SERIAL_ECHOLNPAIR("TargetTEMP: ", temp);
-    SERIAL_ECHOLNPAIR("Length: ", length);
-    SERIAL_ECHOLNPAIR("Termal Temp", thermalManager.degTargetHotend(0));
+    // SERIAL_ECHOLNPAIR("Extruding: ", str);
+    // SERIAL_ECHOLNPAIR("CurrTEMP: ", thermalManager.degHotend(0));
+    // SERIAL_ECHOLNPAIR("TargetTEMP: ", temp);
+    // SERIAL_ECHOLNPAIR("Length: ", length);
+    // SERIAL_ECHOLNPAIR("Termal Temp", thermalManager.degTargetHotend(0));
     SET_HOTEND_TEMP(temp, 0); // First heat to Target Temp
     WAIT_HOTEND_TEMP(60 * 5 * 1000, 3);// Wait until the hotend temperature reaches the target temperature
     
@@ -586,7 +586,7 @@ static uint8_t Move_Language(uint8_t curr_language)
 void HMI_ToggleLanguage()
 {
   HMI_flag.language = Move_Language(HMI_flag.language);
-  SERIAL_ECHOLNPAIR("HMI_flag.language=: ", HMI_flag.language);
+  // SERIAL_ECHOLNPAIR("HMI_flag.language=: ", HMI_flag.language);
 // HMI_flag.language = HMI_IsJapanese() ? DWIN_ENGLISH : DACAI_JAPANESE;
 
 // Hmi set language cache();
@@ -1378,15 +1378,15 @@ inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valr
 #define MOTION_CASE_JERK (MOTION_CASE_ACCEL + ENABLED(HAS_CLASSIC_JERK))
 #define MOTION_CASE_STEPS (MOTION_CASE_JERK + 1)
 #define MOTION_CASE_INPUT_SHAPING (MOTION_CASE_STEPS + 1)
-#define MOTION_CASE_LINADV (MOTION_CASE_INPUT_SHAPING + 1)
-#define MOTION_CASE_TOTAL MOTION_CASE_LINADV
+// #define MOTION_CASE_LINADV (MOTION_CASE_INPUT_SHAPING + 1)
+#define MOTION_CASE_TOTAL MOTION_CASE_INPUT_SHAPING
 
 #define INPUT_SHAPING_CASE_XFREQ 1
 #define INPUT_SHAPING_CASE_YFREQ (INPUT_SHAPING_CASE_XFREQ + 1)
 #define INPUT_SHAPING_CASE_XZETA (INPUT_SHAPING_CASE_YFREQ + 1)
 #define INPUT_SHAPING_CASE_YZETA (INPUT_SHAPING_CASE_XZETA + 1)
 
-#define LINEAR_ADV_KFACTOR 1
+// #define LINEAR_ADV_KFACTOR 1
 
 
 #define PREPARE_CASE_MOVE 1
@@ -2166,61 +2166,61 @@ void Draw_Tune_Menu()
     Draw_Menu_Cursor(TSCROL(select_tune.now));
 }
 
-void draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const char *qrcode_data) {
-  // The structure to manage the QR code
-  QRCode qrcode;
+// void draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const char *qrcode_data) {
+//   // The structure to manage the QR code
+//   QRCode qrcode;
 
-  // QR version 2 allows strings up to 47 chars, e.g. "https://bit.ly/qwertyuiop_asdfghjkl_zxcvbnm_123"
-  uint8_t QR_VERSION = 2;
+//   // QR version 2 allows strings up to 47 chars, e.g. "https://bit.ly/qwertyuiop_asdfghjkl_zxcvbnm_123"
+//   uint8_t QR_VERSION = 2;
 
-  // Allocate a chunk of memory to store the QR code
-  uint8_t qrcodeBytes[qrcode_getBufferSize(QR_VERSION)];
+//   // Allocate a chunk of memory to store the QR code
+//   uint8_t qrcodeBytes[qrcode_getBufferSize(QR_VERSION)];
 
-  qrcode_initText(&qrcode, qrcodeBytes, QR_VERSION, ECC_LOW, qrcode_data);
+//   qrcode_initText(&qrcode, qrcodeBytes, QR_VERSION, ECC_LOW, qrcode_data);
 
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX, topLeftY, topLeftX + qrcode.size * moduleSize, topLeftY + qrcode.size * moduleSize);
+//   DWIN_Draw_Rectangle(1, Color_White, topLeftX, topLeftY, topLeftX + qrcode.size * moduleSize, topLeftY + qrcode.size * moduleSize);
 
-  // top left position marker
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY, topLeftX + moduleSize * 7, topLeftY + moduleSize * 7);
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * 1, topLeftY + moduleSize * 1, topLeftX + moduleSize * 6, topLeftY + moduleSize * 6);
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * 2, topLeftY + moduleSize * 2, topLeftX + moduleSize * 5, topLeftY + moduleSize * 5);
-  // top right position marker
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * (qrcode.size - 7), topLeftY, topLeftX + moduleSize * qrcode.size, topLeftY + moduleSize * 7);
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * (qrcode.size - 6), topLeftY + moduleSize * 1, topLeftX + moduleSize * (qrcode.size - 1), topLeftY + moduleSize * 6);
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * (qrcode.size - 5), topLeftY + moduleSize * 2, topLeftX + moduleSize * (qrcode.size - 2), topLeftY + moduleSize * 5);
-  // // bottom left position marker
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY + moduleSize * (qrcode.size - 7), topLeftX + moduleSize * 7, topLeftY + moduleSize * qrcode.size);
-  DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * 1, topLeftY + moduleSize * (qrcode.size - 6), topLeftX + moduleSize * 6, topLeftY + moduleSize * (qrcode.size - 1));
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * 2, topLeftY + moduleSize * (qrcode.size - 5), topLeftX + moduleSize * 5, topLeftY + moduleSize * (qrcode.size - 2));
+//   // top left position marker
+//   DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY, topLeftX + moduleSize * 7, topLeftY + moduleSize * 7);
+//   DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * 1, topLeftY + moduleSize * 1, topLeftX + moduleSize * 6, topLeftY + moduleSize * 6);
+//   DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * 2, topLeftY + moduleSize * 2, topLeftX + moduleSize * 5, topLeftY + moduleSize * 5);
+//   // top right position marker
+//   DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * (qrcode.size - 7), topLeftY, topLeftX + moduleSize * qrcode.size, topLeftY + moduleSize * 7);
+//   DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * (qrcode.size - 6), topLeftY + moduleSize * 1, topLeftX + moduleSize * (qrcode.size - 1), topLeftY + moduleSize * 6);
+//   DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * (qrcode.size - 5), topLeftY + moduleSize * 2, topLeftX + moduleSize * (qrcode.size - 2), topLeftY + moduleSize * 5);
+//   // // bottom left position marker
+//   DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX, topLeftY + moduleSize * (qrcode.size - 7), topLeftX + moduleSize * 7, topLeftY + moduleSize * qrcode.size);
+//   DWIN_Draw_Rectangle(1, Color_White, topLeftX + moduleSize * 1, topLeftY + moduleSize * (qrcode.size - 6), topLeftX + moduleSize * 6, topLeftY + moduleSize * (qrcode.size - 1));
+//   DWIN_Draw_Rectangle(1, Color_Bg_Black, topLeftX + moduleSize * 2, topLeftY + moduleSize * (qrcode.size - 5), topLeftX + moduleSize * 5, topLeftY + moduleSize * (qrcode.size - 2));
   
-  for (uint8_t y = 0; y < qrcode.size; y++) {
-      for (uint8_t x = 0; x < qrcode.size; x++) {
-        // skip top left and bottom left position markers
-        if (x < 7 && (y < 7 || y > (qrcode.size - 7 - 1))) {
-          continue;
-        }
-        // skip top right position marker
-        if (x > (qrcode.size - 7 - 1) && y < 7) {
-          continue;
-        }
-        if (qrcode_getModule(&qrcode, x, y)) {
-          DWIN_Draw_Rectangle(
-            1,
-            Color_Bg_Black,
-            topLeftX + moduleSize * x, 
-            topLeftY + moduleSize * y,
-            topLeftX + moduleSize * (x + 1),
-            topLeftY + moduleSize * (y + 1)
-          );
-          delay(5);
-        }
-      }
-  }
-}
+//   for (uint8_t y = 0; y < qrcode.size; y++) {
+//       for (uint8_t x = 0; x < qrcode.size; x++) {
+//         // skip top left and bottom left position markers
+//         if (x < 7 && (y < 7 || y > (qrcode.size - 7 - 1))) {
+//           continue;
+//         }
+//         // skip top right position marker
+//         if (x > (qrcode.size - 7 - 1) && y < 7) {
+//           continue;
+//         }
+//         if (qrcode_getModule(&qrcode, x, y)) {
+//           DWIN_Draw_Rectangle(
+//             1,
+//             Color_Bg_Black,
+//             topLeftX + moduleSize * x, 
+//             topLeftY + moduleSize * y,
+//             topLeftX + moduleSize * (x + 1),
+//             topLeftY + moduleSize * (y + 1)
+//           );
+//           delay(5);
+//         }
+//       }
+//   }
+// }
 
-void draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const __FlashStringHelper *qrcode_data) {
-  draw_qrcode(topLeftX, topLeftY, moduleSize, (const char *)qrcode_data);
-}
+// void draw_qrcode(const uint16_t topLeftX, const uint16_t topLeftY, const uint8_t moduleSize, const __FlashStringHelper *qrcode_data) {
+//   draw_qrcode(topLeftX, topLeftY, moduleSize, (const char *)qrcode_data);
+// }
 
 void draw_max_en(const uint16_t line)
 {
@@ -2251,12 +2251,12 @@ void draw_input_shaping(const uint16_t line)
   DWIN_Draw_Label(line, GET_TEXT_F(MSG_INPUT_SHAPING));
 }
 
-void draw_lin_adv(const uint16_t line)
-{
-  // There's no graphical asset for this label, so we just write it as string
-  DWIN_Draw_Label(line, F("Linear Advance"));
-  Draw_Menu_Line(line - 2, ICON_Motion);
-}
+// void draw_lin_adv(const uint16_t line)
+// {
+//   // There's no graphical asset for this label, so we just write it as string
+//   DWIN_Draw_Label(line, F("Linear Advance"));
+//   Draw_Menu_Line(line - 2, ICON_Motion);
+// }
 
 
 
@@ -2303,7 +2303,7 @@ void Draw_Motion_Menu()
     // DWIN_Frame_AreaCopy(1, 153, 148, 194, 161, LBLX, MBASE(MOTION_CASE_STEPS));         //Flow ratio
     DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Step, 42, MBASE(MOTION_CASE_STEPS) + JPN_OFFSET);
     draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
-    draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
+    // draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
   }
   else
   {
@@ -2330,7 +2330,7 @@ void Draw_Motion_Menu()
 #endif // HAS_CLASSIC_JERK
     draw_steps_per_mm(MBASE(MOTION_CASE_STEPS)); // "steps per mm"
     draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
-    draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
+    // draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
 #endif // USE_STRING_TITLES
   }
 
@@ -2354,8 +2354,8 @@ void Draw_Motion_Menu()
   Draw_Menu_Line(++i, ICON_Setspeed);
   Draw_More_Icon(i);
   Draw_Menu_Line(++i, ICON_Motion);
-  Draw_More_Icon(i);
-  Draw_Menu_Icon(MOTION_CASE_STEPS, ICON_Step);
+  // Draw_More_Icon(i);
+  // Draw_Menu_Icon(MOTION_CASE_STEPS, ICON_Step);
 
 }
 
@@ -4269,34 +4269,34 @@ void HMI_InputShaping_Values()
 
 
 ////
-void HMI_LinearAdv_KFactor()
-{
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
+// void HMI_LinearAdv_KFactor()
+// {
+//   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+//   if (encoder_diffState == ENCODER_DIFF_NO)
+//     return;
   
-  if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.LinearAdv_KFactor)) {
-    checkkey = LinearAdv;
-    EncoderRate.enabled = false;   
-    LIMIT(HMI_ValueStruct.LinearAdv_KFactor, 0.000f, 500.0000f); 
-    planner.extruder_advance_K[0] = HMI_ValueStruct.LinearAdv_KFactor / 1000.0f;
-    //SERIAL_ECHOLNPAIR("Saved Value: ", planner.extruder_advance_K[0]);
+//   if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.LinearAdv_KFactor)) {
+//     checkkey = LinearAdv;
+//     EncoderRate.enabled = false;   
+//     LIMIT(HMI_ValueStruct.LinearAdv_KFactor, 0.000f, 500.0000f); 
+//     planner.extruder_advance_K[0] = HMI_ValueStruct.LinearAdv_KFactor / 1000.0f;
+//     //SERIAL_ECHOLNPAIR("Saved Value: ", planner.extruder_advance_K[0]);
 
-    // Display the saved value (multiplied by 100 for correct rendering)
-    DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10 ), MBASE(1) + 3, _MAX(HMI_ValueStruct.LinearAdv_KFactor, 0.0));
-    return;
-  }
+//     // Display the saved value (multiplied by 100 for correct rendering)
+//     DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10 ), MBASE(1) + 3, _MAX(HMI_ValueStruct.LinearAdv_KFactor, 0.0));
+//     return;
+//   }
   
-  //SERIAL_ECHOLNPAIR("HMI_LinAdv_KFactor Editing: ", HMI_ValueStruct.LinearAdv_KFactor);
-  // Ensure the value is within limits **before** displaying
-  LIMIT(HMI_ValueStruct.LinearAdv_KFactor, 0.000f, 500.000f);  // Assuming the real range
+//   //SERIAL_ECHOLNPAIR("HMI_LinAdv_KFactor Editing: ", HMI_ValueStruct.LinearAdv_KFactor);
+//   // Ensure the value is within limits **before** displaying
+//   LIMIT(HMI_ValueStruct.LinearAdv_KFactor, 0.000f, 500.000f);  // Assuming the real range
 
-  // Scale for display (float to int conversion)
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 3, (VALUERANGE_X - 10 ), MBASE(1) + 3, _MAX(HMI_ValueStruct.LinearAdv_KFactor, 0.0));
+//   // Scale for display (float to int conversion)
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 3, (VALUERANGE_X - 10 ), MBASE(1) + 3, _MAX(HMI_ValueStruct.LinearAdv_KFactor, 0.0));
     
   
 
-}
+// }
 ////
 
 
@@ -6052,7 +6052,7 @@ void HMI_O900PauseOrStop()
           SERIAL_ECHOLN("M79 S2"); // 3:cloud print pause
         }
        
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
 
         // Queue.inject p(pstr("m25"));
         RUN_AND_WAIT_GCODE_CMD("M25", true);
@@ -6062,7 +6062,7 @@ void HMI_O900PauseOrStop()
       else
       {
        
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
       }
     }
     else if (select_print.now == 2)
@@ -6102,7 +6102,7 @@ void HMI_O900PauseOrStop()
       }
       else
         
-      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
       // cancel stop
     }
   }
@@ -8534,18 +8534,18 @@ void Draw_InputShaping_Menu()
 }
 
 
-void Draw_LinearAdv_Menu()
-{
-  Clear_Main_Window();
-  HMI_flag.Refresh_bottom_flag = true; // Flag refresh bottom parameter
+// void Draw_LinearAdv_Menu()
+// {
+//   Clear_Main_Window();
+//   HMI_flag.Refresh_bottom_flag = true; // Flag refresh bottom parameter
 
-  Draw_Title(F("Linear Advance"));
-  DWIN_Draw_Label(MBASE(1), F("K-Factor"));
+//   Draw_Title(F("Linear Advance"));
+//   DWIN_Draw_Label(MBASE(1), F("K-Factor"));
   
-  Draw_Back_First();
-  Draw_Menu_Line(1, ICON_Motion);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(1) + 3, planner.extruder_advance_K[0] * 1000);
-}
+//   Draw_Back_First();
+//   Draw_Menu_Line(1, ICON_Motion);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(1) + 3, planner.extruder_advance_K[0] * 1000);
+// }
 
 
 
@@ -8607,11 +8607,11 @@ void HMI_Motion()
       Draw_InputShaping_Menu();
       break;
 
-    case MOTION_CASE_LINADV: // Linear Advance
-      checkkey = LinearAdv;
-      select_linear_adv.reset();
-      Draw_LinearAdv_Menu();
-      break;  
+    // case MOTION_CASE_LINADV: // Linear Advance
+    //   checkkey = LinearAdv;
+    //   select_linear_adv.reset();
+    //   Draw_LinearAdv_Menu();
+    //   break;  
     default:
       break;
     }
@@ -9059,7 +9059,7 @@ void HMI_O9000()
         // queue.enqueue_now_P(PSTR("M24"));
         // gcode.process_subcommands_now_P(PSTR("M24"));
         updateOctoData = false;
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
 
       }
       else
@@ -9145,7 +9145,7 @@ void HMI_O9000Tune()
       select_print.set(0);
       // SERIAL_ECHOLNPAIR("returning from Tune menu with FN as: ", vvfilename);
       
-      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, vvthumb, Octo_Progress_Global);
+      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
 
     }
     break;
@@ -9753,43 +9753,43 @@ void HMI_InputShaping()
 
 ////
 /* Linear Advance */
-void HMI_LinearAdv()
-{
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
+// void HMI_LinearAdv()
+// {
+//   ENCODER_DiffState encoder_diffState = get_encoder_state();
+//   if (encoder_diffState == ENCODER_DIFF_NO)
+//     return;
 
-  // Avoid flicker by updating only the previous menu
-  if (encoder_diffState == ENCODER_DIFF_CW)
-  {
-    if (select_linear_adv.inc(1  + ENABLED(HAS_HOTEND)))
-      Move_Highlight(1, select_linear_adv.now);
-  }
-  else if (encoder_diffState == ENCODER_DIFF_CCW)
-  {
-    if (select_linear_adv.dec())
-      Move_Highlight(-1, select_linear_adv.now);
-  }
-  else if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    switch (select_linear_adv.now)
-    {
-    case 0: // Back
-      checkkey = Motion;
-      select_motion.now = MOTION_CASE_LINADV;
-      Draw_Motion_Menu();
-      break;
-    case LINEAR_ADV_KFACTOR:
-      checkkey = LinAdv_KFactor;
-      SERIAL_ECHOLNPAIR("showMenu Val: ", planner.extruder_advance_K[0]);
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 3, (VALUERANGE_X - 10), MBASE(1) + 3, (planner.extruder_advance_K[0] * 1000));
-      EncoderRate.enabled = true;
-      break;
+//   // Avoid flicker by updating only the previous menu
+//   if (encoder_diffState == ENCODER_DIFF_CW)
+//   {
+//     if (select_linear_adv.inc(1  + ENABLED(HAS_HOTEND)))
+//       Move_Highlight(1, select_linear_adv.now);
+//   }
+//   else if (encoder_diffState == ENCODER_DIFF_CCW)
+//   {
+//     if (select_linear_adv.dec())
+//       Move_Highlight(-1, select_linear_adv.now);
+//   }
+  // else if (encoder_diffState == ENCODER_DIFF_ENTER)
+  // {
+  //   switch (select_linear_adv.now)
+  //   {
+  //   case 0: // Back
+  //     checkkey = Motion;
+  //     select_motion.now = MOTION_CASE_LINADV;
+  //     Draw_Motion_Menu();
+  //     break;
+  //   case LINEAR_ADV_KFACTOR:
+  //     checkkey = LinAdv_KFactor;
+  //     // SERIAL_ECHOLNPAIR("showMenu Val: ", planner.extruder_advance_K[0]);
+  //     DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 3, (VALUERANGE_X - 10), MBASE(1) + 3, (planner.extruder_advance_K[0] * 1000));
+  //     EncoderRate.enabled = true;
+  //     break;
     
-    }
-  }
-  DWIN_UpdateLCD();
-}
+  //   }
+  // }
+//   DWIN_UpdateLCD();
+// }
 
 ////
 
@@ -10331,7 +10331,7 @@ void EachMomentUpdate()
     // Update printing time
     if (last_Printtime != min)
     { // 1 minute update
-      SERIAL_ECHOLNPAIR(" elapsed.value=: ", elapsed.value);
+      // SERIAL_ECHOLNPAIR(" elapsed.value=: ", elapsed.value);
       last_Printtime = min;
       Draw_Print_ProgressElapsed();
     }
@@ -10879,8 +10879,8 @@ void DWIN_HandleScreen()
   case InputShaping:
     HMI_InputShaping();
     break;
-  case LinearAdv:
-    HMI_LinearAdv();
+  // case LinearAdv:
+  //   HMI_LinearAdv();
     break;  
   case Step:
     HMI_Step();
@@ -10940,8 +10940,8 @@ void DWIN_HandleScreen()
   case InputShaping_YZeta:
     HMI_InputShaping_Values();
     break;
-  case LinAdv_KFactor:
-    HMI_LinearAdv_KFactor();
+  // case LinAdv_KFactor:
+  //   HMI_LinearAdv_KFactor();
     break;
   case CExtrude_Menu:
     HMI_CExtrude_Menu();
@@ -11341,15 +11341,15 @@ void HMI_Auto_Bed_PID(void)
         Save_Auto_PID_Value();
         // save PID
         checkkey = AUTO_SET_PID;
-        SERIAL_ECHOLNPAIR("HMI_Auto_Bed_PID");
-        SERIAL_ECHOLNPAIR("11checkkey:", checkkey);
+        // SERIAL_ECHOLNPAIR("HMI_Auto_Bed_PID");
+        // SERIAL_ECHOLNPAIR("11checkkey:", checkkey);
         select_set_pid.set(1);
         select_set_pid.now = 1;
         Draw_Auto_PID_Set();
         HMI_flag.PID_autotune_end = false;
         // Remember to save and exit when you're done debugging
         // settings.save();
-        SERIAL_ECHOLNPAIR("22checkkey:", checkkey);
+        // SERIAL_ECHOLNPAIR("22checkkey:", checkkey);
       }
     }
   }

@@ -53,10 +53,10 @@
  void GcodeSuite::M24()
  {
  
-   SERIAL_ECHOLNPAIR("=====++++>> M24 Resume & Flag = ", serial_connection_active);
+  //  SERIAL_ECHOLNPAIR("=====++++>> M24 Resume & Flag = ", serial_connection_active);
    if (serial_connection_active)
    {
-     SERIAL_ECHOLN("=====++++>> M24 with Octo, Sending Resume Command");
+    //  SERIAL_ECHOLN("=====++++>> M24 with Octo, Sending Resume Command");
  #if ENABLED(HOST_ACTION_COMMANDS)
  #ifdef ACTION_ON_RESUME
      host_action_resume();
@@ -66,7 +66,7 @@
    }
    else
    {
-     SERIAL_ECHOLN("=====++++>> M24 with SD, Sending Resume Command");
+    //  SERIAL_ECHOLN("=====++++>> M24 with SD, Sending Resume Command");
  #if ENABLED(DGUS_LCD_UI_MKS)
      if ((print_job_timer.isPaused() || print_job_timer.isRunning()) && !parser.seen("ST"))
        MKS_resume_print_move();
@@ -133,10 +133,10 @@
    // #else
  
    // Set initial pause flag to prevent more commands from landing in the queue while we try to pause
-   SERIAL_ECHOLNPAIR("=====++++>> M25 PAUSE & Flag = ", serial_connection_active);
+  //  SERIAL_ECHOLNPAIR("=====++++>> M25 PAUSE & Flag = ", serial_connection_active);
    if (serial_connection_active)
    {
-     SERIAL_ECHOLN("=====++++>> M25 with Octo, Sending Pause Command");
+    //  SERIAL_ECHOLN("=====++++>> M25 with Octo, Sending Pause Command");
  #if ENABLED(HOST_ACTION_COMMANDS)
      TERN_(HOST_PROMPT_SUPPORT, host_prompt_open(PROMPT_PAUSE_RESUME, PSTR("Pause"), PSTR("Resume")));
  #ifdef ACTION_ON_PAUSE
@@ -146,7 +146,7 @@
    }
    else
    {
-     SERIAL_ECHOLN("=====++++>> M25 with SD, Sending Pause Command");
+    //  SERIAL_ECHOLN("=====++++>> M25 with SD, Sending Pause Command");
  #if ENABLED(SDSUPPORT)
      if (IS_SD_PRINTING())
        card.pauseSDPrint();

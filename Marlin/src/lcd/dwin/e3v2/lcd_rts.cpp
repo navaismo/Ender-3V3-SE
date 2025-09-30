@@ -36,148 +36,147 @@
  *                true -- Clear historical data ("base64_out", "deCodeBase64Cnt")
  *                false -- No action
  */
-bool gcodePicGetDataFormBase64(char * buf, unsigned long picLen, bool resetFlag)
-{
-  char base64_in[4];                          // 保存base64编码的数组 -- Save base64 encoded array
-  static unsigned char base64_out[3] = {'0'}; // 保存base64解码的数组 -- Save base64 decoded array
-  char getBase64Cnt = 0;                      // 从U盘获取的，base64编码的数据 -- Base64 encoded data obtained from USB drive
-  static signed char deCodeBase64Cnt = 0;     // 已经解码得了数据 -- Decoded data
-  unsigned long deCodePicLenCnt = 0;          // 保存已经获取的图片数据 -- Save the obtained image data
-  static char lCmdBuf[100];
-  bool getPicEndFlag = false;
+// bool gcodePicGetDataFormBase64(char * buf, unsigned long picLen, bool resetFlag)
+// {
+//   char base64_in[4];                          // 保存base64编码的数组 -- Save base64 encoded array
+//   static unsigned char base64_out[3] = {'0'}; // 保存base64解码的数组 -- Save base64 decoded array
+//   char getBase64Cnt = 0;                      // 从U盘获取的，base64编码的数据 -- Base64 encoded data obtained from USB drive
+//   static signed char deCodeBase64Cnt = 0;     // 已经解码得了数据 -- Decoded data
+//   unsigned long deCodePicLenCnt = 0;          // 保存已经获取的图片数据 -- Save the obtained image data
+//   static char lCmdBuf[100];
+//   bool getPicEndFlag = false;
 
-  // if (ENABLED(USER_LOGIC_DEUBG))
-  // {
-       // SERIAL_ECHOLNPAIR("\r\n gcodePicGetDataFormBase64(...), .deCodeBase64Cnt = ", deCodeBase64Cnt,
-                         // "\r\n gcodePicGetDataFormBase64(...), .deCodePicLenCnt = ", deCodePicLenCnt,
-                         // "\r\n gcodePicGetDataFormBase64(...), .picLen = ", picLen);
-  // }
+//   // if (ENABLED(USER_LOGIC_DEUBG))
+//   // {
+//        // SERIAL_ECHOLNPAIR("\r\n gcodePicGetDataFormBase64(...), .deCodeBase64Cnt = ", deCodeBase64Cnt,
+//                          // "\r\n gcodePicGetDataFormBase64(...), .deCodePicLenCnt = ", deCodePicLenCnt,
+//                          // "\r\n gcodePicGetDataFormBase64(...), .picLen = ", picLen);
+//   // }
 
-  // 清除上次记录 -- Clear last record
-  if (resetFlag)
-  {
-    for (int i = 0; i < (signed)sizeof(base64_out); i++)
-    {
-      base64_out[i] = 0x00;
-    }
-    deCodeBase64Cnt = 0;
-    return true;
-  }
+//   // 清除上次记录 -- Clear last record
+//   if (resetFlag)
+//   {
+//     for (int i = 0; i < (signed)sizeof(base64_out); i++)
+//     {
+//       base64_out[i] = 0x00;
+//     }
+//     deCodeBase64Cnt = 0;
+//     return true;
+//   }
 
-  if ((deCodeBase64Cnt > 0) && (deCodePicLenCnt < picLen))
-  {
-    if (ENABLED(USER_LOGIC_DEUBG)) 
-    {
-      // SERIAL_ECHO("\r\n There are parameters left last time ");
-      memset(lCmdBuf, 0, sizeof(lCmdBuf));
-      // sprintf(lCmdBuf, "\r\n ------------------------------deCodeBase64Cnt = %d; base64_out[3 - deCodeBase64Cnt] = %x",deCodeBase64Cnt,base64_out[3 - deCodeBase64Cnt]);
-      // SERIAL_ECHO(lCmdBuf);
-    }
+//   if ((deCodeBase64Cnt > 0) && (deCodePicLenCnt < picLen))
+//   {
+//     if (ENABLED(USER_LOGIC_DEUBG)) 
+//     {
+//       // SERIAL_ECHO("\r\n There are parameters left last time ");
+//       memset(lCmdBuf, 0, sizeof(lCmdBuf));
+//       // sprintf(lCmdBuf, "\r\n ------------------------------deCodeBase64Cnt = %d; base64_out[3 - deCodeBase64Cnt] = %x",deCodeBase64Cnt,base64_out[3 - deCodeBase64Cnt]);
+//       // SERIAL_ECHO(lCmdBuf);
+//     }
 
-    for (int deCode = deCodeBase64Cnt; deCode > 0; deCode--)
-    {
-      if (deCodePicLenCnt < picLen)
-      {
-        buf[deCodePicLenCnt++] = base64_out[3 - deCode];
-      }
-      else
-      {
-        break;
-      }
-    }
-  }
+//     for (int deCode = deCodeBase64Cnt; deCode > 0; deCode--)
+//     {
+//       if (deCodePicLenCnt < picLen)
+//       {
+//         buf[deCodePicLenCnt++] = base64_out[3 - deCode];
+//       }
+//       else
+//       {
+//         break;
+//       }
+//     }
+//   }
 
-  // if (ENABLED(USER_LOGIC_DEUBG))
-  // {
-       // SERIAL_ECHOLNPAIR("\r\n gcodePicGetDataFormBase64(...), ..deCodeBase64Cnt = ", deCodeBase64Cnt,
-                         // "\r\n gcodePicGetDataFormBase64(...), ..deCodePicLenCnt = ", deCodePicLenCnt);
-  // }
+//   // if (ENABLED(USER_LOGIC_DEUBG))
+//   // {
+//        // SERIAL_ECHOLNPAIR("\r\n gcodePicGetDataFormBase64(...), ..deCodeBase64Cnt = ", deCodeBase64Cnt,
+//                          // "\r\n gcodePicGetDataFormBase64(...), ..deCodePicLenCnt = ", deCodePicLenCnt);
+//   // }
 
-  while(deCodePicLenCnt < picLen)
-  {
-    char j, ret;
-    for ( j = 0; j < 20; j++)
-    {
-      // 从U盘中获取一个字符 -- Get a character from USB disk
-      ret = card.get();
+//   while(deCodePicLenCnt < picLen)
+//   {
+//     char j, ret;
+//     for ( j = 0; j < 20; j++)
+//     {
+//       // 从U盘中获取一个字符 -- Get a character from USB disk
+//       ret = card.get();
 
-      if (ret == ';' || ret == ' ' || ret == '\r' || ret == '\n')
-      {
-        continue;
-      }
+//       if (ret == ';' || ret == ' ' || ret == '\r' || ret == '\n')
+//       {
+//         continue;
+//       }
 
-      base64_in[getBase64Cnt++] = ret;
-      if (getBase64Cnt >= 4)
-      {
-        getBase64Cnt = 0;
-        break;
-      }
-    }
+//       base64_in[getBase64Cnt++] = ret;
+//       if (getBase64Cnt >= 4)
+//       {
+//         getBase64Cnt = 0;
+//         break;
+//       }
+//     }
 
-    memset(base64_out, 0, sizeof(base64_out));
-    deCodeBase64Cnt = base64_decode(base64_in, 4, base64_out);
-    for(int i = deCodeBase64Cnt; i < 3; i++)
-    {
-      base64_out[i] = 0;
-    }
-    // 这里强制给3，因为始终是4 --> 3 字符 -- 3 is forced here because it is always 4 --> 3 characters
-    deCodeBase64Cnt = 3;
+//     memset(base64_out, 0, sizeof(base64_out));
+//     deCodeBase64Cnt = base64_decode(base64_in, 4, base64_out);
+//     for(int i = deCodeBase64Cnt; i < 3; i++)
+//     {
+//       base64_out[i] = 0;
+//     }
+//     // 这里强制给3，因为始终是4 --> 3 字符 -- 3 is forced here because it is always 4 --> 3 characters
+//     deCodeBase64Cnt = 3;
 
-    // if (ENABLED(USER_LOGIC_DEUBG))
-    // {
-    //   memset(lCmdBuf, 0, sizeof(lCmdBuf));
-    //   sprintf(lCmdBuf, "\r\n deCodePicLenCnt = %d ;in = %s; ", deCodePicLenCnt, base64_in);
-    //   SERIAL_ECHO(lCmdBuf);
-    // }
-    int test = deCodeBase64Cnt;
-    for (int deCode = 0; deCode < test; deCode++)
-    {
-      if (deCodePicLenCnt < picLen)
-      {
-        // 特殊处理一下末尾字符，找到了FF D9后退出 -- Specially process the last character and exit after finding FF D9.
-        if (getPicEndFlag)
-        {
-          buf[deCodePicLenCnt++] = 0;
-        }
-        else
-        {
-          buf[deCodePicLenCnt++] = base64_out[deCode];
-        }
+//     // if (ENABLED(USER_LOGIC_DEUBG))
+//     // {
+//     //   memset(lCmdBuf, 0, sizeof(lCmdBuf));
+//     //   sprintf(lCmdBuf, "\r\n deCodePicLenCnt = %d ;in = %s; ", deCodePicLenCnt, base64_in);
+//     //   SERIAL_ECHO(lCmdBuf);
+//     // }
+//     int test = deCodeBase64Cnt;
+//     for (int deCode = 0; deCode < test; deCode++)
+//     {
+//       if (deCodePicLenCnt < picLen)
+//       {
+//         // 特殊处理一下末尾字符，找到了FF D9后退出 -- Specially process the last character and exit after finding FF D9.
+//         if (getPicEndFlag)
+//         {
+//           buf[deCodePicLenCnt++] = 0;
+//         }
+//         else
+//         {
+//           buf[deCodePicLenCnt++] = base64_out[deCode];
+//         }
 
-        if (deCodePicLenCnt > 2 && \
-           ((buf[deCodePicLenCnt-1] == 0xD9 && buf[deCodePicLenCnt-2] == 0xFF) || (buf[deCodePicLenCnt-1] == 0xd9 && buf[deCodePicLenCnt-2] == 0xff)))
-        {
-          getPicEndFlag = true;
-          if (ENABLED(USER_LOGIC_DEUBG))
-          {
-            SERIAL_ECHOLNPAIR("\r\n ---------------- deCodePicLenCnt = ", deCodePicLenCnt);
-          }
-        }
-        deCodeBase64Cnt--;
-      }
-      else
-      {
-        break;
-      }
-    }
+//         if (deCodePicLenCnt > 2 && ((buf[deCodePicLenCnt-1] == 0xD9 && buf[deCodePicLenCnt-2] == 0xFF) || (buf[deCodePicLenCnt-1] == 0xd9 && buf[deCodePicLenCnt-2] == 0xff)))
+//         {
+//           getPicEndFlag = true;
+//           if (ENABLED(USER_LOGIC_DEUBG))
+//           {
+//             SERIAL_ECHOLNPAIR("\r\n ---------------- deCodePicLenCnt = ", deCodePicLenCnt);
+//           }
+//         }
+//         deCodeBase64Cnt--;
+//       }
+//       else
+//       {
+//         break;
+//       }
+//     }
 
-    watchdog_refresh();
+//     watchdog_refresh();
 
-    // if (ENABLED(USER_LOGIC_DEUBG))
-    // {
-    //   memset(lCmdBuf, 0, sizeof(lCmdBuf));
-    //   sprintf(lCmdBuf, "j = %d ;in = %s; out = %x %x %x; buf = %x %x %x", j, base64_in, base64_out[0], base64_out[1], base64_out[2], buf[deCodePicLenCnt-3], buf[deCodePicLenCnt-2], buf[deCodePicLenCnt-1]);
-    //   SERIAL_ECHO(lCmdBuf);
-    //   SERIAL_ECHO("\r\n-- ");
-    // }
-  }
+//     // if (ENABLED(USER_LOGIC_DEUBG))
+//     // {
+//     //   memset(lCmdBuf, 0, sizeof(lCmdBuf));
+//     //   sprintf(lCmdBuf, "j = %d ;in = %s; out = %x %x %x; buf = %x %x %x", j, base64_in, base64_out[0], base64_out[1], base64_out[2], buf[deCodePicLenCnt-3], buf[deCodePicLenCnt-2], buf[deCodePicLenCnt-1]);
+//     //   SERIAL_ECHO(lCmdBuf);
+//     //   SERIAL_ECHO("\r\n-- ");
+//     // }
+//   }
 
-  if (ENABLED(USER_LOGIC_DEUBG))
-  {
-    SERIAL_ECHOLNPAIR("\r\n gcodePicGetDataFormBase64(...), ....deCodePicLenCnt = ", deCodePicLenCnt);
-  }
-  return true;
-}
+//   if (ENABLED(USER_LOGIC_DEUBG))
+//   {
+//     SERIAL_ECHOLNPAIR("\r\n gcodePicGetDataFormBase64(...), ....deCodePicLenCnt = ", deCodePicLenCnt);
+//   }
+//   return true;
+// }
 
 /**
  * @功能   gcode预览图显示、隐藏 -- gcode preview display and hide
@@ -187,22 +186,22 @@ bool gcodePicGetDataFormBase64(char * buf, unsigned long picLen, bool resetFlag)
  * onoff        显示(onoff == true)，隐藏(onoff == false)
  * 显示地址
  */
-void gcodePicDispalyOnOff(unsigned int jpgAddr, bool onoff)
-{
-  if (onoff)
-  {
-    // rock_20221013
-    #if ENABLED(DWIN_CREALITY_480_LCD)
-      DWIN_ICON_SHOW_SRAM(36, 35, 0);
-    #elif ENABLED(DWIN_CREALITY_320_LCD)
-      DWIN_ICON_SHOW_SRAM(72, 24, 0);
-    #endif
-  }
-  else
-  {
+// void gcodePicDispalyOnOff(unsigned int jpgAddr, bool onoff)
+// {
+//   if (onoff)
+//   {
+//     // rock_20221013
+//     #if ENABLED(DWIN_CREALITY_480_LCD)
+//       DWIN_ICON_SHOW_SRAM(36, 35, 0);
+//     #elif ENABLED(DWIN_CREALITY_320_LCD)
+//       DWIN_ICON_SHOW_SRAM(72, 24, 0);
+//     #endif
+//   }
+//   else
+//   {
 
-  }
-}
+//   }
+// }
 
 model_information_t model_information;
 static const char * gcode_information_name[] =
@@ -212,7 +211,7 @@ static const char * gcode_information_name[] =
 uint8_t read_gcode_model_information(const char* fileName)
 {
   char string_buf[_GCODE_METADATA_STRING_LENGTH_MAX + 1];
-  char *char_pos;
+  // char *char_pos;
   char byte;
   unsigned char buf_state = 0;
   uint8_t line_idx=0;
@@ -323,64 +322,64 @@ uint8_t read_gcode_model_information(const char* fileName)
  * isDisplay: whether to display the image
  * jpgAddr: Display the address of the image
  */
-extern unsigned long arr_data_num;
-bool gcodePicDataRead(unsigned long picLenth, char isDisplay, unsigned long jpgAddr)
-{
-  //          96*96-耗时-Ms  200*200-耗时-Ms // 96*96-Time-consuming-Ms 200*200-Time-consuming-Ms
-  //  * 2  :      1780        8900 
-  //  * 4  :      940         4490 
-  //  * 8  :      518         2010 
-  //  * 12 :      435         1300 
-  //  * 16 :      420         1130 
-  #define PIN_BUG_LEN_DACAI   2048 
-  #define PIN_BUG_LEN_DWIN    PIN_BUG_LEN_DACAI + 20  // (JPG_BYTES_PER_FRAME * 12)
-  #define PIN_DATA_LEN_DWIN   PIN_BUG_LEN_DACAI + 20  // (PIN_BUG_LEN_DWIN / 2)
+// extern unsigned long arr_data_num;
+// bool gcodePicDataRead(unsigned long picLenth, char isDisplay, unsigned long jpgAddr)
+// {
+//   //          96*96-耗时-Ms  200*200-耗时-Ms // 96*96-Time-consuming-Ms 200*200-Time-consuming-Ms
+//   //  * 2  :      1780        8900 
+//   //  * 4  :      940         4490 
+//   //  * 8  :      518         2010 
+//   //  * 12 :      435         1300 
+//   //  * 16 :      420         1130 
+//   #define PIN_BUG_LEN_DACAI   2048 
+//   #define PIN_BUG_LEN_DWIN    PIN_BUG_LEN_DACAI + 20  // (JPG_BYTES_PER_FRAME * 12)
+//   #define PIN_DATA_LEN_DWIN   PIN_BUG_LEN_DACAI + 20  // (PIN_BUG_LEN_DWIN / 2)
 
-  static char picBuf[PIN_BUG_LEN_DWIN+1];   // 这个取 MXA(PIN_BUG_LEN_DACAI, PIN_BUG_LEN_DWIN) -- This takes MXA(PIN_BUG_LEN_DACAI, PIN_BUG_LEN_DWIN)
-  unsigned long picLen;                     // 图片长度(解码后的长度) -- Image length (decoded length)
-  unsigned long j;
+//   static char picBuf[PIN_BUG_LEN_DWIN+1];   // 这个取 MXA(PIN_BUG_LEN_DACAI, PIN_BUG_LEN_DWIN) -- This takes MXA(PIN_BUG_LEN_DACAI, PIN_BUG_LEN_DWIN)
+//   unsigned long picLen;                     // 图片长度(解码后的长度) -- Image length (decoded length)
+//   unsigned long j;
 
-  // (picLenth / 4) * 3;
-  picLen = picLenth;
+//   // (picLenth / 4) * 3;
+//   picLen = picLenth;
 
-  gcodePicGetDataFormBase64(picBuf, 0, true);
+//   gcodePicGetDataFormBase64(picBuf, 0, true);
 
-  arr_data_num = 0;
-  // 开始读取 -- Start reading
-  // 一次传送2048个数据 -- Transmit 2048 data at one time
-  for (j = 0; j < (picLen / PIN_BUG_LEN_DACAI); j++)
-  {
-    memset(picBuf, 0, sizeof(picBuf));
-    // card.read(picBuf, PIN_BUG_LEN_DACAI);
-    gcodePicGetDataFormBase64(picBuf, PIN_BUG_LEN_DACAI, false);
+//   arr_data_num = 0;
+//   // 开始读取 -- Start reading
+//   // 一次传送2048个数据 -- Transmit 2048 data at one time
+//   for (j = 0; j < (picLen / PIN_BUG_LEN_DACAI); j++)
+//   {
+//     memset(picBuf, 0, sizeof(picBuf));
+//     // card.read(picBuf, PIN_BUG_LEN_DACAI);
+//     gcodePicGetDataFormBase64(picBuf, PIN_BUG_LEN_DACAI, false);
 
-    // 发送图片数据到指定地址 -- Send image data to the specified address
-    if (isDisplay)
-    {
-      uiShow.UI_SendJpegDate(picBuf, PIN_BUG_LEN_DACAI);
-    }
-  }
-  // 剩下的不足2048字符的数据处理，根据迪文处理内容 -- The remaining data with less than 2048 characters will be processed according to the processing content of Diwen
-  watchdog_refresh();
-  if (picLen % PIN_BUG_LEN_DACAI != 0)
-  {
-    memset(picBuf, 0, sizeof(picBuf));
-    gcodePicGetDataFormBase64(picBuf, (picLen - PIN_BUG_LEN_DACAI * j), false);
-    // card.read(picBuf, (picLen - PIN_BUG_LEN_DACAI * j));
-    // 发送图片数据到指定地址 -- Send image data to the specified address
-    if (isDisplay)
-    {
-      uiShow.UI_SendJpegDate(picBuf, picLen - PIN_BUG_LEN_DACAI * j);
-    }
-  }
-  if (isDisplay)
-  {
-    gcodePicDispalyOnOff(jpgAddr, true);
-  }
+//     // 发送图片数据到指定地址 -- Send image data to the specified address
+//     if (isDisplay)
+//     {
+//       uiShow.UI_SendJpegDate(picBuf, PIN_BUG_LEN_DACAI);
+//     }
+//   }
+//   // 剩下的不足2048字符的数据处理，根据迪文处理内容 -- The remaining data with less than 2048 characters will be processed according to the processing content of Diwen
+//   watchdog_refresh();
+//   if (picLen % PIN_BUG_LEN_DACAI != 0)
+//   {
+//     memset(picBuf, 0, sizeof(picBuf));
+//     gcodePicGetDataFormBase64(picBuf, (picLen - PIN_BUG_LEN_DACAI * j), false);
+//     // card.read(picBuf, (picLen - PIN_BUG_LEN_DACAI * j));
+//     // 发送图片数据到指定地址 -- Send image data to the specified address
+//     if (isDisplay)
+//     {
+//       uiShow.UI_SendJpegDate(picBuf, picLen - PIN_BUG_LEN_DACAI * j);
+//     }
+//   }
+//   if (isDisplay)
+//   {
+//     gcodePicDispalyOnOff(jpgAddr, true);
+//   }
 
-  read_gcode_model_information(card.filename);
-  return true;
-}
+//   read_gcode_model_information(card.filename);
+//   return true;
+// }
 
 /**
  * @功能   gcode预览图存在判断
@@ -400,285 +399,285 @@ bool gcodePicDataRead(unsigned long picLenth, char isDisplay, unsigned long jpgA
  *jpgFormat image type (jpg, png)
  *jpgResolution image size
  */
-char gcodePicExistjudge(char *fileName, unsigned int jpgAddr, unsigned char jpgFormat, unsigned char jpgResolution)
-{
-  #define JUDGE_PIC_BUF_CNT   20
-  enum{
-    MENU_PIC_FORMAT,        // 图片格式判断
-    MENU_PIC_HEADER,        // 标识位判断
-    MENU_PIC_RESOLITION,    // 图片分辨率判断
-    MENU_PIC_LEN,           // 数据长度判断
-    MENU_PIC_START_LINE,    // 起始行
-    MENU_PIC_END_LINE,      // 结束行
-    MENU_PIC_HIGH,          // 模型高度
-    MENU_PIC_MAX
-  };
-  unsigned char picMenu = MENU_PIC_FORMAT;
-  unsigned long picLen = 0;     // 图片数据长度
-  unsigned int  i;
-  // unsigned long dataLen = 0; // 包数据长度
-  unsigned char picFormat = PIC_FORMAT_MAX;         // 图片格式
-  unsigned char picResolution = PIC_RESOLITION_MAX; // 图片分辨率
-  unsigned char ret;
-  // unsigned char picGetDataCnt = 0;               // 读取数据计数
-  // char picFileHeader[PIC_PRESENT_LEN] = {0xAA, 0x55, 0xA5, 0x5A};
-  unsigned char buf[20] = {0};
-  unsigned char bufIndex = 0;
-  char lCmdBuf[20];
+// char gcodePicExistjudge(char *fileName, unsigned int jpgAddr, unsigned char jpgFormat, unsigned char jpgResolution)
+// {
+//   #define JUDGE_PIC_BUF_CNT   20
+//   enum{
+//     MENU_PIC_FORMAT,        // 图片格式判断
+//     MENU_PIC_HEADER,        // 标识位判断
+//     MENU_PIC_RESOLITION,    // 图片分辨率判断
+//     MENU_PIC_LEN,           // 数据长度判断
+//     MENU_PIC_START_LINE,    // 起始行
+//     MENU_PIC_END_LINE,      // 结束行
+//     MENU_PIC_HIGH,          // 模型高度
+//     MENU_PIC_MAX
+//   };
+//   unsigned char picMenu = MENU_PIC_FORMAT;
+//   unsigned long picLen = 0;     // 图片数据长度
+//   unsigned int  i;
+//   // unsigned long dataLen = 0; // 包数据长度
+//   unsigned char picFormat = PIC_FORMAT_MAX;         // 图片格式
+//   unsigned char picResolution = PIC_RESOLITION_MAX; // 图片分辨率
+//   unsigned char ret;
+//   // unsigned char picGetDataCnt = 0;               // 读取数据计数
+//   // char picFileHeader[PIC_PRESENT_LEN] = {0xAA, 0x55, 0xA5, 0x5A};
+//   unsigned char buf[20] = {0};
+//   unsigned char bufIndex = 0;
+//   char lCmdBuf[20];
 
-  // 查找图片，只从前20字节串查找，
-  for (i = 0; i < JUDGE_PIC_BUF_CNT; i++)
-  {
-    memset(buf, 0, sizeof(buf));
-    bufIndex = 0;
-    int j;
-    for (j = 0; j < 20; j++)
-    {
-      // 从U盘中获取一个字符
-      ret = card.get();
-      // 第一个字符是无效的，重新读取
-      if((ret == ';' || ret == ' ' || ret == '\r' || ret == '\n') && bufIndex == 0)
-      {
-        continue;
-      }
-      else if ((ret == ';' || ret == ' ' || ret == '\r' || ret == '\n') && bufIndex != 0)
-      {
-        break;
-      }
-      buf[bufIndex++] = ret;
-    }
-    if (j == 20) break;
-    memset(lCmdBuf, 0, sizeof(lCmdBuf));
-    sprintf(lCmdBuf, "%s", buf);
-    if (ENABLED(USER_LOGIC_DEUBG))
-    {
-      SERIAL_ECHO(lCmdBuf);
-      SERIAL_ECHO("\r\n");
-    }
+//   // 查找图片，只从前20字节串查找，
+//   for (i = 0; i < JUDGE_PIC_BUF_CNT; i++)
+//   {
+//     memset(buf, 0, sizeof(buf));
+//     bufIndex = 0;
+//     int j;
+//     for (j = 0; j < 20; j++)
+//     {
+//       // 从U盘中获取一个字符
+//       ret = card.get();
+//       // 第一个字符是无效的，重新读取
+//       if((ret == ';' || ret == ' ' || ret == '\r' || ret == '\n') && bufIndex == 0)
+//       {
+//         continue;
+//       }
+//       else if ((ret == ';' || ret == ' ' || ret == '\r' || ret == '\n') && bufIndex != 0)
+//       {
+//         break;
+//       }
+//       buf[bufIndex++] = ret;
+//     }
+//     if (j == 20) break;
+//     memset(lCmdBuf, 0, sizeof(lCmdBuf));
+//     sprintf(lCmdBuf, "%s", buf);
+//     if (ENABLED(USER_LOGIC_DEUBG))
+//     {
+//       SERIAL_ECHO(lCmdBuf);
+//       SERIAL_ECHO("\r\n");
+//     }
 
-    switch(picMenu)
-    {
-      // 图片的格式判断 jpg或png
-      case MENU_PIC_FORMAT:
-        picFormat = PIC_FORMAT_MAX;
-        if (strcmp(lCmdBuf, FORMAT_JPG) == 0)
-        {
-          picFormat = PIC_FORMAT_JPG;
-        }
-        else if (strcmp(lCmdBuf, FORMAT_PNG) == 0)
-        {
-          picFormat = PIC_FORMAT_PNG;
-        }
-        if (ENABLED(USER_LOGIC_DEUBG))
-        {
-          SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_FORMAT, lCmdBuf = ", lCmdBuf,
-                            "\r\n picMenu = MENU_PIC_FORMAT, FORMAT_JPG = ", FORMAT_JPG,
-                            "\r\n picMenu = MENU_PIC_FORMAT, picFormat = ", picFormat);
-        }
-        // 判断是否完成标识位判断，完成后进入下一步
-        if (picFormat != PIC_FORMAT_MAX)
-        {
-          picMenu = MENU_PIC_HEADER;
-        }
-        break;
+//     switch(picMenu)
+//     {
+//       // 图片的格式判断 jpg或png
+//       case MENU_PIC_FORMAT:
+//         picFormat = PIC_FORMAT_MAX;
+//         if (strcmp(lCmdBuf, FORMAT_JPG) == 0)
+//         {
+//           picFormat = PIC_FORMAT_JPG;
+//         }
+//         else if (strcmp(lCmdBuf, FORMAT_PNG) == 0)
+//         {
+//           picFormat = PIC_FORMAT_PNG;
+//         }
+//         if (ENABLED(USER_LOGIC_DEUBG))
+//         {
+//           SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_FORMAT, lCmdBuf = ", lCmdBuf,
+//                             "\r\n picMenu = MENU_PIC_FORMAT, FORMAT_JPG = ", FORMAT_JPG,
+//                             "\r\n picMenu = MENU_PIC_FORMAT, picFormat = ", picFormat);
+//         }
+//         // 判断是否完成标识位判断，完成后进入下一步
+//         if (picFormat != PIC_FORMAT_MAX)
+//         {
+//           picMenu = MENU_PIC_HEADER;
+//         }
+//         break;
 
-      case MENU_PIC_HEADER:
-        // 开始标志判断，找到（begin）
-        if (ENABLED(USER_LOGIC_DEUBG)) 
-        {
-          SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_HEADER, lCmdBuf = ", lCmdBuf,
-                            "\r\n picMenu = MENU_PIC_HEADER, PIC_HEADER = ", PIC_HEADER);
-        }
+//       case MENU_PIC_HEADER:
+//         // 开始标志判断，找到（begin）
+//         if (ENABLED(USER_LOGIC_DEUBG)) 
+//         {
+//           SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_HEADER, lCmdBuf = ", lCmdBuf,
+//                             "\r\n picMenu = MENU_PIC_HEADER, PIC_HEADER = ", PIC_HEADER);
+//         }
 
-        // 判断是否完成包数据长度判断，完成后进图下一步
-        if (strcmp(lCmdBuf, PIC_HEADER) == 0)
-        {
-          picMenu = MENU_PIC_RESOLITION;
-        }
-        break;
+//         // 判断是否完成包数据长度判断，完成后进图下一步
+//         if (strcmp(lCmdBuf, PIC_HEADER) == 0)
+//         {
+//           picMenu = MENU_PIC_RESOLITION;
+//         }
+//         break;
 
-      case MENU_PIC_RESOLITION:
-        // 图片分辨率判断
-        picResolution = PIC_RESOLITION_MAX;
-        if (strcmp(lCmdBuf, RESOLITION_36_36) == 0)
-        {
-          picResolution = PIC_RESOLITION_36_36;
-        }
-        else if (strcmp(lCmdBuf, RESOLITION_48_48) == 0)
-        {
-          picResolution = PIC_RESOLITION_48_48;
-        }
-        else if (strcmp(lCmdBuf, RESOLITION_64_64) == 0)
-        {
-          picResolution = PIC_RESOLITION_64_64;
-        }
-        else if (strcmp(lCmdBuf, RESOLITION_96_96) == 0)
-        {
-          picResolution = PIC_RESOLITION_96_96;
-        }
-        else if (strcmp(lCmdBuf, RESOLITION_144_144) == 0)
-        {
-          picResolution = PIC_RESOLITION_144_144;
-        }
-        else if (strcmp(lCmdBuf, RESOLITION_200_200) == 0)
-        {
-          picResolution = PIC_RESOLITION_200_200;
-        }
-        else if (strcmp(lCmdBuf, RESOLITION_300_300) == 0)
-        {
-          picResolution = PIC_RESOLITION_300_300;
-        }
-        else if (strcmp(lCmdBuf, RESOLITION_600_600) == 0)
-        {
-          picResolution = PIC_RESOLITION_600_600;
-        }
+//       case MENU_PIC_RESOLITION:
+//         // 图片分辨率判断
+//         picResolution = PIC_RESOLITION_MAX;
+//         if (strcmp(lCmdBuf, RESOLITION_36_36) == 0)
+//         {
+//           picResolution = PIC_RESOLITION_36_36;
+//         }
+//         else if (strcmp(lCmdBuf, RESOLITION_48_48) == 0)
+//         {
+//           picResolution = PIC_RESOLITION_48_48;
+//         }
+//         else if (strcmp(lCmdBuf, RESOLITION_64_64) == 0)
+//         {
+//           picResolution = PIC_RESOLITION_64_64;
+//         }
+//         else if (strcmp(lCmdBuf, RESOLITION_96_96) == 0)
+//         {
+//           picResolution = PIC_RESOLITION_96_96;
+//         }
+//         else if (strcmp(lCmdBuf, RESOLITION_144_144) == 0)
+//         {
+//           picResolution = PIC_RESOLITION_144_144;
+//         }
+//         else if (strcmp(lCmdBuf, RESOLITION_200_200) == 0)
+//         {
+//           picResolution = PIC_RESOLITION_200_200;
+//         }
+//         else if (strcmp(lCmdBuf, RESOLITION_300_300) == 0)
+//         {
+//           picResolution = PIC_RESOLITION_300_300;
+//         }
+//         else if (strcmp(lCmdBuf, RESOLITION_600_600) == 0)
+//         {
+//           picResolution = PIC_RESOLITION_600_600;
+//         }
 
-        if (picResolution != PIC_RESOLITION_MAX)
-        {
-          picMenu = MENU_PIC_LEN;
-        }
+//         if (picResolution != PIC_RESOLITION_MAX)
+//         {
+//           picMenu = MENU_PIC_LEN;
+//         }
 
-        if (ENABLED(USER_LOGIC_DEUBG))
-        {
-          SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_RESOLITION, lCmdBuf = ", lCmdBuf);
-        }
-        break;
+//         if (ENABLED(USER_LOGIC_DEUBG))
+//         {
+//           SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_RESOLITION, lCmdBuf = ", lCmdBuf);
+//         }
+//         break;
 
-      case MENU_PIC_LEN:
-        // 图片长度
-        picLen = atoi(lCmdBuf);
-        picMenu = MENU_PIC_START_LINE;
+//       case MENU_PIC_LEN:
+//         // 图片长度
+//         picLen = atoi(lCmdBuf);
+//         picMenu = MENU_PIC_START_LINE;
 
-        if (ENABLED(USER_LOGIC_DEUBG))
-        {
-          SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_LEN, lCmdBuf = ", lCmdBuf,
-                            "\r\n picMenu = MENU_PIC_LEN, picLen = ", picLen);
-        }
-        break;
+//         if (ENABLED(USER_LOGIC_DEUBG))
+//         {
+//           SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_LEN, lCmdBuf = ", lCmdBuf,
+//                             "\r\n picMenu = MENU_PIC_LEN, picLen = ", picLen);
+//         }
+//         break;
 
-      case MENU_PIC_START_LINE:
-        // 起始行
-        picMenu = MENU_PIC_END_LINE;
+//       case MENU_PIC_START_LINE:
+//         // 起始行
+//         picMenu = MENU_PIC_END_LINE;
 
-        if (ENABLED(USER_LOGIC_DEUBG))
-        {
-          SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_START_LINE, lCmdBuf = ", lCmdBuf);
-        }
-        break;
+//         if (ENABLED(USER_LOGIC_DEUBG))
+//         {
+//           SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_START_LINE, lCmdBuf = ", lCmdBuf);
+//         }
+//         break;
 
-      case MENU_PIC_END_LINE:
-        // 结束行
-        picMenu = MENU_PIC_HIGH;
+//       case MENU_PIC_END_LINE:
+//         // 结束行
+//         picMenu = MENU_PIC_HIGH;
 
-        if (ENABLED(USER_LOGIC_DEUBG))
-        {
-          SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_END_LINE, lCmdBuf = ", lCmdBuf);
-        }
-        break;
+//         if (ENABLED(USER_LOGIC_DEUBG))
+//         {
+//           SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_END_LINE, lCmdBuf = ", lCmdBuf);
+//         }
+//         break;
 
-      case MENU_PIC_HIGH:
-        // 高度
-        picMenu = MENU_PIC_MAX;
-        if (ENABLED(USER_LOGIC_DEUBG))
-        {
-          SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_HIGH, lCmdBuf = ", lCmdBuf);
-        }
-        break;
+//       case MENU_PIC_HIGH:
+//         // 高度
+//         picMenu = MENU_PIC_MAX;
+//         if (ENABLED(USER_LOGIC_DEUBG))
+//         {
+//           SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_HIGH, lCmdBuf = ", lCmdBuf);
+//         }
+//         break;
 
-      default:
-        break;
-    }   // switch(picMenu)
+//       default:
+//         break;
+//     }   // switch(picMenu)
 
-    if (picMenu == MENU_PIC_MAX)
-    {
-      if (ENABLED(USER_LOGIC_DEUBG))
-      {
-        SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_MAX, picMenu = ", picMenu);
-      }
-      break;
-    }
-  }
+//     if (picMenu == MENU_PIC_MAX)
+//     {
+//       if (ENABLED(USER_LOGIC_DEUBG))
+//       {
+//         SERIAL_ECHOLNPAIR("\r\n picMenu = MENU_PIC_MAX, picMenu = ", picMenu);
+//       }
+//       break;
+//     }
+//   }
 
-  if (ENABLED(USER_LOGIC_DEUBG))
-  {
-    // SERIAL_ECHOPAIR("\r\n gcode pic time test 1 msTest = ", (millis() - msTest));
-    // msTest = millis();
-  }
-  // That means we found the photo,
-  if (picMenu == MENU_PIC_MAX)
-  {
-    if (ENABLED(USER_LOGIC_DEUBG))
-    {
-      SERIAL_ECHOLNPAIR("\r\n ...picResolution = ", picResolution,
-                        "\r\n ...picFormat = ", picFormat,
-                        "\r\n ...picLen = ", picLen);
-    }
+//   if (ENABLED(USER_LOGIC_DEUBG))
+//   {
+//     // SERIAL_ECHOPAIR("\r\n gcode pic time test 1 msTest = ", (millis() - msTest));
+//     // msTest = millis();
+//   }
+//   // That means we found the photo,
+//   if (picMenu == MENU_PIC_MAX)
+//   {
+//     if (ENABLED(USER_LOGIC_DEUBG))
+//     {
+//       SERIAL_ECHOLNPAIR("\r\n ...picResolution = ", picResolution,
+//                         "\r\n ...picFormat = ", picFormat,
+//                         "\r\n ...picLen = ", picLen);
+//     }
 
-    // uint32_t index = card.getIndex1();//card.getIndex();
-    // card.setIndex((index - (JUDGE_PIC_BUF_LEN - i -1)));
-    // if (ENABLED(USER_LOGIC_DEUBG)) 
-    // {
-    //     SERIAL_ECHOLNPAIR("\r\n ...old_index = ", index,
-    //                     "\r\n ...new_index = ", (index - (JUDGE_PIC_BUF_LEN - i -1)));
-    // }
-    // 从gcode里面读出图片数据，根据选择的是不是预定格式或预定大小图片来判断是否需要发送到屏上
+//     // uint32_t index = card.getIndex1();//card.getIndex();
+//     // card.setIndex((index - (JUDGE_PIC_BUF_LEN - i -1)));
+//     // if (ENABLED(USER_LOGIC_DEUBG)) 
+//     // {
+//     //     SERIAL_ECHOLNPAIR("\r\n ...old_index = ", index,
+//     //                     "\r\n ...new_index = ", (index - (JUDGE_PIC_BUF_LEN - i -1)));
+//     // }
+//     // 从gcode里面读出图片数据，根据选择的是不是预定格式或预定大小图片来判断是否需要发送到屏上
 
-    // 判断是否是需要的分辨率 和 格式
-    if ((picResolution == jpgResolution) && (picFormat == jpgFormat))
-    {
-      gcodePicDataRead(picLen, true, jpgAddr);
-    }
-    else
-    {
-      // 直接移动指针，跳过无效的图片
-      // 协议规定完整一行数据：';' + ' ' + "数据" + '\n'  1+1+76+1 = 79字节
-      // 最后一行为“; png end\r” 或 “; jpg end\r”,
-      // uint32_t index1 = card.getIndex();
-      uint32_t index1 = card.getIndex1();
-      uint32_t picLen1 = 0;
-      if (picLen % 3 == 0)
-      {
-        picLen1 = picLen / 3 * 4;
-      }
-      else
-      {
-        picLen1 = (picLen / 3 + 1) * 4;
-      }
-      uint32_t indexAdd = (picLen1 / 76) * 3 + picLen1 + 10;
-      if ((picLen1 % 76) != 0) 
-      {
-        indexAdd += 3;
-      }
+//     // 判断是否是需要的分辨率 和 格式
+//     if ((picResolution == jpgResolution) && (picFormat == jpgFormat))
+//     {
+//       gcodePicDataRead(picLen, true, jpgAddr);
+//     }
+//     else
+//     {
+//       // 直接移动指针，跳过无效的图片
+//       // 协议规定完整一行数据：';' + ' ' + "数据" + '\n'  1+1+76+1 = 79字节
+//       // 最后一行为“; png end\r” 或 “; jpg end\r”,
+//       // uint32_t index1 = card.getIndex();
+//       uint32_t index1 = card.getIndex1();
+//       uint32_t picLen1 = 0;
+//       if (picLen % 3 == 0)
+//       {
+//         picLen1 = picLen / 3 * 4;
+//       }
+//       else
+//       {
+//         picLen1 = (picLen / 3 + 1) * 4;
+//       }
+//       uint32_t indexAdd = (picLen1 / 76) * 3 + picLen1 + 10;
+//       if ((picLen1 % 76) != 0) 
+//       {
+//         indexAdd += 3;
+//       }
 
-      card.setIndex((index1 + indexAdd));
-      if (ENABLED(USER_LOGIC_DEUBG)) 
-      {
-        SERIAL_ECHOLNPAIR("\r\n ...old_index1 = ", index1,
-                          "\r\n ...indexAdd = ", indexAdd);
-      }
+//       card.setIndex((index1 + indexAdd));
+//       if (ENABLED(USER_LOGIC_DEUBG)) 
+//       {
+//         SERIAL_ECHOLNPAIR("\r\n ...old_index1 = ", index1,
+//                           "\r\n ...indexAdd = ", indexAdd);
+//       }
 
-      if (picResolution != jpgResolution)
-      {
-        return PIC_RESOLITION_ERR;
-      }
-      else
-      {
-        return PIC_FORMAT_ERR;
-      }
-    }
-  }
-  else
-  {
-    // 该gcode中没有图标
-    // card.closefile();
-    return PIC_MISS_ERR;
-  }
-  // card.closefile();
-  // if (ENABLED(USER_LOGIC_DEUBG)) 
-  //     SERIAL_ECHOPAIR("\r\n gcode pic time test 3 msTest = ", (millis() - msTest));
-  // msTest = millis();
-  return PIC_OK;
-}
+//       if (picResolution != jpgResolution)
+//       {
+//         return PIC_RESOLITION_ERR;
+//       }
+//       else
+//       {
+//         return PIC_FORMAT_ERR;
+//       }
+//     }
+//   }
+//   else
+//   {
+//     // 该gcode中没有图标
+//     // card.closefile();
+//     return PIC_MISS_ERR;
+//   }
+//   // card.closefile();
+//   // if (ENABLED(USER_LOGIC_DEUBG)) 
+//   //     SERIAL_ECHOPAIR("\r\n gcode pic time test 3 msTest = ", (millis() - msTest));
+//   // msTest = millis();
+//   return PIC_OK;
+// }
 
 /**
  * @功能   gcode预览图发送到迪文
@@ -767,176 +766,176 @@ uint8_t gcodePicDataSendToDwin(char *fileName, unsigned int jpgAddr, unsigned ch
     PIC_MISS_ERR, //gcode no picture
  */
 // Parse_Only_Picture_Data(char*fileName, char *time, char *FilamentUsed, char *layerHeight)
-uint8_t gcodePicDataSendToDwin(char *fileName, unsigned int jpgAddr, unsigned char jpgFormat, unsigned char jpgResolution)
-{
-  char ret;
-  char returyCnt = 0; 
+// uint8_t gcodePicDataSendToDwin(char *fileName, unsigned int jpgAddr, unsigned char jpgFormat, unsigned char jpgResolution)
+// {
+//   char ret;
+//   // char returyCnt = 0; 
 
  
  
-  HAL_watchdog_refresh();
-  SERIAL_ECHO("\r\n gcodePicDataSendToDwin fileName = ");
-  SERIAL_ECHO(fileName);
-  card.openFileRead(fileName);
-  // SERIAL_ECHOLNPAIR(" ret333=: ", ret); // rock_20210909
-  // msTest = millis();
-  // while (1)
-  // {
-    ret=read_gcode_model_information(card.filename);
-    // 当gcode中没有pic时，直接返回 -- When there is no pic in gcode, return directly
-    if (ret == PIC_MISS_ERR)
-    {
-      card.closefile();
-      return PIC_MISS_ERR;
-    }
-    /*
-    else if ((ret == PIC_FORMAT_ERR) || (ret == PIC_RESOLITION_ERR))
-    {
-      // 当格式或大小错误，继续往下判断 -- When the format or size is wrong, continue to judge.
-      if (++returyCnt >= 3)
-      {
-        card.closefile();
-        return PIC_MISS_ERR;
-      }
-      // else
-      // {
-      //   continue;
-      // }
-    }
-    */
-    else
-    {
-      card.closefile();
-      return PIC_OK;
-    }
-  // }
+//   HAL_watchdog_refresh();
+//   SERIAL_ECHO("\r\n gcodePicDataSendToDwin fileName = ");
+//   SERIAL_ECHO(fileName);
+//   card.openFileRead(fileName);
+//   // SERIAL_ECHOLNPAIR(" ret333=: ", ret); // rock_20210909
+//   // msTest = millis();
+//   // while (1)
+//   // {
+//     ret=read_gcode_model_information(card.filename);
+//     // 当gcode中没有pic时，直接返回 -- When there is no pic in gcode, return directly
+//     if (ret == PIC_MISS_ERR)
+//     {
+//       card.closefile();
+//       return PIC_MISS_ERR;
+//     }
+//     /*
+//     else if ((ret == PIC_FORMAT_ERR) || (ret == PIC_RESOLITION_ERR))
+//     {
+//       // 当格式或大小错误，继续往下判断 -- When the format or size is wrong, continue to judge.
+//       if (++returyCnt >= 3)
+//       {
+//         card.closefile();
+//         return PIC_MISS_ERR;
+//       }
+//       // else
+//       // {
+//       //   continue;
+//       // }
+//     }
+//     */
+//     else
+//     {
+//       card.closefile();
+//       return PIC_OK;
+//     }
+//   // }
   
-}
+// }
 
 
-char Parse_Only_Picture_Data(char* fileName, char * time, char * FilamentUsed, char * layerHeight)
-{
-   #define STRING_MAX_LEN      60
-	  unsigned char ret;
-    unsigned char strBuf[STRING_MAX_LEN] = {0};
-    unsigned char bufIndex = 0;
-	unsigned char buf[10] = {0};
-	uint8_t retryTimes = 0;	//重复查询次数 -- Number of repeated queries
+// char Parse_Only_Picture_Data(char* fileName, char * time, char * FilamentUsed, char * layerHeight)
+// {
+//    #define STRING_MAX_LEN      60
+// 	  unsigned char ret;
+//     unsigned char strBuf[STRING_MAX_LEN] = {0};
+//     unsigned char bufIndex = 0;
+// 	unsigned char buf[10] = {0};
+// 	uint8_t retryTimes = 0;	//重复查询次数 -- Number of repeated queries
 
-  SERIAL_ECHO("\r\n gcodePicDataSendToDwin fileName = ");
-  SERIAL_ECHO(fileName);
-  card.openFileRead(fileName);
+//   SERIAL_ECHO("\r\n gcodePicDataSendToDwin fileName = ");
+//   SERIAL_ECHO(fileName);
+//   card.openFileRead(fileName);
 
-    // 读取一个字符串，以空格隔开 -- Read a string, separated by spaces
-    #define GET_STRING_ON_GCODE()
-        {
-            // 读取一行，以换行符隔开  -- Read one line, separated by newlines
-            memset(strBuf, 0, sizeof(strBuf));
-            int strLenMax;
-            bool strStartFg = false;
-            uint8_t curBufLen = 0;
-            retryTimes = 0;   // 查找次数 -- Number of searches
-            do {
-                for (strLenMax = 0; strLenMax < STRING_MAX_LEN; strLenMax++)
-                {
-                    ret = card.get();   // 从U盘中获取一个字符 -- Get a character from USB disk
-                    SERIAL_ECHO_MSG("1:",&ret);
-                    if (ret != ';' && strStartFg == false)  // 读到';'为一行的开始 -- Read ';' as the beginning of a line
-                        continue;
-                    else
-                        strStartFg = true;
-                    if ((ret == '\r' || ret == '\n') && bufIndex != 0) break;   // 读到换行符，退出 -- Read the newline character and exit
-                    strBuf[bufIndex++] = ret;
-                }
-                SERIAL_ECHO_MSG("4f56ds:",strBuf);
-                if (strLenMax >= STRING_MAX_LEN) {
-                    SERIAL_ECHO_MSG("curren srting lenth more than STRING_MAX_LEN(60)");
-                    card.closefile();
-                    return false;	// 返回失败 -- Return failure
-                }
-                curBufLen = sizeof(strBuf);
-                if (retryTimes++ >= 5)
-                {
-                    SERIAL_ECHO_MSG("retryTimes more than5 times");
-                    card.closefile();
-                    return false;	// 返回失败 -- Return failure
-                }
-            }while(curBufLen < 20);
+//     // 读取一个字符串，以空格隔开 -- Read a string, separated by spaces
+//     #define GET_STRING_ON_GCODE()
+//         {
+//             // 读取一行，以换行符隔开  -- Read one line, separated by newlines
+//             memset(strBuf, 0, sizeof(strBuf));
+//             int strLenMax;
+//             bool strStartFg = false;
+//             uint8_t curBufLen = 0;
+//             retryTimes = 0;   // 查找次数 -- Number of searches
+//             do {
+//                 for (strLenMax = 0; strLenMax < STRING_MAX_LEN; strLenMax++)
+//                 {
+//                     ret = card.get();   // 从U盘中获取一个字符 -- Get a character from USB disk
+//                     SERIAL_ECHO_MSG("1:",&ret);
+//                     if (ret != ';' && strStartFg == false)  // 读到';'为一行的开始 -- Read ';' as the beginning of a line
+//                         continue;
+//                     else
+//                         strStartFg = true;
+//                     if ((ret == '\r' || ret == '\n') && bufIndex != 0) break;   // 读到换行符，退出 -- Read the newline character and exit
+//                     strBuf[bufIndex++] = ret;
+//                 }
+//                 SERIAL_ECHO_MSG("4f56ds:",strBuf);
+//                 if (strLenMax >= STRING_MAX_LEN) {
+//                     SERIAL_ECHO_MSG("curren srting lenth more than STRING_MAX_LEN(60)");
+//                     card.closefile();
+//                     return false;	// 返回失败 -- Return failure
+//                 }
+//                 curBufLen = sizeof(strBuf);
+//                 if (retryTimes++ >= 5)
+//                 {
+//                     SERIAL_ECHO_MSG("retryTimes more than5 times");
+//                     card.closefile();
+//                     return false;	// 返回失败 -- Return failure
+//                 }
+//             }while(curBufLen < 20);
 
-			      // 调试打印 -- Debug Print
-            SERIAL_ECHO_MSG("strBuf = ", strBuf);
-            SERIAL_ECHO_MSG("curBufLen = ", curBufLen);
-      }
-
-
-	// 获取某一行的指定值 -- Get the specified value of a row
-	// 例如，获取“;TIME:464.876” 中的 “464.876” -- For example, get "464.876" in ";TIME:464.876"
+// 			      // 调试打印 -- Debug Print
+//             SERIAL_ECHO_MSG("strBuf = ", strBuf);
+//             SERIAL_ECHO_MSG("curBufLen = ", curBufLen);
+//       }
 
 
-	// 查找TIME -- Find time
-	retryTimes = 0;
-	do {
-		GET_STRING_ON_GCODE();
+// 	// 获取某一行的指定值 -- Get the specified value of a row
+// 	// 例如，获取“;TIME:464.876” 中的 “464.876” -- For example, get "464.876" in ";TIME:464.876"
+
+
+// 	// 查找TIME -- Find time
+// 	retryTimes = 0;
+// 	do {
+// 		GET_STRING_ON_GCODE();
     
-		memset(buf, 0, sizeof(buf));
-		if ( strstr((const char *)strBuf, "TIME" ) == NULL) {
-			sscanf((const char *)strBuf,"%s:%s",&buf, time);
+// 		memset(buf, 0, sizeof(buf));
+// 		if ( strstr((const char *)strBuf, "TIME" ) == NULL) {
+// 			sscanf((const char *)strBuf,"%s:%s",&buf, time);
 
-			// 调试打印信息 -- Debug print information
-			SERIAL_ECHO_MSG("buf = ", buf);
-            SERIAL_ECHO_MSG("time = ", time);
-			break;
-		}
+// 			// 调试打印信息 -- Debug print information
+// 			SERIAL_ECHO_MSG("buf = ", buf);
+//             SERIAL_ECHO_MSG("time = ", time);
+// 			break;
+// 		}
 
-		if (retryTimes++ >= 3) 
-    {
-      card.closefile();
-      return false;	// 超过3次，返回失败 -- More than 3 times, return failure
-    }
-	}while(1);
+// 		if (retryTimes++ >= 3) 
+//     {
+//       card.closefile();
+//       return false;	// 超过3次，返回失败 -- More than 3 times, return failure
+//     }
+// 	}while(1);
 
 
-	// 查找 "Filament used" -- Find "Filament used"
-	retryTimes = 0;
-	do {
-		GET_STRING_ON_GCODE();
-		memset(buf, 0, sizeof(buf));
-		if ( strstr((const char *)strBuf, "Filament used" ) == NULL) {
-			sscanf((const char *)strBuf,"%s:%s",&buf, FilamentUsed);
+// 	// 查找 "Filament used" -- Find "Filament used"
+// 	retryTimes = 0;
+// 	do {
+// 		GET_STRING_ON_GCODE();
+// 		memset(buf, 0, sizeof(buf));
+// 		if ( strstr((const char *)strBuf, "Filament used" ) == NULL) {
+// 			sscanf((const char *)strBuf,"%s:%s",&buf, FilamentUsed);
 
-			// 调试打印信息 -- Debug print information
-			SERIAL_ECHO_MSG("buf = ", buf);
-            SERIAL_ECHO_MSG("time = ", FilamentUsed);
-			break;
-		}
+// 			// 调试打印信息 -- Debug print information
+// 			SERIAL_ECHO_MSG("buf = ", buf);
+//             SERIAL_ECHO_MSG("time = ", FilamentUsed);
+// 			break;
+// 		}
 
-		if (retryTimes++ >= 3) 
-    {
-      card.closefile();
-      return false;	// 超过3次，返回失败 -- More than 3 times, return failure
-    }
-	}while(1);
+// 		if (retryTimes++ >= 3) 
+//     {
+//       card.closefile();
+//       return false;	// 超过3次，返回失败 -- More than 3 times, return failure
+//     }
+// 	}while(1);
 
-	// 查找 "Layer height" -- Find "Layer height"
-	retryTimes = 0;
-	do {
-		GET_STRING_ON_GCODE();
-		memset(buf, 0, sizeof(buf));
-		if ( strstr((const char *)strBuf, "Layer height" ) == NULL) {
-			sscanf((const char *)strBuf,"%s:%s",&buf, layerHeight);
+// 	// 查找 "Layer height" -- Find "Layer height"
+// 	retryTimes = 0;
+// 	do {
+// 		GET_STRING_ON_GCODE();
+// 		memset(buf, 0, sizeof(buf));
+// 		if ( strstr((const char *)strBuf, "Layer height" ) == NULL) {
+// 			sscanf((const char *)strBuf,"%s:%s",&buf, layerHeight);
 
-			// 调试打印信息 -- Debug print information
-			SERIAL_ECHO_MSG("buf = ", buf);
-            SERIAL_ECHO_MSG("time = ", layerHeight);
-			break;
-		}
+// 			// 调试打印信息 -- Debug print information
+// 			SERIAL_ECHO_MSG("buf = ", buf);
+//             SERIAL_ECHO_MSG("time = ", layerHeight);
+// 			break;
+// 		}
 
-		if (retryTimes++ >= 3) 
-    {
-      card.closefile();
-      return false;	// 超过3次，返回失败 -- -- More than 3 times, return failure
-    }
-	}while(1);
-}
+// 		if (retryTimes++ >= 3) 
+//     {
+//       card.closefile();
+//       return false;	// 超过3次，返回失败 -- -- More than 3 times, return failure
+//     }
+// 	}while(1);
+// }
 
 ////////////////////////////
