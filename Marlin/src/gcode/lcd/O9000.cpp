@@ -103,7 +103,6 @@ static inline void o9_refresh_details() {
 
 // Render the full job card on the LCD with all details
 static inline void o9_render_job_card() {
-  // DWIN_OctoPrintJob(filename, elapsed_str, remain_str, total_layers_str, curr_layer_str, curr_layer_dup, progress_str)
   fmt_hms(o9_elapsed_s, o9_buf_elapsed, sizeof(o9_buf_elapsed));
   fmt_hms(o9_remain_s,  o9_buf_eta,     sizeof(o9_buf_eta));
   snprintf(o9_buf_totly, sizeof(o9_buf_totly), "%d", o9_total_ly);
@@ -159,7 +158,7 @@ void GcodeSuite::O9000() {
 }
 
 // ---------------------------------------------------------------------------
-// G-Code O9001: Rapid Update
+// G-Code O9001: inline Update
 // ---------------------------------------------------------------------------
 void GcodeSuite::O9001() {
   if (parser.seen('T')) o9_remain_s = (uint32_t)parser.value_ulong();

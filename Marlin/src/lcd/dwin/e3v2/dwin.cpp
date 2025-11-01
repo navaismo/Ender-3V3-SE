@@ -11373,7 +11373,7 @@ void DWIN_Show_M117(char *str)
 }
 
 // Function to render the print job details from Octoprint in the LCD.
-void DWIN_OctoPrintJob(char *filename, char *print_time, char *ptime_left, char *total_layer, char *curr_layer, char *thumbnail, char *progress)
+void DWIN_OctoPrintJob(char *filename, char *print_time, char *ptime_left, char *total_layer, char *curr_layer, char *progress)
 {
   //updateOctoData = false;
   // verify that none is null or emtpy before printing the values
@@ -11383,7 +11383,7 @@ void DWIN_OctoPrintJob(char *filename, char *print_time, char *ptime_left, char 
   const char *vtotal_layer = total_layer && total_layer[0] != '\0' ? total_layer : "0";
   const char *vcurr_layer = curr_layer && curr_layer[0] != '\0' ? curr_layer : "      0";
   // first render layer is always 0 from there we update values(spaces are needed to correct format and clear values)
-  const char *vthumb = "";
+  // const char *vthumb = "";
   const char *vprogress = progress && progress[0] != '\0' ? progress : "0";
 
   // Copy to reuse vlues outside the function
@@ -11403,8 +11403,8 @@ void DWIN_OctoPrintJob(char *filename, char *print_time, char *ptime_left, char 
   HMI_flag.Refresh_bottom_flag = false;
 
   Draw_OctoTitle(vfilename); // FileName as Title
-  if (vthumb == NULL || vthumb[0] == '\0')
-    DC_Show_defaut_imageOcto(); // For the moment show default preview
+  // if (vthumb == NULL || vthumb[0] == '\0')
+  //   DC_Show_defaut_imageOcto(); // For the moment show default preview
 
   Draw_Print_ProgressBarOcto(atoi(vprogress));
   DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 12, 123, F("Print Time:")); // Label Print Time
