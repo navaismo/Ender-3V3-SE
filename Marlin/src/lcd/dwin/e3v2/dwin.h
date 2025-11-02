@@ -108,8 +108,6 @@ enum processID : uint8_t {
   InputShaping_XZeta,
   InputShaping_YFreq,
   InputShaping_YZeta,
-  LinearAdv,
-  LinAdv_KFactor,
   CExtrude_Menu,
   custom_extrude_temp,
   custom_extrude_length,
@@ -142,7 +140,6 @@ enum processID : uint8_t {
   #if HAS_HOTEND
     Extruder,
     ETemp,
-    EFlow,
   #endif
   Homeoffset,
   #if HAS_HEATED_BED
@@ -175,22 +172,8 @@ enum processID : uint8_t {
   Change_Level_Value, //改变调平值
   ONE_HIGH, //一键对高页面
   POPUP_CONFIRM,//弹窗确定界面
-  Max_GUI,
- #if ENABLED(DWIN_CREALITY_LCD) // Enable the M117 string into LCD if LCD and Hosts commands are enabled.
-  #if ENABLED(HOST_ACTION_COMMANDS)
-    M117Info,
-    O9000Ctrl,
-    O9000Tune,
-    O9000PrintSpeed,
-    O9000ETemp,
-    O9000EFlow,
-    O9000BedTemp,
-    O9000FanSpeed,
-    O9000Homeoffset,
-    O9000Print_window,
-    OctoFinish,
-  #endif
- #endif  
+  Max_GUI, 
+  M117Info,
 };
 
 enum DC_language{
@@ -669,7 +652,6 @@ typedef struct
 {
   #if ENABLED(HAS_HOTEND)
     celsius_t E_Temp = 0;
-    int16_t E_Flow = 0;
     int16_t Extrusion_Length = 0;
     int16_t LCD_MaxBright  = MAX_SCREEN_BRIGHTNESS;
     int16_t LCD_DimmBright = DIMM_SCREEN_BRIGHTNESS;
@@ -690,7 +672,6 @@ typedef struct
   float Move_Y_scaled     = 0;
   float Move_Z_scaled     = 0;
   float InputShaping_scaled = 0;
-  float LinearAdv_KFactor= 0;
   uint8_t Curve_index = 0;
   uint16_t Auto_PID_Temp  = 0;
   uint16_t Auto_PID_Value[3] = {0, 100, 260}; // 1:热床温度; 2 喷嘴温度
@@ -872,28 +853,7 @@ void DWIN_Draw_Checkbox(uint16_t color, uint16_t bcolor, uint16_t x, uint16_t y,
 
 inline void DWIN_StartHoming() { HMI_flag.home_flag = true; }
 
-// Octoprint messages support
 void DWIN_Show_M117(char* str);
-// Octoprint Print status
-void DWIN_OctoPrintJob(char* filename, char* print_time, char* ptime_left, char* total_layer, char* curr_layer, char *progress);
-// Octoprint Update status
-void DWIN_OctoUpdate();
-// Function to show Gcode Preview
-void DWIN_OctoShowGCodeImage();
-// Fucntion to finish job
-void DWIN_OctoJobFinish();
-// Function to show title
-void Draw_OctoTitle(const char *const title);
-void octo_make_name_without_ext(char *dst, char *src, size_t maxlen);
-void octoUpdateScroll();
-void clearOctoScrollVars();
-// Set Values for updates
-void DWIN_SetPrintingDetails(const char *eta, const char *progress, const char *current_layer);
-
-// Update print time
-void DWIN_OctoSetPrintTime(char* print_time);
-
-
 
 void DWIN_CompletedHoming();
 void DWIN_CompletedHeight();

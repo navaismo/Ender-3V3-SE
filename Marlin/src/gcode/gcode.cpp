@@ -1614,26 +1614,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok /*=false*/)
     break; // Dn: Debug codes
 #endif
 
-// receive print setting from octoprint or any serial device
-#if ENABLED(HOST_ACTION_COMMANDS)
-#if ENABLED(DWIN_CREALITY_LCD)
-  case 'O':
-    switch (parser.codenum)
-    {
-    case 9000:
-      //SERIAL_ECHOLN("Got O9000");
-      O9000();
-      break;
-    case 9001:
-      //SERIAL_ECHOLN("Got O9001");
-      O9001();
-      break;
-
-    }
-  break;
-#endif
-#endif
-
 #if ENABLED(REALTIME_REPORTING_COMMANDS)
   case 'S':
   case 'P':

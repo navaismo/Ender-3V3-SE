@@ -1008,61 +1008,6 @@ void Draw_Title(const __FlashStringHelper *title)
 }
 
 
-//vars to scroll title when octoprinting
-int scrollOffset = 0;
-unsigned long lastScrollTime = 0;
-const int scrollDelay2 = 250; // this to move chars
-int maxOffset;
-char visibleText[35] = {0};
-void Draw_OctoTitle(const char *const title)
-{
-  char* nTitle = const_cast<char*>(title);
-  
-  octo_make_name_without_ext(shift_name, nTitle, 100); // Copy to new string Long Name
-  maxOffset = strlen(shift_name); 
-  
-#if ENABLED(DWIN_CREALITY_480_LCD)
-
-#elif ENABLED(DWIN_CREALITY_320_LCD)
-  if (maxOffset > 30)
-  {
-    //move flag
-    scrollOffset = 0;
-    DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_Red, Color_Bg_Blue, 0, 4, shift_name);
-  }
-  else
-  {
-  DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_Red, Color_Bg_Blue, 0, 4, shift_name);
-  }
-
-#endif
-}
-
-//scroll title name
-void octoUpdateScroll() {
-    if (strlen(shift_name) <= 30) return; // No need to update if filename is less than 30chars
-
-    unsigned long currentTime = millis(); // check interval
-    if (currentTime - lastScrollTime >= scrollDelay2) {
-        lastScrollTime = currentTime;
-        
-        Clear_Title_Bar(); //clear title bar to avoid ghosting text
-        strncpy(visibleText, shift_name + scrollOffset, 30); // copy the text to shift left
-        // Draw the string
-        DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_Red, Color_Bg_Blue, 0, 4, visibleText);
-        
-        // Inc and reset
-        scrollOffset++;
-        if (scrollOffset > maxOffset) {
-            scrollOffset = 0;  // Restart
-        }
-    }
-}
-
-
-
-
-
 
 void Clear_Menu_Area()
 {
@@ -3339,14 +3284,9 @@ void Goto_MainMenu()
                                        //  DWIN_ICON_Show(ICON, ICON_LOGO, LOGO_LITTLE_X, LOGO_LITTLE_Y);
   if (HMI_flag.language < Language_Max)
   {
-    if(serial_connection_active)
-    {
-      DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_White, Color_Bg_Blue, 0, 4, F(" ~(o.O)~ OctoPrint Connected"));
-    }
-    else
-    {
+   
       DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Main, TITLE_X, TITLE_Y); // Rock j
-    }
+    
     //DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Main, TITLE_X, TITLE_Y); //rock_j
   }
 #endif
@@ -3541,51 +3481,6 @@ void HMI_Zoffset()
   }
 }
 
-void HMI_O9000Zoffset()
-{
-  updateOctoData = false;
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState != ENCODER_DIFF_NO)
-  {
-    uint8_t zoff_line;
-    switch (HMI_ValueStruct.show_mode)
-    {
-    case -4:
-      zoff_line = PREPARE_CASE_ZOFF + MROWS - index_prepare;
-      break;
-    default:
-      zoff_line = TUNE_CASE_ZOFF + MROWS - index_tune;
-    }
-    if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.offset_value))
-    {
-      LIMIT(HMI_ValueStruct.offset_value, (Z_PROBE_OFFSET_RANGE_MIN) * 100, (Z_PROBE_OFFSET_RANGE_MAX) * 100);
-      last_zoffset = dwin_zoffset;
-      dwin_zoffset = HMI_ValueStruct.offset_value / 100.0f; // Rock 20210726
-      EncoderRate.enabled = false;
-#if HAS_BED_PROBE
-      probe.offset.z = dwin_zoffset;
-      // millis_t start = millis();
-      TERN_(EEPROM_SETTINGS, settings.save());
-      // millis_t end = millis();
-      // SERIAL_ECHOLNPAIR("pl write time:", end -start);
-#endif
-      checkkey = HMI_ValueStruct.show_mode == -4 ? Prepare : O9000Tune;
-      DWIN_Draw_Signed_Float(font8x16, Color_Bg_Black, 2, 2, VALUERANGE_X - 14, MBASE(zoff_line), TERN(HAS_BED_PROBE, BABY_Z_VAR * 100, HMI_ValueStruct.offset_value));
-      DWIN_UpdateLCD();
-      return;
-    }
-    LIMIT(HMI_ValueStruct.offset_value, (Z_PROBE_OFFSET_RANGE_MIN) * 100, (Z_PROBE_OFFSET_RANGE_MAX) * 100);
-    last_zoffset = dwin_zoffset;
-    dwin_zoffset = HMI_ValueStruct.offset_value / 100.0f;
-#if EITHER(BABYSTEP_ZPROBE_OFFSET, JUST_BABYSTEP)
-    // if (BABYSTEP_ALLOWED()) babystep.add_mm(Z_AXIS, dwin_zoffset -last_zoffset);   //rock_20220214
-    // serialprintPGM("d:babystep\n");
-    babystep.add_mm(Z_AXIS, dwin_zoffset - last_zoffset);
-#endif
-    DWIN_Draw_Signed_Float(font8x16, Select_Color, 2, 2, VALUERANGE_X - 14, MBASE(zoff_line), HMI_ValueStruct.offset_value);
-    DWIN_UpdateLCD();
-  }
-}
 
 #endif // Has zoffset item
 
@@ -3658,133 +3553,6 @@ void HMI_ETemp()
       DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, HMI_ValueStruct.E_Temp);
   }
 }
-
-void HMI_O9000ETemp()
-{
-  updateOctoData = false;
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState != ENCODER_DIFF_NO)
-  {
-    uint8_t temp_line;
-    switch (HMI_ValueStruct.show_mode)
-    {
-    case -1:
-      temp_line = select_temp.now + MROWS - index_temp;
-      break;
-    case -2:
-      temp_line = PREHEAT_CASE_TEMP;
-      break;
-    case -3:
-      temp_line = PREHEAT_CASE_TEMP;
-      break;
-    default:
-      temp_line = TUNE_CASE_TEMP + MROWS - index_tune;
-    }
-
-    if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.E_Temp))
-    {
-      EncoderRate.enabled = false;
-      // E_Temp limit
-      LIMIT(HMI_ValueStruct.E_Temp, HEATER_0_MINTEMP, thermalManager.hotend_max_target(0));
-      if (HMI_ValueStruct.show_mode == -2)
-      {
-        checkkey = PLAPreheat;
-        ui.material_preset[0].hotend_temp = HMI_ValueStruct.E_Temp;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[0].hotend_temp);
-        return;
-      }
-      else if (HMI_ValueStruct.show_mode == -3)
-      {
-        checkkey = ABSPreheat;
-        ui.material_preset[1].hotend_temp = HMI_ValueStruct.E_Temp;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[1].hotend_temp);
-        return;
-      }
-      else if (HMI_ValueStruct.show_mode == -1) // Temperature
-      {
-        checkkey = TemperatureID;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, HMI_ValueStruct.E_Temp);
-      }
-      else
-      {
-        checkkey = O9000Tune;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Temp);
-      }
-#if ENABLED(USE_SWITCH_POWER_200W)
-      while ((thermalManager.degTargetBed() > 0) && (ABS(thermalManager.degTargetBed() - thermalManager.degBed()) > TEMP_WINDOW))
-      {
-        idle();
-      }
-#endif
-      thermalManager.setTargetHotend(HMI_ValueStruct.E_Temp, 0);
-      return;
-    }
-    // E_Temp limit
-    LIMIT(HMI_ValueStruct.E_Temp, HEATER_0_MINTEMP, thermalManager.hotend_max_target(0));
-    // E_Temp value
-    if (0 == HMI_ValueStruct.show_mode)
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(temp_line) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Temp);
-    else
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, HMI_ValueStruct.E_Temp);
-  }
-}
-
-
-void HMI_O9000EFlow()
-{
-  updateOctoData = false;
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState != ENCODER_DIFF_NO)
-  {
-    if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.E_Flow))
-    {
-      checkkey = O9000Tune;
-      EncoderRate.enabled = false;
-      ui.material_preset[0].flow_rate = HMI_ValueStruct.E_Flow;
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(select_tune.now + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Flow);
-      planner.set_flow(0, HMI_ValueStruct.E_Flow);
-      return;
-    }
-    // E_Flow limit
-    LIMIT(HMI_ValueStruct.E_Flow, FLOW_MINVAL, FLOW_MAXVAL);
-    // E_Flow value
-    if (0 == HMI_ValueStruct.show_mode)
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(select_tune.now + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Flow);
-      
-    else
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(select_tune.now + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Flow);
-      
-  }
-}
-
-
-
-void HMI_EFlow()
-{
-   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState != ENCODER_DIFF_NO)
-  {
-    if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.E_Flow))
-    {
-      checkkey = Tune;
-      EncoderRate.enabled = false;
-      ui.material_preset[0].flow_rate = HMI_ValueStruct.E_Flow;
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(select_tune.now + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Flow);
-      planner.set_flow(0, HMI_ValueStruct.E_Flow);
-      return;
-    }
-    // E_Flow limit
-    LIMIT(HMI_ValueStruct.E_Flow, FLOW_MINVAL, FLOW_MAXVAL);
-    // E_Flow value
-    if (0 == HMI_ValueStruct.show_mode)
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(select_tune.now + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Flow);
-      
-    else
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(select_tune.now + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Flow);
-      
-  }
-}
-
 
 #endif // Has hotend
 
@@ -3864,80 +3632,6 @@ void HMI_BedTemp()
   }
 }
 
-void HMI_O9000BedTemp()
-{
-  updateOctoData = false;
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState != ENCODER_DIFF_NO)
-  {
-    uint8_t bed_line;
-    switch (HMI_ValueStruct.show_mode)
-    {
-    case -1:
-      bed_line = select_temp.now + MROWS - index_temp;
-      break;
-    case -2:
-      bed_line = PREHEAT_CASE_BED;
-      break;
-    case -3:
-      bed_line = PREHEAT_CASE_BED;
-      break;
-    default:
-      bed_line = TUNE_CASE_BED + MROWS - index_tune;
-    }
-    // Bed_Temp limit
-    LIMIT(HMI_ValueStruct.Bed_Temp, BED_MINTEMP, BED_MAX_TARGET);
-    if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.Bed_Temp))
-    {
-      EncoderRate.enabled = false;
-      // Bed_Temp limit
-      LIMIT(HMI_ValueStruct.Bed_Temp, BED_MINTEMP, BED_MAX_TARGET);
-      if (HMI_ValueStruct.show_mode == -2)
-      {
-        checkkey = PLAPreheat;
-        ui.material_preset[0].bed_temp = HMI_ValueStruct.Bed_Temp;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[0].bed_temp);
-        return;
-      }
-      else if (HMI_ValueStruct.show_mode == -3)
-      {
-        checkkey = ABSPreheat;
-        ui.material_preset[1].bed_temp = HMI_ValueStruct.Bed_Temp;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[1].bed_temp);
-        return;
-      }
-      else if (HMI_ValueStruct.show_mode == -1)
-      {
-        checkkey = TemperatureID;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, HMI_ValueStruct.Bed_Temp);
-      }
-      else
-      {
-        checkkey = O9000Tune;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + PRINT_SET_OFFSET, HMI_ValueStruct.Bed_Temp);
-      }
-#if ENABLED(USE_SWITCH_POWER_200W)
-      while (((thermalManager.degTargetHotend(0) > 0) && ABS(thermalManager.degTargetHotend(0) - thermalManager.degHotend(0)) > TEMP_WINDOW))
-      {
-        idle();
-      }
-#endif
-      thermalManager.setTargetBed(HMI_ValueStruct.Bed_Temp);
-      return;
-    }
-    // Bed_Temp limit
-    LIMIT(HMI_ValueStruct.Bed_Temp, BED_MINTEMP, BED_MAX_TARGET);
-    // Bed_Temp value
-    if (0 == HMI_ValueStruct.show_mode)
-    {
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(bed_line) + PRINT_SET_OFFSET, HMI_ValueStruct.Bed_Temp);
-    }
-    else
-    {
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, HMI_ValueStruct.Bed_Temp);
-    }
-  }
-}
 
 #endif // Has heated bed
 
@@ -4009,72 +3703,7 @@ void HMI_FanSpeed()
   }
 }
 
-void HMI_O9000FanSpeed()
-{
-  updateOctoData = false;
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState != ENCODER_DIFF_NO)
-  {
-    uint8_t fan_line;
-    switch (HMI_ValueStruct.show_mode)
-    {
-    case -1:
-      fan_line = select_temp.now + MROWS - index_temp;
-      break;
-    case -2:
-      fan_line = PREHEAT_CASE_FAN;
-      break;
-    case -3:
-      fan_line = PREHEAT_CASE_FAN;
-      break;
-    // case -4: fan_line = TEMP_CASE_FAN + MROWS -index_temp;break;
-    default:
-      fan_line = TUNE_CASE_FAN + MROWS - index_tune;
-    }
 
-    if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.Fan_speed))
-    {
-      EncoderRate.enabled = false;
-      if (HMI_ValueStruct.show_mode == -2)
-      {
-        checkkey = PLAPreheat;
-        ui.material_preset[0].fan_speed = HMI_ValueStruct.Fan_speed;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[0].fan_speed);
-        return;
-      }
-      else if (HMI_ValueStruct.show_mode == -3)
-      {
-        checkkey = ABSPreheat;
-        ui.material_preset[1].fan_speed = HMI_ValueStruct.Fan_speed;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[1].fan_speed);
-        return;
-      }
-      else if (HMI_ValueStruct.show_mode == -1)
-      {
-        checkkey = TemperatureID;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, HMI_ValueStruct.Fan_speed);
-      }
-      else
-      {
-        checkkey = O9000Tune;
-        DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + PRINT_SET_OFFSET, HMI_ValueStruct.Fan_speed);
-      }
-      thermalManager.set_fan_speed(0, HMI_ValueStruct.Fan_speed);
-      return;
-    }
-    // Fan_speed limit
-    LIMIT(HMI_ValueStruct.Fan_speed, 0, 255);
-    // Fan_speed value
-    if (0 == HMI_ValueStruct.show_mode)
-    {
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(fan_line) + PRINT_SET_OFFSET, HMI_ValueStruct.Fan_speed);
-    }
-    else
-    {
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, HMI_ValueStruct.Fan_speed);
-    }
-  }
-}
 
 #endif // HAS_PREHEAT && HAS_FAN
 
@@ -4098,26 +3727,6 @@ void HMI_PrintSpeed()
   }
 }
 
-void HMI_O9000PrintSpeed()
-{
-  updateOctoData = false;
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState != ENCODER_DIFF_NO)
-  {
-    if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.print_speed))
-    {
-      checkkey = O9000Tune;
-      EncoderRate.enabled = false;
-      feedrate_percentage = HMI_ValueStruct.print_speed;
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(select_tune.now + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.print_speed);
-      return;
-    }
-    // print_speed limit
-    LIMIT(HMI_ValueStruct.print_speed, MIN_PRINT_SPEED, MAX_PRINT_SPEED);
-    // print_speed value
-    DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(select_tune.now + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.print_speed);
-  }
-}
 
 #define LAST_AXIS TERN(HAS_HOTEND, E_AXIS, Z_AXIS)
 
@@ -6028,86 +5637,6 @@ void HMI_PauseOrStop()
   DWIN_UpdateLCD();
 }
 
-/* Pause and Stop window */
-void HMI_O900PauseOrStop()
-{
-  updateOctoData = false;
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
-
-  if (encoder_diffState == ENCODER_DIFF_CW)
-    Draw_Select_Highlight(false);
-  else if (encoder_diffState == ENCODER_DIFF_CCW)
-    Draw_Select_Highlight(true);
-  else if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    if (select_print.now == 1)
-    { // pause window
-      if (HMI_flag.select_flag)
-      {
-        HMI_flag.pause_action = true;
-        if (HMI_flag.cloud_printing_flag && !HMI_flag.filement_resume_flag)
-        {
-          SERIAL_ECHOLN("M79 S2"); // 3:cloud print pause
-        }
-       
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
-
-        // Queue.inject p(pstr("m25"));
-        RUN_AND_WAIT_GCODE_CMD("M25", true);
-        ICON_Continue();
-        // Queue.enqueue now p(pstr("m25"));
-      }
-      else
-      {
-       
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
-      }
-    }
-    else if (select_print.now == 2)
-    { // stop window
-      if (HMI_flag.select_flag)
-      {
-        if (HMI_flag.home_flag)
-          planner.synchronize();                 // Wait for planner moves to finish!
-        wait_for_heatup = wait_for_user = false; // Stop waiting for heating/user
-
-        HMI_flag.disallow_recovery_flag = true; // Data recovery is not allowed
-        print_job_timer.stop();
-        thermalManager.disable_all_heaters();
-        print_job_timer.reset();
-        thermalManager.setTargetHotend(0, 0);
-        thermalManager.setTargetBed(0);
-        thermalManager.zero_fan_speeds();
-
-        recovery.info.sd_printing_flag = false; // rock_20210820
-// rock_20210830 The following sentence is absolutely not required. It will perform two main interface operations.
-// dwin_abort_flag = true; //Reset feedrate, return to Home
-#ifdef ACTION_ON_CANCEL
-        host_action_cancel();
-#endif
-        // BL24CXX::EEPROM_Reset(PLR_ADDR, (uint8_t*)&recovery.info, sizeof(recovery.info));//rock_20210812  清空 EEPROM
-        // checkkey = Popup_Window;
-        Popup_Window_Home(true); // Rock 20221018
-        clearOctoScrollVars();
-
-        card.abortFilePrintSoon(); // Let the main loop handle SD abort  //rock_20211020
-        checkkey = Back_Main;
-        if (HMI_flag.cloud_printing_flag)
-        {
-          HMI_flag.cloud_printing_flag = false;
-          SERIAL_ECHOLN("M79 S4");
-        }
-      }
-      else
-        
-      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
-      // cancel stop
-    }
-  }
-  DWIN_UpdateLCD();
-}
 
 #if ENABLED(HAS_CHECKFILAMENT)
 /* Check filament */
@@ -8929,290 +8458,7 @@ void HMI_M117Info()
   DWIN_UpdateLCD(); // Update LCD
 }
 
-/* Print Finish */
-void HMI_OctoFinish()
-{
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
-  if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    // If enter go back to main menu
-    Goto_MainMenu();
-    HMI_flag.Refresh_bottom_flag = true; // Flag not to refresh bottom parameters --Flag not to refresh bottom parameters
-  }
-  DWIN_UpdateLCD(); // Update LCD
-}
 
-// Octoprint Job control
-void HMI_O9000()
-{
-
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if (encoder_diffState == ENCODER_DIFF_NO || HMI_flag.pause_action || HMI_flag.Level_check_start_flag)
-    return;
-  // Hmi flag.pause action
-  if (HMI_flag.done_confirm_flag)
-  {
-    if (encoder_diffState == ENCODER_DIFF_ENTER)
-    {
-      HMI_flag.done_confirm_flag = false;
-      dwin_abort_flag = true; // Reset feedrate, return to Home
-    }
-    return;
-  }
-  // Avoid flicker by updating only the previous menu
-  if (encoder_diffState == ENCODER_DIFF_CW)
-  {
-    if (select_print.inc(3))
-    {
-      switch (select_print.now)
-      {
-      case 0:
-        ICON_Tune();
-        break;
-      case 1:
-        ICON_Tune();
-        if (printingIsPaused())
-        {
-          ICON_Continue();
-        }
-        else
-        {
-          ICON_Pause();
-        }
-        break;
-      case 2:
-        if (printingIsPaused())
-        {
-
-          ICON_Continue();
-        }
-        else
-        {
-          ICON_Pause();
-        }
-        ICON_Stop();
-        break;
-      }
-    }
-  }
-  else if (encoder_diffState == ENCODER_DIFF_CCW)
-  {
-    if (select_print.dec())
-    {
-      switch (select_print.now)
-      {
-      case 0:
-        ICON_Tune();
-        if (printingIsPaused())
-          ICON_Continue();
-        else
-          ICON_Pause();
-        break;
-      case 1:
-        if (printingIsPaused())
-          ICON_Continue();
-        else
-          ICON_Pause();
-        ICON_Stop();
-        break;
-      case 2:
-        ICON_Stop();
-        break;
-      }
-    }
-  }
-  else if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    switch (select_print.now)
-    {
-    case 0: // Tune
-      checkkey = O9000Tune;
-      HMI_ValueStruct.show_mode = 0;
-      select_tune.reset();
-      HMI_flag.Refresh_bottom_flag = false; // Flag refresh bottom parameter
-      index_tune = MROWS;
-      Draw_Tune_Menu();
-      break;
-    case 1: // Pause
-      if (HMI_flag.pause_flag)
-      { // Sure
-        Show_JPN_print_title();
-        ICON_Pause();
-        char cmd[40];
-        cmd[0] = '\0';
-#if BOTH(HAS_HEATED_BED, PAUSE_HEAT)
-        // if (resume_bed_temp) sprintf_P(cmd, PSTR("M190 S%i\n"), resume_bed_temp); //rock_20210901
-#endif
-#if BOTH(HAS_HOTEND, PAUSE_HEAT)
-        // if (resume_hotend_temp) sprintf_P(&cmd[strlen(cmd)], PSTR("M109 S%i\n"), resume_hotend_temp);
-#endif
-        if (HMI_flag.cloud_printing_flag && !HMI_flag.filement_resume_flag)
-        {
-          SERIAL_ECHOLN("M79 S3");
-        }
-        pause_resume_feedstock(FEEDING_DEF_DISTANCE, FEEDING_DEF_SPEED);
-        // strcat_P(cmd, M24_STR);
-        queue.inject("M24");
-        // RUN_AND_WAIT_GCODE_CMD("M24", true);
-        // queue.enqueue_now_P(PSTR("M24"));
-        // gcode.process_subcommands_now_P(PSTR("M24"));
-        updateOctoData = false;
-        DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
-
-      }
-      else
-      {
-        // Cancel
-        HMI_flag.select_flag = true;
-        checkkey = O9000Print_window;
-        Popup_window_PauseOrStop();
-      }
-      break;
-    case 2: // Stop
-      HMI_flag.select_flag = true;
-      checkkey = O9000Print_window;
-      Popup_window_PauseOrStop();
-      break;
-    default:
-      break;
-    }
-  }
-  DWIN_UpdateLCD();
-}
-
-// octo tune
-void HMI_O9000Tune()
-{
-  updateOctoData=false;
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
-
-  // Avoid flicker by updating only the previous menu
-  if (encoder_diffState == ENCODER_DIFF_CW)
-  {
-    if (select_tune.inc(1 + TUNE_CASE_TOTAL))
-    {
-      if (select_tune.now > MROWS && select_tune.now > index_tune)
-      {
-        index_tune = select_tune.now;
-        Scroll_Menu(DWIN_SCROLL_UP);
-#if ENABLED(DWIN_CREALITY_320_LCD)
-        DWIN_Draw_Rectangle(1, All_Black, 50, 206, DWIN_WIDTH, 236);
-#endif
-        // Show new icons
-        Draw_Menu_Icon(MROWS, ICON_Zoffset);
-
-#if HAS_ZOFFSET_ITEM
-        if (index_tune == TUNE_CASE_ZOFF)         
-          Item_Tune_Zoffset(MROWS);
-#endif
-      }
-      else
-      {
-        Move_Highlight(1, select_tune.now + MROWS - index_tune);
-      }
-    }
-  }
-  else if (encoder_diffState == ENCODER_DIFF_CCW)
-  {
-    if (select_tune.dec())
-    {
-      if (select_tune.now < index_tune - MROWS)
-      {
-        index_tune--;
-        Scroll_Menu(DWIN_SCROLL_DOWN);
-        DWIN_Draw_Rectangle(1, Color_Bg_Black, 180, MBASE(0) - 8, 238, MBASE(0 + 1) - 12); // Clear the last line
-        if (index_tune == MROWS)
-          Draw_Back_First();
-        else if(index_tune == 6) 
-          Item_Tune_Speed(0); 
-      }
-      else
-      {
-        Move_Highlight(-1, select_tune.now + MROWS - index_tune);
-      }
-    }
-  }
-  else if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    switch (select_tune.now)
-    {
-    case 0:
-    { // Back
-      select_print.set(0);
-      // SERIAL_ECHOLNPAIR("returning from Tune menu with FN as: ", vvfilename);
-      
-      DWIN_OctoPrintJob(vvfilename, vvprint_time, Octo_ETA_Global, vvtotal_layer, Octo_CL_Global, Octo_Progress_Global);
-
-    }
-    break;
-    case TUNE_CASE_SPEED: // Print speed
-      checkkey = O9000PrintSpeed;
-      HMI_ValueStruct.print_speed = feedrate_percentage;
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(TUNE_CASE_SPEED + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.print_speed);
-      EncoderRate.enabled = true;
-      break;
-#if HAS_HOTEND
-    case TUNE_CASE_TEMP: // Nozzle temp
-      checkkey = O9000ETemp;
-      HMI_ValueStruct.E_Temp = thermalManager.degTargetHotend(0);
-      LIMIT(HMI_ValueStruct.E_Temp, HEATER_0_MINTEMP, thermalManager.hotend_max_target(0));
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(TUNE_CASE_TEMP + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Temp);
-      EncoderRate.enabled = true;
-      break;
-
-    case TUNE_CASE_FLOW: // Flow rate
-      checkkey = O9000EFlow;
-      HMI_ValueStruct.E_Flow = planner.flow_percentage[0];
-      LIMIT(HMI_ValueStruct.E_Flow, FLOW_MINVAL, FLOW_MAXVAL);
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(TUNE_CASE_FLOW + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Flow);
-      EncoderRate.enabled = true;
-      break;
-
-
-#endif
-#if HAS_HEATED_BED
-    case TUNE_CASE_BED: // Bed temp
-      checkkey = O9000BedTemp;
-      HMI_ValueStruct.Bed_Temp = thermalManager.degTargetBed();
-      LIMIT(HMI_ValueStruct.Bed_Temp, BED_MINTEMP, BED_MAX_TARGET);
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(TUNE_CASE_BED + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.Bed_Temp);
-      EncoderRate.enabled = true;
-      break;
-#endif
-#if HAS_FAN
-    case TUNE_CASE_FAN: // Fan speed
-      checkkey = O9000FanSpeed;
-      HMI_ValueStruct.Fan_speed = thermalManager.fan_speed[0];
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(TUNE_CASE_FAN + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.Fan_speed);
-      EncoderRate.enabled = true;
-      break;
-#endif
-#if HAS_ZOFFSET_ITEM
-    case TUNE_CASE_ZOFF: // With offset
-#if EITHER(HAS_BED_PROBE, BABYSTEPPING)
-      checkkey = O9000Homeoffset;
-      HMI_ValueStruct.offset_value = BABY_Z_VAR * 100;
-      DWIN_Draw_Signed_Float(font8x16, Select_Color, 2, 2, VALUERANGE_X - 14, MBASE(TUNE_CASE_ZOFF + MROWS - index_tune), HMI_ValueStruct.offset_value);
-      EncoderRate.enabled = true;
-#else
-                         // Apply workspace offset, making the current position 0,0,0
-      queue.inject_P(PSTR("G92 X0 Y0 Z0"));
-      HMI_AudioFeedback();
-#endif
-      break;
-#endif
-    default:
-      break;
-    }
-  }
-  DWIN_UpdateLCD();
-}
-
-/* Tune */
 void HMI_Tune()
 {
   ENCODER_DiffState encoder_diffState = get_encoder_state();
@@ -9289,15 +8535,6 @@ void HMI_Tune()
       DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(TUNE_CASE_TEMP + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Temp);
       EncoderRate.enabled = true;
       break;
-
-    case TUNE_CASE_FLOW: // Flow rate
-      checkkey = EFlow;
-      HMI_ValueStruct.E_Flow = planner.flow_percentage[0];
-      LIMIT(HMI_ValueStruct.E_Flow, FLOW_MINVAL, FLOW_MAXVAL);
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(TUNE_CASE_FLOW + MROWS - index_tune) + PRINT_SET_OFFSET, HMI_ValueStruct.E_Flow);
-      EncoderRate.enabled = true;
-      break;
-
 
 #endif
 #if HAS_HEATED_BED
@@ -10059,11 +9296,6 @@ void EachMomentUpdate()
   if (ELAPSED(ms, next_var_update_ms))
   {
     next_var_update_ms = ms + DWIN_VAR_UPDATE_INTERVAL;
-
-    if(serial_connection_active){
-      DWIN_OctoUpdate();
-    }
-
 
     if (!HMI_flag.Refresh_bottom_flag)
     {
@@ -10901,9 +10133,6 @@ void DWIN_HandleScreen()
   case ETemp:
     HMI_ETemp();
     break;
-  case EFlow:
-    HMI_EFlow();
-    break;
 #endif
 #if EITHER(HAS_BED_PROBE, BABYSTEPPING)
   case Homeoffset:
@@ -11009,36 +10238,7 @@ void DWIN_HandleScreen()
   case M117Info: // M117 window fix for HMI
     HMI_M117Info();
     break;
-  case O9000Ctrl: // Octoprint Job HMI
-    HMI_O9000();
-    break;
-  case O9000Tune: // Octoprint Tune HMI
-    HMI_O9000Tune();
-    break;
-  case O9000PrintSpeed:
-    HMI_O9000PrintSpeed();
-    break;
-  case O9000ETemp:
-    HMI_O9000ETemp();
-    break;
-  case O9000EFlow:
-    HMI_O9000EFlow();
-    break;    
-  case O9000BedTemp:
-    HMI_O9000BedTemp();
-    break;
-  case O9000FanSpeed:
-    HMI_O9000FanSpeed();
-    break;
-  case O9000Homeoffset:
-    HMI_O9000Zoffset();
-    break;
-  case O9000Print_window:
-    HMI_O900PauseOrStop();
-    break;
-  case OctoFinish:
-    HMI_OctoFinish();
-    break;
+
   default:
     break;
   }
@@ -11360,7 +10560,6 @@ void HMI_Auto_Bed_PID(void)
 void DWIN_Show_M117(char *str)
 {
   updateOctoData = false;
-  clearOctoScrollVars(); // If the OctoPrint-E3v3seprintjobdetails plugin is enable we will receive a cancel M117 so clear vars, if not is safe to clear since no job will be render
   checkkey = M117Info; // Implement Human Interface Control for M117
   Clear_Main_Window();
   Draw_Mid_Status_Area(true);                                                                                                    // Draw Status Area, the one with Nozzle and bed temp.
@@ -11372,174 +10571,6 @@ void DWIN_Show_M117(char *str)
   Draw_Back_First();
 }
 
-// Function to render the print job details from Octoprint in the LCD.
-void DWIN_OctoPrintJob(char *filename, char *print_time, char *ptime_left, char *total_layer, char *curr_layer, char *progress)
-{
-  //updateOctoData = false;
-  // verify that none is null or emtpy before printing the values
-  const char *vfilename = filename && filename[0] != '\0' ? filename : "Default Dummy FileName";
-  const char *vprint_time = print_time && print_time[0] != '\0' ? print_time : "00:00:00";
-  const char *vptime_left = ptime_left && ptime_left[0] != '\0' ? ptime_left : "00:00:00";
-  const char *vtotal_layer = total_layer && total_layer[0] != '\0' ? total_layer : "0";
-  const char *vcurr_layer = curr_layer && curr_layer[0] != '\0' ? curr_layer : "      0";
-  // first render layer is always 0 from there we update values(spaces are needed to correct format and clear values)
-  // const char *vthumb = "";
-  const char *vprogress = progress && progress[0] != '\0' ? progress : "0";
-
-  // Copy to reuse vlues outside the function
-  strncpy(vvfilename, vfilename, sizeof(vvfilename) - 1);
-  strncpy(vvprint_time, vprint_time, sizeof(vvprint_time) - 1);
-  strncpy(vvptime_left, vptime_left, sizeof(vvptime_left) - 1);
-  strncpy(vvtotal_layer, vtotal_layer, sizeof(vvtotal_layer) - 1);
-  strncpy(vvcurr_layer, vcurr_layer, sizeof(vvcurr_layer) - 1);
-  strncpy(vvprogress, vprogress, sizeof(vvprogress) - 1);
-
-  char show_layers[51] = {0};
-  snprintf(show_layers, sizeof(show_layers), "%s / %s", vcurr_layer, vtotal_layer);
-
-  checkkey = O9000Ctrl;
-  Clear_Main_Window();
-  Draw_Mid_Status_Area(true);
-  HMI_flag.Refresh_bottom_flag = false;
-
-  Draw_OctoTitle(vfilename); // FileName as Title
-  // if (vthumb == NULL || vthumb[0] == '\0')
-  //   DC_Show_defaut_imageOcto(); // For the moment show default preview
-
-  Draw_Print_ProgressBarOcto(atoi(vprogress));
-  DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 12, 123, F("Print Time:")); // Label Print Time
-  DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 126, 123, F(vprint_time));   // value Print Time
-  DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 12, 144, F("Time Left:"));  // Label Time Left
-  DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 126, 144, F(vptime_left));   // value Time Left
-  DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 12, 165, F("Layer:"));      // Label Print Time
-  DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 80, 165, F(show_layers));    // Label Print Time
-
-  ICON_Tune();
-  if (printingIsPaused() && !HMI_flag.cloud_printing_flag)
-    ICON_Continue();
-  // Pause --Pause
-  if (printingIsPaused())
-  {
-    // Show_JPN_pause_title(); //Show title -Show Title
-    ICON_Continue();
-  }
-  else
-  {
-    // Printing --Printing
-    // Show_JPN_print_title();
-    ICON_Pause();
-  }
-  // Stop button --Stop
-  ICON_Stop();
-}
-
-// Function to set the printing variables
-void DWIN_SetPrintingDetails(const char *eta, const char *progress, const char *current_layer) {
-    if (eta) strncpy(Octo_ETA_Global, eta, sizeof(Octo_ETA_Global) - 1);
-    if (progress) strncpy(Octo_Progress_Global, progress, sizeof(Octo_Progress_Global) - 1);
-    if (current_layer) strncpy(Octo_CL_Global, current_layer, sizeof(Octo_CL_Global) - 1);
-
-    updateOctoData = true;
-}
-
-void DWIN_OctoUpdate() {
-  if (updateOctoData) {
-    //We use a static variable to keep the "step" account.
-    static uint8_t updateStep = 0;
-    
-    switch (updateStep) {
-      case 0:
-        //Step 0: Update the scroll
-        octoUpdateScroll();
-        
-        break;
-
-      case 1:
-        //Step 1: Update Layer in the LCD
-        DWIN_Draw_Rectangle(1, All_Black, 80, 165, 144, 177);
-        DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 80, 165, F(Octo_CL_Global));
-        break;
-
-      case 2:{
-        //Step 2: Update the progress in the LCD
-        uint8_t lp = atoi(Octo_Progress_Global);
-        Draw_Print_ProgressBarOcto(lp);
-        break;
-      }
-
-      case 3:  
-        //Step 2: Update ETA in the LCD
-        DWIN_Draw_Rectangle(1, All_Black, 120, 144, 230, 156);
-        DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 126, 144, F(Octo_ETA_Global));
-        break;
-
-    }
-    
-    //Increase the counter and restart it upon reaching 4 (0 to 3)
-    updateStep = (updateStep + 1) % 4;
-  }
-
-  updateOctoData = false;
-}
-
-
-void clearOctoScrollVars(){
-  shift_name[0] = '\0';       // clear scrolling variables
-  visibleText[0] = '\0';      
-  scrollOffset = 0;           
-  maxOffset = 0;   
-}
-// finishc job, clear controls and allow go back main window
-void DWIN_OctoJobFinish()
-{
-  updateOctoData = false;
-  checkkey = OctoFinish;
-  HMI_flag.Refresh_bottom_flag = true;
-  char show_layers[51] = {0};
-  clearOctoScrollVars();
-  snprintf(show_layers, sizeof(show_layers), "%s / %s", vvtotal_layer, vvtotal_layer);
-  Clear_Title_Bar();
-  Clear_Main_Window();
-  DC_Show_defaut_imageOcto(); // For the moment show default preview
-  Draw_Print_ProgressBarOcto(atoi("100"));
-  DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 12, 145, F("Print Time:")); // Label Print Time
-  DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 136, 145, F(vvprint_time));   // value Print Time
-  DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 12, 165, F("Elapsed Time:"));  // Label Time Left
-  DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 138, 165, F(Octo_ETA_Global));   // value Time Left
-  DWIN_Draw_String(false, false, font6x12, Color_Yellow, Color_Bg_Black, 12, 186, F("Layer:"));      // Label Print Time
-  DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 80, 186, F(show_layers));    // Label Print Time
-
-  //Clear Variables of the print job
-  Octo_ETA_Global[0] = '\0';
-  Octo_Progress_Global[0] = '\0';
-  Octo_CL_Global[0] = '\0';
-
-  // show print done confirm
-  if (HMI_flag.language < Language_Max) // Rock 20211120
-  {
-    DWIN_ICON_Show(HMI_flag.language, LANGUAGE_LEVEL_FINISH, TITLE_X, TITLE_Y);
-    DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, OK_BUTTON_X, 225);
-  }
-}
-
-
-
-void DWIN_OctoSetPrintTime(char* print_time){
-  const char *vprint_time = print_time && print_time[0] != '\0' ? print_time : "00:00:00";
-  // Copy to reuse vlues outside the function
-  strncpy(vvprint_time, vprint_time, sizeof(vvprint_time) - 1);
-
-  DWIN_Draw_Rectangle(1, All_Black, 120, 123, 230, 143);
-  DWIN_Draw_String(false, false, font6x12, Color_White, Color_Bg_Black, 126, 123, F(vprint_time));
-
-}
-
-void DWIN_OctoShowGCodeImage()
-{
-  checkkey = M117Info; // Implement Human Interface Control for M117
-  Clear_Main_Window();
- // Octo dwin preview();
-}
 
 void DWIN_CompletedHoming()
 {

@@ -28,7 +28,7 @@
 #endif
 
 uint8_t marlin_debug_flags = MARLIN_DEBUG_NONE;
-bool serial_connection_active = false;
+
 
 // Commonly-used strings in serial output
 PGMSTR(NUL_STR,   "");   PGMSTR(SP_P_STR, " P");  PGMSTR(SP_T_STR, " T");

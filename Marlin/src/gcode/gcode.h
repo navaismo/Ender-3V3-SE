@@ -707,13 +707,7 @@ private:
     static void M117();
   #endif
 
-  #if ENABLED(DWIN_CREALITY_LCD)
-   #if ENABLED(HOST_ACTION_COMMANDS)
-    static void O9000(); // receive print details from serial device 
-    static void O9001(); // receive update details from serial device
-  #endif
-  #endif
-
+ 
   #if ENABLED(HOST_PROMPT_SUPPORT)
       static void M876();
   #endif
