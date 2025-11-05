@@ -240,23 +240,6 @@ uint16_t resume_bed_temp = 0;
 #endif
 #endif
 
-#if ENABLED(DWIN_CREALITY_LCD)
-#if ENABLED(HOST_ACTION_COMMANDS)
-// Beware of OctoprintJobs
-char vvfilename[35];
-char vvprint_time[10];
-char vvptime_left[10];
-char vvtotal_layer[10];
-char vvcurr_layer[10];
-// char vvthumb[50];
-char vvprogress[10];
-bool updateOctoData = false;
-char Octo_ETA_Global[10];
-char Octo_Progress_Global[10];
-char Octo_CL_Global[10];
-
-#endif
-#endif
 
 #if HAS_ZOFFSET_ITEM
 float dwin_zoffset = 0, last_zoffset = 0;
@@ -3274,7 +3257,6 @@ void Goto_PrintProcess()
 void Goto_MainMenu()
 {
   DWIN_Backlight_SetLuminance(MAX_SCREEN_BRIGHTNESS);
-  updateOctoData = false;
   checkkey = MainMenu;
   Clear_Main_Window();
   HMI_flag.Refresh_bottom_flag = true; // Flag does not refresh bottom parameters
@@ -5576,7 +5558,7 @@ void HMI_PauseOrStop()
   {
     if (select_print.now == 1)
     { // pause window
-      updateOctoData = false;
+      
       if (HMI_flag.select_flag)
       {
         HMI_flag.pause_action = true;
@@ -5597,7 +5579,7 @@ void HMI_PauseOrStop()
     }
     else if (select_print.now == 2)
     { // stop window
-      updateOctoData = false;
+     
       if (HMI_flag.select_flag)
       {
         if (HMI_flag.home_flag)
@@ -10559,7 +10541,6 @@ void HMI_Auto_Bed_PID(void)
 // Function to send string to LCD
 void DWIN_Show_M117(char *str)
 {
-  updateOctoData = false;
   checkkey = M117Info; // Implement Human Interface Control for M117
   Clear_Main_Window();
   Draw_Mid_Status_Area(true);                                                                                                    // Draw Status Area, the one with Nozzle and bed temp.
