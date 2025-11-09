@@ -22,7 +22,7 @@
  */
 void GcodeSuite::M8015(void)
 {
-  const bool withLevel = parser.seen('S');
+  const bool wLevel = parser.seen('S') ? parser.value_bool() : true; // S0: Get Z offset without leveling; S1: Get Z offset with leveling
   float zOffset = 0;
    for(int x = 0; x < GRID_MAX_POINTS_X; x ++)
   {
@@ -57,7 +57,7 @@ void GcodeSuite::M8015(void)
       // TERN_(USE_AUTOZ_TOOL_2, DWIN_CompletedHeight());
       RUN_AND_WAIT_GCODE_CMD("G28", true);                   //测量前先获取一次HOME点 
       
-      if (withLevel){
+      if (wLevel){
 
       HMI_flag.leveling_offset_flag=false;
       HMI_flag.Pressure_Height_end=true;

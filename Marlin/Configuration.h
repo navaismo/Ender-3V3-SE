@@ -1761,8 +1761,8 @@
 
 #if ENABLED(SKEW_CORRECTION)
   // Input all length measurements here:
-   #define XY_DIAG_AC 282.84
-  #define XY_DIAG_BD 270.45
+  #define XY_DIAG_AC 282.84
+  #define XY_DIAG_BD 282.84
   #define XY_SIDE_AD 200.69
 
   extern float xyskew_d_ac;
