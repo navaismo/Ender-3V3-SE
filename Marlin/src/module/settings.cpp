@@ -4085,6 +4085,11 @@ void MarlinSettings::reset() {
       SERIAL_ECHOLNPAIR("MAX BRIGHTNESS: ", MAX_SCREEN_BRIGHTNESS);
       SERIAL_ECHOLNPAIR("DIMM BRIGHTNESS: ", DIMM_SCREEN_BRIGHTNESS);
       SERIAL_ECHOLNPAIR("AUTO OFF TIME: ", TURN_OFF_TIME);
+      SERIAL_ECHOLNPAIR("SKEW Correction");
+      SERIAL_ECHOLNPAIR("   XY DIAG AC: ", xyskew_d_ac);
+      SERIAL_ECHOLNPAIR("   XY DIAG BD: ", xyskew_d_bd);
+      SERIAL_ECHOLNPAIR("   SIDE AD: ", xyskew_s_ad);
+      SERIAL_ECHOPAIR_F("   SKEW FACTOR: ", planner.skew_factor.xy, 6);
     #endif
 
 

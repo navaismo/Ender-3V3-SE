@@ -1682,6 +1682,12 @@ uint8_t record_lcd_flag = 0;
 extern bool SD_Card_status;
 extern bool sd_printing_autopause;
 
+#if ENABLED(SKEW_CORRECTION)
+  float xyskew_d_ac = (xyskew_d_ac == 0.0f || xyskew_d_ac > 500.0f) ? XY_DIAG_AC : xyskew_d_ac;
+  float xyskew_d_bd = (xyskew_d_bd == 0.0f || xyskew_d_bd > 500.0f) ? XY_DIAG_BD : xyskew_d_bd;
+  float xyskew_s_ad = (xyskew_s_ad == 0.0f || xyskew_s_ad > 500.0f) ? XY_SIDE_AD : xyskew_s_ad;
+  float skew_factor = _SKEW_FACTOR(xyskew_d_ac, xyskew_d_bd, xyskew_s_ad);
+#endif 
 
 #if ENABLED(ENABLE_AUTO_OFF_DISPLAY)
 int16_t DIMM_SCREEN_BRIGHTNESS = 175;

@@ -245,35 +245,45 @@ bool load_filament(const_float_t slow_load_length/*=0*/, const_float_t fast_load
     wait_for_user = false;
 
   #else
+    uint8_t serial_connection_active = 0;
+    #if ENABLED(HOST_PROMPT_SUPPORT)
+      if(serial_connection_active){
+        do {
+          if (purge_length > 0) {
+            // "Wait for filament purge"
+            if (show_lcd) ui.pause_show_message(PAUSE_MESSAGE_PURGE);
 
-    do {
+            // Extrude filament to get into hotend
+            unscaled_e_move(purge_length, ADVANCED_PAUSE_PURGE_FEEDRATE);
+          }
+
+          TERN_(HOST_PROMPT_SUPPORT, filament_load_host_prompt()); // Initiate another host prompt.
+
+          #if M600_PURGE_MORE_RESUMABLE
+            if (show_lcd) {
+              // Show "Purge More" / "Resume" menu and wait for reply
+              KEEPALIVE_STATE(PAUSED_FOR_USER);
+              wait_for_user = false;
+              #if HAS_LCD_MENU
+                ui.pause_show_message(PAUSE_MESSAGE_OPTION); // Also sets PAUSE_RESPONSE_WAIT_FOR
+              #else
+                pause_menu_response = PAUSE_RESPONSE_WAIT_FOR;
+              #endif
+              while (pause_menu_response == PAUSE_RESPONSE_WAIT_FOR) idle_no_sleep();
+            }
+          #endif
+
+          // Keep looping if "Purge More" was selected
+        } while (TERN0(M600_PURGE_MORE_RESUMABLE, show_lcd && pause_menu_response == PAUSE_RESPONSE_EXTRUDE_MORE));
+      }else{
       if (purge_length > 0) {
         // "Wait for filament purge"
         if (show_lcd) ui.pause_show_message(PAUSE_MESSAGE_PURGE);
-
         // Extrude filament to get into hotend
         unscaled_e_move(purge_length, ADVANCED_PAUSE_PURGE_FEEDRATE);
       }
-
-      TERN_(HOST_PROMPT_SUPPORT, filament_load_host_prompt()); // Initiate another host prompt.
-
-      #if M600_PURGE_MORE_RESUMABLE
-        if (show_lcd) {
-          // Show "Purge More" / "Resume" menu and wait for reply
-          KEEPALIVE_STATE(PAUSED_FOR_USER);
-          wait_for_user = false;
-          #if HAS_LCD_MENU
-            ui.pause_show_message(PAUSE_MESSAGE_OPTION); // Also sets PAUSE_RESPONSE_WAIT_FOR
-          #else
-            pause_menu_response = PAUSE_RESPONSE_WAIT_FOR;
-          #endif
-          while (pause_menu_response == PAUSE_RESPONSE_WAIT_FOR) idle_no_sleep();
-        }
-      #endif
-
-      // Keep looping if "Purge More" was selected
-    } while (TERN0(M600_PURGE_MORE_RESUMABLE, show_lcd && pause_menu_response == PAUSE_RESPONSE_EXTRUDE_MORE));
-
+    }
+    #endif   
   #endif
   TERN_(HOST_PROMPT_SUPPORT, host_action_prompt_end());
 

@@ -192,7 +192,7 @@ void DWIN_Draw_FloatValue(uint8_t bShow, bool zeroFill, uint8_t zeroMode, uint8_
 
 // Draw JPG and cached in #0 virtual display area
 // id: Picture ID
-void DWIN_JPG_ShowAndCache(const uint8_t id);
+// void DWIN_JPG_ShowAndCache(const uint8_t id);
 
 // Draw an Icon
 //  libID: Icon library ID
@@ -204,11 +204,11 @@ void DWIN_ICON_Not_Filter_Show(uint8_t libID, uint8_t picID, uint16_t x, uint16_
 // Unzip the JPG picture to a virtual display area
 //  n: Cache index
 //  id: Picture ID
-void DWIN_JPG_CacheToN(uint8_t n, uint8_t id);
+// void DWIN_JPG_CacheToN(uint8_t n, uint8_t id);
 
 // Unzip the JPG picture to virtual display area #1
 //  id: Picture ID
-inline void DWIN_JPG_CacheTo1(uint8_t id) { DWIN_JPG_CacheToN(1, id); }
+// inline void DWIN_JPG_CacheTo1(uint8_t id) { DWIN_JPG_CacheToN(1, id); }
 
 // Copy area from virtual display area to current screen
 //  cacheID: virtual area number
@@ -233,5 +233,5 @@ void DWIN_ICON_Animation(uint8_t animID, bool animate, uint8_t libID, uint8_t pi
 //  state: 16 bits, each bit is the state of an animation id
 void DWIN_ICON_AnimationControl(uint16_t state);
 
-void DWIN_ICON_SHOW_SRAM(uint16_t x,uint16_t y,uint16_t addr);
+// void DWIN_ICON_SHOW_SRAM(uint16_t x,uint16_t y,uint16_t addr);
 void DWIN_SHOW_MAIN_PIC();

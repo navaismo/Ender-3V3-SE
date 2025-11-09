@@ -22,6 +22,7 @@
  */
 void GcodeSuite::M8015(void)
 {
+  const bool withLevel = parser.seen('S');
   float zOffset = 0;
    for(int x = 0; x < GRID_MAX_POINTS_X; x ++)
   {
@@ -55,8 +56,16 @@ void GcodeSuite::M8015(void)
       // TERN_(EEPROM_SETTINGS, settings.save());
       // TERN_(USE_AUTOZ_TOOL_2, DWIN_CompletedHeight());
       RUN_AND_WAIT_GCODE_CMD("G28", true);                   //测量前先获取一次HOME点 
+      
+      if (withLevel){
+
       HMI_flag.leveling_offset_flag=false;
       HMI_flag.Pressure_Height_end=true;
+      
+      }else{
+        settings.save(); 
+        Goto_MainMenu();
+      }
     // }
   }
   else //对高失败

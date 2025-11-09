@@ -71,9 +71,6 @@ lin 3D Printer Firmware
 #include "lcd_rts.h"
 #include "../../../module/AutoOffset.h"
 
-// #include <QRCodeGenerator.h>
-
-
 #ifndef MACHINE_SIZE
 #define MACHINE_SIZE STRINGIFY(X_BED_SIZE) "x" STRINGIFY(Y_BED_SIZE) "x" STRINGIFY(Z_MAX_POS)
 #endif
@@ -152,8 +149,6 @@ int8_t shift_amt;  // = 0
 millis_t shift_ms; // = 0
 static uint8_t left_move_index = 0;
 
-// bool qrShown = false;
-
 /* Value Init */
 HMI_value_t HMI_ValueStruct;
 HMI_Flag_t HMI_flag{0};
@@ -199,7 +194,7 @@ typedef struct
   char longfilename[LONG_FILENAME_LENGTH];
 } PrintFile_InfoTypeDef;
 
-select_t select_page{0}, select_file{0}, select_print{0}, select_prepare{0}, select_control{0}, select_axis{0}, select_temp{0}, select_motion{0}, select_tune{0}, select_advset{0}, select_PLA{0}, select_ABS{0},select_TPU{0},select_PETG{0}, select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_input_shaping{0}, select_cextr{0},select_display{0}, select_item{0}, select_language{0}, select_hm_set_pid{0}, select_set_pid{0}, select_level{0}, select_show_pic{0};
+select_t select_page{0}, select_file{0}, select_print{0}, select_prepare{0}, select_control{0}, select_axis{0}, select_temp{0}, select_motion{0}, select_tune{0}, select_advset{0}, select_PLA{0}, select_ABS{0},select_TPU{0},select_PETG{0}, select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_input_shaping{0}, select_skew{0}, select_cextr{0},select_display{0}, select_item{0}, select_language{0}, select_hm_set_pid{0}, select_set_pid{0}, select_level{0}, select_show_pic{0};
 
 uint8_t index_file = MROWS,
         index_prepare = MROWS,
@@ -1307,7 +1302,8 @@ inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valr
 #define MOTION_CASE_STEPS (MOTION_CASE_JERK + 1)
 #define MOTION_CASE_INPUT_SHAPING (MOTION_CASE_STEPS + 1)
 // #define MOTION_CASE_LINADV (MOTION_CASE_INPUT_SHAPING + 1)
-#define MOTION_CASE_TOTAL MOTION_CASE_INPUT_SHAPING
+#define MOTION_CASE_SKEW (MOTION_CASE_INPUT_SHAPING + 1)
+#define MOTION_CASE_TOTAL MOTION_CASE_SKEW
 
 #define INPUT_SHAPING_CASE_XFREQ 1
 #define INPUT_SHAPING_CASE_YFREQ (INPUT_SHAPING_CASE_XFREQ + 1)
@@ -2186,6 +2182,12 @@ void draw_input_shaping(const uint16_t line)
 //   Draw_Menu_Line(line - 2, ICON_Motion);
 // }
 
+void Draw_Skew_Menu(const uint16_t line)
+{
+  // There's no graphical asset for this label, so we just write it as string
+  DWIN_Draw_Label(line, F("Skew Correction"));
+  Draw_Menu_Line(line - 2, ICON_Motion);
+}
 
 
 void say_x(const uint16_t inset, const uint16_t line)
@@ -2232,6 +2234,7 @@ void Draw_Motion_Menu()
     DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Step, 42, MBASE(MOTION_CASE_STEPS) + JPN_OFFSET);
     draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
     // draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
+    Draw_Skew_Menu(MBASE(MOTION_CASE_SKEW) + 2);  // "Skew Correction"
   }
   else
   {
@@ -2259,6 +2262,7 @@ void Draw_Motion_Menu()
     draw_steps_per_mm(MBASE(MOTION_CASE_STEPS)); // "steps per mm"
     draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
     // draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
+    Draw_Skew_Menu(MBASE(MOTION_CASE_SKEW) + 2);
 #endif // USE_STRING_TITLES
   }
 
@@ -2281,9 +2285,8 @@ void Draw_Motion_Menu()
   Draw_More_Icon(i);
   Draw_Menu_Line(++i, ICON_Setspeed);
   Draw_More_Icon(i);
-  Draw_Menu_Line(++i, ICON_Motion);
-  // Draw_More_Icon(i);
-  // Draw_Menu_Icon(MOTION_CASE_STEPS, ICON_Step);
+  Draw_Menu_Line(++i, ICON_PrintSize); // skew correction line
+  Draw_More_Icon(i); // skew correction more icon
 
 }
 
@@ -5063,6 +5066,74 @@ void HMI_Select_language()
   DWIN_UpdateLCD();
 }
 
+
+
+
+void Draw_Level_Menu(){
+  Clear_Main_Window();
+  Draw_Mid_Status_Area(true);
+  HMI_flag.Refresh_bottom_flag = false; // Flag refresh bottom parameter
+
+  // Back option
+  Draw_Back_First();
+  // Title
+  Draw_Title(F("Leveling Menu"));
+  
+  // There's no graphical asset for this label, so we just write it as string
+  DWIN_Draw_Label(MBASE(1), F("Start Auto Z-Offset"));
+  // Menu Line with Extrusion Icon
+  Draw_Menu_Line(1, ICON_SetHome);
+  
+
+  // There's no graphical asset for this label, so we just write it as string
+  DWIN_Draw_Label(MBASE(2), F("Start Bed Leveling"));
+  // Menu Line with Extrusion Icon
+  Draw_Menu_Line(2, ICON_Edit_Level_Data); 
+}
+
+void HMI_Level_Menu(){
+  ENCODER_DiffState encoder_diffState = get_encoder_state();
+  if (encoder_diffState == ENCODER_DIFF_NO)
+    return;
+
+  // Avoid flicker by updating only the previous menu
+  if (encoder_diffState == ENCODER_DIFF_CW)
+  {
+    if (select_cextr.inc(1  + 2))
+      Move_Highlight(1, select_cextr.now);
+  }
+  else if (encoder_diffState == ENCODER_DIFF_CCW)
+  {
+    if (select_cextr.dec())
+      Move_Highlight(-1, select_cextr.now);
+  }
+  else if (encoder_diffState == ENCODER_DIFF_ENTER)
+  {
+    switch (select_cextr.now)
+    {
+      case 0: // Back
+        select_page.set(3);
+        select_cextr.reset();
+        Goto_MainMenu();
+        break;
+      case 1: // Start Auto Z-Offset
+        Popup_Window_Home();
+        gcode.process_subcommands_now_P(PSTR("M8015 S0"));
+        break;
+      case 2: // Start Bed Leveling
+        Popup_Window_Home();
+        RUN_AND_WAIT_GCODE_CMD("G28", true); // Home all axes
+        HMI_flag.leveling_offset_flag = false; //Disable Offset Flag
+        HMI_flag.Pressure_Height_end = true; // Enable Leveling Flag
+      
+        break;
+    }
+  }
+  DWIN_UpdateLCD();
+}
+
+
+
 /* Main Process */
 void HMI_MainMenu()
 {
@@ -5144,19 +5215,9 @@ void HMI_MainMenu()
       break;
 
     case 3: // Leveling or Info
-#if HAS_ONESTEP_LEVELING
-            // checkkey = Leveling;
-      // HMI_Leveling();
-      checkkey = ONE_HIGH;
-#if ANY(USE_AUTOZ_TOOL, USE_AUTOZ_TOOL_2)
-      queue.inject_P(PSTR("M8015"));
-      // Popup window home();
-      Popup_Window_Height(Nozz_Start);
-#endif
-#else
-      checkkey = Info;
-      Draw_Info_Menu();
-#endif
+      checkkey = Level;
+      select_cextr.reset();
+      Draw_Level_Menu();
       break;
     }
   }
@@ -5612,9 +5673,33 @@ void HMI_PauseOrStop()
           SERIAL_ECHOLN("M79 S4");
         }
       }
-      else
+      else{
         Goto_PrintProcess(); // cancel stop
-    }
+      }
+    } else if (select_print.now == 20)
+      {
+        if (HMI_flag.select_flag)
+        {
+          // Reset EEPROM
+          settings.reset();
+          // After resetting, the language needs to be refreshed again.
+          Clear_Main_Window();
+          DWIN_ICON_Not_Filter_Show(Background_ICON, Background_reset, 0, 25);
+          settings.save();
+          delay(100);
+          HMI_ResetLanguage();
+          HMI_ValueStruct.Auto_PID_Value[1] = 100; // Pid number reset
+          HMI_ValueStruct.Auto_PID_Value[2] = 260; // Pid number reset
+          Save_Auto_PID_Value();
+          HAL_reboot(); // Mcu resets into bootloader
+        }
+        else
+        {
+          // cancel reset
+          Goto_MainMenu();
+        }
+      }  
+    
   }
   DWIN_UpdateLCD();
 }
@@ -5844,7 +5929,7 @@ void HMI_Confirm()
       Popup_Window_Height(Nozz_Start); // Jump to height page
       checkkey = ONE_HIGH;             // Enter the high logic
 #if ANY(USE_AUTOZ_TOOL, USE_AUTOZ_TOOL_2)
-      queue.inject_P(PSTR("M8015"));
+      queue.inject_P(PSTR("M8015 S1"));
 #endif
       // Checkkey=max gui;
     }
@@ -5854,7 +5939,7 @@ void HMI_Confirm()
       Popup_Window_Height(Nozz_Start); // Jump to height page
       checkkey = ONE_HIGH;             // Enter the high logic
 #if ANY(USE_AUTOZ_TOOL, USE_AUTOZ_TOOL_2)
-      queue.inject_P(PSTR("M8015"));
+      queue.inject_P(PSTR("M8015 S1"));
 #endif
     }
     else if (Set_levelling == HMI_flag.boot_step) // Boot boot leveling successful
@@ -5871,7 +5956,7 @@ void HMI_Confirm()
       Popup_Window_Height(Nozz_Start); // Jump to height page
       checkkey = ONE_HIGH;             // Enter the high logic
 #if ANY(USE_AUTOZ_TOOL, USE_AUTOZ_TOOL_2)
-      queue.inject_P(PSTR("M8015"));
+      queue.inject_P(PSTR("M8015 S1"));
 #endif
       // HMI_flag.Need_boot_flag=false; //No need to boot in the future
       // select_page.set(0);//The action of jumping to the main interface
@@ -5882,7 +5967,7 @@ void HMI_Confirm()
       Popup_Window_Height(Nozz_Start); // Jump to height page
       checkkey = ONE_HIGH;             // Enter the high logic
 #if ANY(USE_AUTOZ_TOOL, USE_AUTOZ_TOOL_2)
-      queue.inject_P(PSTR("M8015"));
+      queue.inject_P(PSTR("M8015 S1"));
 #endif
     }
 #if BOTH(EEPROM_SETTINGS, IIC_BL24CXX_EEPROM)
@@ -6231,6 +6316,8 @@ void HMI_DimmTime(){
   LIMIT(HMI_ValueStruct.Dimm_Time, 1, 60);
   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(4)+3 , HMI_ValueStruct.Dimm_Time);
 }
+
+
 
 
 void Draw_CExtrude_Menu(){
@@ -6926,26 +7013,12 @@ void HMI_Control()
 #endif
     case CONTROL_CASE_RESET:
       // Reset EEPROM
-      settings.reset();
-      HMI_AudioFeedback();
-      // After resetting, the language needs to be refreshed again.
-      // Draw_Control_Menu();
-      Clear_Main_Window();
-#if ENABLED(DWIN_CREALITY_480_LCD)
-      DWIN_ICON_Show(ICON, ICON_LOGO, 71, 52);
-#elif ENABLED(DWIN_CREALITY_320_LCD)
-      // DWIN_ICON_Show(ICON, ICON_LOGO, 72, 36);
-      DWIN_ICON_Not_Filter_Show(Background_ICON, Background_reset, 0, 25);
-#endif
-      settings.save();
-      delay(100);
-      HMI_ResetLanguage();
-      HMI_ValueStruct.Auto_PID_Value[1] = 100; // Pid number reset
-      HMI_ValueStruct.Auto_PID_Value[2] = 260; // Pid number reset
-      Save_Auto_PID_Value();
-      // Dwin show main pic();
-      HAL_reboot(); // Mcu resets into bootloader
+      checkkey = Print_window;
+      select_print.now = 20;
+      HMI_flag.select_flag = true;
+      Popup_window_PauseOrStop();
       break;
+      
 #endif
     /*
     // rock_20210727
@@ -8059,6 +8132,123 @@ void Draw_InputShaping_Menu()
 // }
 
 
+// Skew Correction Items
+void Draw_SkewItems_Menu()
+{
+  Clear_Main_Window();
+  Draw_Mid_Status_Area(true);
+  HMI_flag.Refresh_bottom_flag = true; // Flag refresh bottom parameter
+
+  Draw_Back_First();
+  Draw_Title(F("Skew Correction"));
+
+  DWIN_Draw_Label(MBASE(1), F("XY DIAGONAL AC"));
+  Draw_Menu_Line(1, ICON_PrintSize);
+  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(1) + 3, xyskew_d_ac * 1000);
+
+  DWIN_Draw_Label(MBASE(2), F("XY DIAGONAL BD"));
+  Draw_Menu_Line(2, ICON_PrintSize);
+  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(2) + 3, xyskew_d_bd * 1000);
+
+  DWIN_Draw_Label(MBASE(3), F("XY SIDE AD"));
+  Draw_Menu_Line(3, ICON_PrintSize);
+  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(3) + 3, xyskew_s_ad * 1000);
+
+  DWIN_Draw_Label(MBASE(4), F("Calculate & Set"));
+  Draw_Menu_Line(4, ICON_Homing);
+}
+
+
+void HMI_SkewItems_Menu()
+{
+  ENCODER_DiffState encoder_diffState = get_encoder_state();
+  if (encoder_diffState == ENCODER_DIFF_NO)
+    return;
+
+  // Avoid flicker by updating only the previous menu
+  if (encoder_diffState == ENCODER_DIFF_CW)
+  {
+    if (select_skew.inc(1 + 4))
+      Move_Highlight(1, select_skew.now);
+  }
+  else if (encoder_diffState == ENCODER_DIFF_CCW)
+  {
+    if (select_skew.dec())
+      Move_Highlight(-1, select_skew.now);
+  }
+  else if (encoder_diffState == ENCODER_DIFF_ENTER)
+  {
+    switch (select_skew.now)
+    {
+      case 0: // Back
+        checkkey = Motion;
+        select_motion.now = MOTION_CASE_SKEW;
+        Draw_Motion_Menu();
+        break;
+      case 1: // XY_DIAG_AC
+        checkkey = skewxy_dac;
+        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(1) + 3, xyskew_d_ac * 10000);
+        EncoderRate.enabled = true;
+        break;
+      case 2: // XY_DIAG_BD
+        checkkey = skewxy_dbd;
+        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(2) + 3, xyskew_d_bd * 10000);
+        EncoderRate.enabled = true;
+        break;
+      case 3: // XY_SIDE_AD
+        checkkey = skewxy_sad;
+        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(3) + 3, xyskew_s_ad * 10000);
+        EncoderRate.enabled = true;
+        break;
+
+      case 4: // Calculate & Set
+        // Perform skew correction calculation
+        if(xyskew_d_ac != 0.0 && xyskew_d_bd != 0.0 && xyskew_s_ad != 0.0)
+        {
+           
+          skew_factor = _SKEW_FACTOR(xyskew_d_ac, xyskew_d_bd, xyskew_s_ad);
+          
+          //skew factor must be between SKEW_FACTOR_MIN & SKEW_FACTOR_MAX to be valid
+          if(skew_factor < SKEW_FACTOR_MIN || skew_factor > SKEW_FACTOR_MAX){
+            skew_factor = 0.0;
+            DWIN_Draw_Rectangle(1, All_Black, 0, 200, 240, 237);
+            const char *str = "Invalid Skew Factor:";
+            DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 210, F(str));   // Centered Received String
+            DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_Yellow, Color_Bg_Black, 2, 4, (DWIN_WIDTH - 10 * MENU_CHR_W) / 2, 230, planner.skew_factor.xy * 1000);
+
+          }else{
+
+            planner.skew_factor.xy = skew_factor;
+            settings.save();
+
+            DWIN_Draw_Rectangle(1, All_Black, 0, 200, 240, 237);
+            const char *str = "Set Skew Factor Of:";
+            DWIN_Draw_String(true, true, font8x16, Color_Blue, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 210, F(str));   // Centered Received String
+            DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_Blue, Color_Bg_Black, 2, 4, (DWIN_WIDTH - 10 * MENU_CHR_W) / 2, 230, planner.skew_factor.xy * 1000);
+          }
+
+        }
+        else
+        {
+        DWIN_Draw_Rectangle(1, All_Black, 0, 174, 240, 237);
+          // Help Info
+          // Info Icon
+          DWIN_ICON_Show(ICON, 56, 115, 175);
+          const char *str = "Warning!";
+          const char *str2 = "XY Values";
+          const char *str3 = "Cannot be Zero or Invalid!";
+          // Draw Help Strings
+          DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 195, F(str));   // Centered Received String
+          DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str2) * MENU_CHR_W) / 2, 215, F(str2)); // Centered Received String
+          DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str3) * MENU_CHR_W) / 2, 235, F(str3)); // Centered Received String
+
+        }
+      break;  
+    }
+  }
+  DWIN_UpdateLCD();
+}
+
 
 
 
@@ -8123,6 +8313,13 @@ void HMI_Motion()
     //   select_linear_adv.reset();
     //   Draw_LinearAdv_Menu();
     //   break;  
+
+     case MOTION_CASE_SKEW: // Skew Correction
+      checkkey = SkewCorrection;
+      select_skew.reset();
+      Draw_SkewItems_Menu();
+      break;  
+
     default:
       break;
     }
@@ -8968,6 +9165,86 @@ void HMI_InputShaping()
     }
   }
   DWIN_UpdateLCD();
+}
+
+
+void HMI_SkewXY_DAC()
+{
+  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+  if (encoder_diffState == ENCODER_DIFF_NO) return;
+
+  EncoderRate.enabled = false;   //base step = 1 (in scaled space)
+  //Edit in hundredths (2 decimal places)
+  xyskew_d_ac *= 100.0f;
+
+  if (Apply_Encoder(encoder_diffState, xyskew_d_ac)) {
+    LIMIT(xyskew_d_ac, 0.0f, 50000.0f);     //0.00–500.00 in hundredths
+    xyskew_d_ac /= 100.0f;                  //return to real units
+    checkkey = SkewCorrection;
+
+    //fNum=2 => send integer ×100
+    DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(1) + 3, lroundf(xyskew_d_ac * 100.0f));
+    return;
+  }
+
+  xyskew_d_ac /= 100.0f;
+  LIMIT(xyskew_d_ac, 0.00f, 500.00f);
+
+  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(1) + 3, lroundf(xyskew_d_ac * 100.0f));
+}
+
+
+void HMI_SkewXY_DBD()
+{
+  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+  if (encoder_diffState == ENCODER_DIFF_NO) return;
+
+  EncoderRate.enabled = false;   
+
+  xyskew_d_bd *= 100.0f;
+
+  if (Apply_Encoder(encoder_diffState, xyskew_d_bd)) {
+    LIMIT(xyskew_d_bd, 0.0f, 50000.0f);     
+    xyskew_d_bd /= 100.0f;                  
+
+    checkkey = SkewCorrection;
+
+    DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(2) + 3, lroundf(xyskew_d_bd * 100.0f));
+    return;
+  }
+
+
+  xyskew_d_bd /= 100.0f;
+  LIMIT(xyskew_d_bd, 0.00f, 500.00f);
+
+  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(2) + 3, lroundf(xyskew_d_bd * 100.0f));
+}
+
+
+void HMI_SkewXY_SAD()
+{
+  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+  if (encoder_diffState == ENCODER_DIFF_NO) return;
+
+  EncoderRate.enabled = false;       
+
+
+  xyskew_s_ad *= 100.0f;
+
+  if (Apply_Encoder(encoder_diffState, xyskew_s_ad)) {
+    LIMIT(xyskew_s_ad, 0.0f, 50000.0f);     
+    xyskew_s_ad /= 100.0f;                 
+
+    checkkey = SkewCorrection;
+
+    DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(3) + 3, lroundf(xyskew_s_ad * 100.0f));
+    return;
+  }
+
+  xyskew_s_ad /= 100.0f;
+  LIMIT(xyskew_s_ad, 0.00f, 500.00f);
+
+  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(3) + 3, lroundf(xyskew_s_ad * 100.0f));
 }
 
 ////
@@ -9992,6 +10269,9 @@ void DWIN_HandleScreen()
   case Control:
     HMI_Control();
     break;
+  case Level:
+    HMI_Level_Menu();
+    break;
   case Leveling:
 #if ENABLED(SHOW_GRID_VALUES) // If you need to display the leveling grid value display
     HMI_Leveling();
@@ -10095,7 +10375,18 @@ void DWIN_HandleScreen()
     break;
   // case LinearAdv:
   //   HMI_LinearAdv();
+  case SkewCorrection:
+    HMI_SkewItems_Menu();
     break;  
+  case skewxy_dac:
+    HMI_SkewXY_DAC();
+    break;
+  case skewxy_dbd:
+    HMI_SkewXY_DBD();
+    break;
+  case skewxy_sad:
+    HMI_SkewXY_SAD();
+    break;    
   case Step:
     HMI_Step();
     break;

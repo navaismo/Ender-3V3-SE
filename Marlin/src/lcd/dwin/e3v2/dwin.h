@@ -82,6 +82,7 @@ enum processID : uint8_t {
   Prepare,
   Control,
   Leveling,
+  Level,
   PrintProcess,
   AxisMove,
   TemperatureID,
@@ -104,6 +105,10 @@ enum processID : uint8_t {
   Step,
   Step_value,
   InputShaping,
+  SkewCorrection,
+  skewxy_dac,
+  skewxy_dbd,
+  skewxy_sad,
   InputShaping_XFreq,
   InputShaping_XZeta,
   InputShaping_YFreq,
@@ -635,7 +640,6 @@ extern enum DC_language current_language;
 #define Button_Select_Color 0xFFFF  // Selected color
 #define All_Black         0x0000  // Selected color
 
-extern bool Show_Default_IMG;
 extern volatile uint8_t checkkey;
 extern float zprobe_zoffset;
 extern char print_filename[16];
