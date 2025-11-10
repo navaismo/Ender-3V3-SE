@@ -245,7 +245,7 @@ bool load_filament(const_float_t slow_load_length/*=0*/, const_float_t fast_load
     wait_for_user = false;
 
   #else
-    uint8_t serial_connection_active = 0;
+    bool serial_connection_active = false;
     #if ENABLED(HOST_PROMPT_SUPPORT)
       if(serial_connection_active){
         do {
