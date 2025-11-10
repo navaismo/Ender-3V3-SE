@@ -2926,16 +2926,16 @@ void Popup_window_boot(uint8_t type_popup)
       DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
     }
     break;
-  case UnknownError:
-    if (HMI_flag.language < Language_Max)
-    {
-      DWIN_Draw_String(false, false, font10x20, Color_Red, Color_Bg_Black, WORD_HINT_CLEAR_X, WORD_HINT_CLEAR_Y, F("Unknown error"));
-      DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, BUTTON_BOOT_X, BUTTON_BOOT_Y); // OK button
-      // Add a white selection block
-      DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 1, BUTTON_BOOT_Y - 1, BUTTON_BOOT_X + 82, BUTTON_BOOT_Y + 32);
-      DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
-    }
-    break;
+  // case UnknownError:
+  //   if (HMI_flag.language < Language_Max)
+  //   {
+  //     DWIN_Draw_String(false, false, font10x20, Color_Red, Color_Bg_Black, WORD_HINT_CLEAR_X, WORD_HINT_CLEAR_Y, F("Unknown error"));
+  //     DWIN_ICON_Not_Filter_Show(HMI_flag.language, LANGUAGE_Confirm, BUTTON_BOOT_X, BUTTON_BOOT_Y); // OK button
+  //     // Add a white selection block
+  //     DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 1, BUTTON_BOOT_Y - 1, BUTTON_BOOT_X + 82, BUTTON_BOOT_Y + 32);
+  //     DWIN_Draw_Rectangle(0, Button_Select_Color, BUTTON_BOOT_X - 2, BUTTON_BOOT_Y - 2, BUTTON_BOOT_X + 83, BUTTON_BOOT_Y + 33);
+  //   }
+  //   break;
   default:
     break;
   }
@@ -4425,18 +4425,18 @@ void octo_make_name_without_ext(char *dst, char *src, size_t maxlen = MENU_CHAR_
 
 void HMI_SDCardInit() { card.cdroot(); }
 
-void MarlinUI::refresh() { /* Nothing to see here */ }
-void MarlinUI::kill_screen(PGM_P lcd_error, PGM_P lcd_component) {
-  Popup_window_boot(UnknownError);
+// void MarlinUI::refresh() { /* Nothing to see here */ }
+// void MarlinUI::kill_screen(PGM_P lcd_error, PGM_P lcd_component) {
+//   Popup_window_boot(UnknownError);
 
-  // RED ALERT. RED ALERT.
-  #ifdef HAS_COLOR_LEDS
-    #ifdef NEOPIXEL_BKGD_INDEX_FIRST
-      neo.set_background_color(255, 0, 0, 0);
-      neo.show();
-    #endif
-  #endif
-}
+//   // RED ALERT. RED ALERT.
+//   #ifdef HAS_COLOR_LEDS
+//     #ifdef NEOPIXEL_BKGD_INDEX_FIRST
+//       neo.set_background_color(255, 0, 0, 0);
+//       neo.show();
+//     #endif
+//   #endif
+// }
 
 #define ICON_Folder ICON_More
 
