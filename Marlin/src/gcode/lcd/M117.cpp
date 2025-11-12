@@ -38,7 +38,7 @@
 void GcodeSuite::M117()
 {
 
-#if ENABLED(HOST_ACTION_COMMANDS)
+#if ENABLED(HOST2_ACTION_COMMANDS)
 
   if (parser.string_arg && parser.string_arg[0] != '\0')
   {
