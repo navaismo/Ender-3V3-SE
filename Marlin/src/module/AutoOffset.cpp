@@ -768,51 +768,51 @@ bool getZOffset(bool isNozzleClr, bool isRunProByPress, bool isRunProByTouch, fl
   return (isRunProByPress && isRunProByTouch);  //喷头和CR-TOUCH都测量，数据才有效
 }
 
-/*
-* Function Name: 	gcodeG212()
-* Purpose: 			  用于上位机发送测试指令，如G212 C128 B P T， C128=测量128次；B=执行擦头操作；P=执行压力优传感器测量操作；T=执行CR-TOUCH测量操作
-* Params :        无
-* Return: 			  无
-* Attention:      需要在gcode.h中添加 #include "../module/AutoOffset.h"， 在gcode.cpp的 case 'G':的break前插入case 212:gcodeG212();break;
-*/
-void gcodeG212()
-{
-  int count = 1;
-  if(GET_PARSER_SEEN('C')) count = GET_PARSER_INT_VAL();
+// /*
+// * Function Name: 	gcodeG212()
+// * Purpose: 			  用于上位机发送测试指令，如G212 C128 B P T， C128=测量128次；B=执行擦头操作；P=执行压力优传感器测量操作；T=执行CR-TOUCH测量操作
+// * Params :        无
+// * Return: 			  无
+// * Attention:      需要在gcode.h中添加 #include "../module/AutoOffset.h"， 在gcode.cpp的 case 'G':的break前插入case 212:gcodeG212();break;
+// */
+// void gcodeG212()
+// {
+//   int count = 1;
+//   if(GET_PARSER_SEEN('C')) count = GET_PARSER_INT_VAL();
 
-  if(GET_PARSER_SEEN('H'))
-  {
-    HX711 hx711;
-    hx711.init(HX711_SCK_PIN, HX711_SDO_PIN);
-    FOR_LOOP_TIMES(i, 0, count, hx711.getVal(1)); 
-    return;
-  }
+//   if(GET_PARSER_SEEN('H'))
+//   {
+//     HX711 hx711;
+//     hx711.init(HX711_SCK_PIN, HX711_SDO_PIN);
+//     FOR_LOOP_TIMES(i, 0, count, hx711.getVal(1)); 
+//     return;
+//   }
 
-  if(GET_PARSER_SEEN('K'))
-  {
-    ProbeAcq pa;
-    xyz_pos_t cp = PRESS_XYZ_POS;
-    pa.hx711.init(HX711_SCK_PIN, HX711_SDO_PIN);
-    pa.minZ_mm = -10;    //最多下降10mm
-    pa.basePos_mm.x = cp.x;
-    pa.basePos_mm.y = cp.y;
-    pa.basePos_mm.z = 3;
-    pa.baseSpdXY_mm_s = 100;        
-    pa.baseSpdZ_mm_s = 5;
-    pa.step_mm = 0.02;  //rock             
-    pa.minHold = MIN_HOLD;
-    pa.maxHold = MAX_HOLD;
-    pa.probePointByStep();
-    return;
-  }
+//   if(GET_PARSER_SEEN('K'))
+//   {
+//     ProbeAcq pa;
+//     xyz_pos_t cp = PRESS_XYZ_POS;
+//     pa.hx711.init(HX711_SCK_PIN, HX711_SDO_PIN);
+//     pa.minZ_mm = -10;    //最多下降10mm
+//     pa.basePos_mm.x = cp.x;
+//     pa.basePos_mm.y = cp.y;
+//     pa.basePos_mm.z = 3;
+//     pa.baseSpdXY_mm_s = 100;        
+//     pa.baseSpdZ_mm_s = 5;
+//     pa.step_mm = 0.02;  //rock             
+//     pa.minHold = MIN_HOLD;
+//     pa.maxHold = MAX_HOLD;
+//     pa.probePointByStep();
+//     return;
+//   }
 
-  bool isRunClearNozzle = GET_PARSER_SEEN('B'); //是否需要擦喷头
-  bool isRunTestByPress = GET_PARSER_SEEN('P'); //是否需要使用压力传感器测量喷头高度
-  bool isRunTestByTouch = GET_PARSER_SEEN('T'); //是否需要使用CT-TOUCH测量
-  float zOffset = 0;
-  CHECK_AND_RUN((isRunClearNozzle || isRunTestByPress || isRunTestByTouch), FOR_LOOP_TIMES(i, 0, count, getZOffset(isRunClearNozzle, isRunTestByPress, isRunTestByTouch, &zOffset)));
+//   bool isRunClearNozzle = GET_PARSER_SEEN('B'); //是否需要擦喷头
+//   bool isRunTestByPress = GET_PARSER_SEEN('P'); //是否需要使用压力传感器测量喷头高度
+//   bool isRunTestByTouch = GET_PARSER_SEEN('T'); //是否需要使用CT-TOUCH测量
+//   float zOffset = 0;
+//   CHECK_AND_RUN((isRunClearNozzle || isRunTestByPress || isRunTestByTouch), FOR_LOOP_TIMES(i, 0, count, getZOffset(isRunClearNozzle, isRunTestByPress, isRunTestByTouch, &zOffset)));
 
-}
+// }
 
 //对高操作再次封装
 

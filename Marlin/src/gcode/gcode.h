@@ -835,6 +835,13 @@ private:
     static void M250();
   #endif
 
+   #if ENABLED(DWIN_CREALITY_LCD)
+    static void M255();
+    static void M255_report();
+    static void M256();
+    static void M256_report();
+  #endif
+
   #if ENABLED(EXPERIMENTAL_I2CBUS)
     static void M260();
     static void M261();

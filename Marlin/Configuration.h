@@ -1765,14 +1765,14 @@
   #define XY_DIAG_BD 282.84
   #define XY_SIDE_AD 200.69
 
-  extern float xyskew_d_ac;
-  extern float xyskew_d_bd;
-  extern float xyskew_s_ad;
-  extern float skew_factor;
+  // extern float xyskew_d_ac;
+  // extern float xyskew_d_bd;
+  // extern float xyskew_s_ad;
+  // extern float skew_factor;
 
   // Or, set the default skew factors directly here
   // to override the above measurements:
-  #define XY_SKEW_FACTOR 0.0
+  // #define XY_SKEW_FACTOR 0.0
 
   //#define SKEW_CORRECTION_FOR_Z
   #if ENABLED(SKEW_CORRECTION_FOR_Z)

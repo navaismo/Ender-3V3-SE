@@ -544,11 +544,11 @@ void GcodeSuite::process_parsed_command(const bool no_ok /*=false*/)
       doG212ExCmd();
       break;
 #endif
-#if ENABLED(USE_AUTOZ_TOOL_2)
-    case 212:
-      gcodeG212();
-      break;
-#endif
+// #if ENABLED(USE_AUTOZ_TOOL_2)
+//     case 212:
+//       gcodeG212();
+//       break;
+// #endif
     default:
       parser.unknown_command_warning();
       break;
@@ -1073,6 +1073,11 @@ void GcodeSuite::process_parsed_command(const bool no_ok /*=false*/)
     case 250:
       M250();
       break; // M250: Set LCD contrast
+#endif
+
+#if ENABLED(DWIN_CREALITY_LCD)
+    case 255: M255(); break;  // M255: Set LCD Sleep/Backlight Timeout (Minutes)
+    case 256: M256(); break;  // M256: Set LCD brightness
 #endif
 
 #if ENABLED(EXPERIMENTAL_I2CBUS)

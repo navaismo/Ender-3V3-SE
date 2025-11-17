@@ -1302,15 +1302,15 @@ inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valr
 #define MOTION_CASE_ACCEL 2
 #define MOTION_CASE_JERK (MOTION_CASE_ACCEL + ENABLED(HAS_CLASSIC_JERK))
 #define MOTION_CASE_STEPS (MOTION_CASE_JERK + 1)
-#define MOTION_CASE_INPUT_SHAPING (MOTION_CASE_STEPS + 1)
+// #define MOTION_CASE_INPUT_SHAPING (MOTION_CASE_STEPS + 1)
 // #define MOTION_CASE_LINADV (MOTION_CASE_INPUT_SHAPING + 1)
-#define MOTION_CASE_SKEW (MOTION_CASE_INPUT_SHAPING + 1)
-#define MOTION_CASE_TOTAL MOTION_CASE_SKEW
+// #define MOTION_CASE_SKEW (MOTION_CASE_INPUT_SHAPING + 1)
+#define MOTION_CASE_TOTAL MOTION_CASE_STEPS
 
-#define INPUT_SHAPING_CASE_XFREQ 1
-#define INPUT_SHAPING_CASE_YFREQ (INPUT_SHAPING_CASE_XFREQ + 1)
-#define INPUT_SHAPING_CASE_XZETA (INPUT_SHAPING_CASE_YFREQ + 1)
-#define INPUT_SHAPING_CASE_YZETA (INPUT_SHAPING_CASE_XZETA + 1)
+// #define INPUT_SHAPING_CASE_XFREQ 1
+// #define INPUT_SHAPING_CASE_YFREQ (INPUT_SHAPING_CASE_XFREQ + 1)
+// #define INPUT_SHAPING_CASE_XZETA (INPUT_SHAPING_CASE_YFREQ + 1)
+// #define INPUT_SHAPING_CASE_YZETA (INPUT_SHAPING_CASE_XZETA + 1)
 
 // #define LINEAR_ADV_KFACTOR 1
 
@@ -2234,9 +2234,9 @@ void Draw_Motion_Menu()
 #endif
     // DWIN_Frame_AreaCopy(1, 153, 148, 194, 161, LBLX, MBASE(MOTION_CASE_STEPS));         //Flow ratio
     DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Step, 42, MBASE(MOTION_CASE_STEPS) + JPN_OFFSET);
-    draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
+    // draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
     // draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
-    Draw_Skew_Menu(MBASE(MOTION_CASE_SKEW) + 2);  // "Skew Correction"
+    // Draw_Skew_Menu(MBASE(MOTION_CASE_SKEW) + 2);  // "Skew Correction"
   }
   else
   {
@@ -2262,9 +2262,9 @@ void Draw_Motion_Menu()
     draw_jerk_en(MBASE(MOTION_CASE_JERK)); // "Max Jerk"
 #endif // HAS_CLASSIC_JERK
     draw_steps_per_mm(MBASE(MOTION_CASE_STEPS)); // "steps per mm"
-    draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
+    // draw_input_shaping(MBASE(MOTION_CASE_INPUT_SHAPING) + 2); // "Input shaping"
     // draw_lin_adv(MBASE(MOTION_CASE_LINADV) + 2); // "Linear Advance"
-    Draw_Skew_Menu(MBASE(MOTION_CASE_SKEW) + 2);
+    // Draw_Skew_Menu(MBASE(MOTION_CASE_SKEW) + 2);
 #endif // USE_STRING_TITLES
   }
 
@@ -2285,10 +2285,10 @@ void Draw_Motion_Menu()
 #endif
   _MOTION_ICON(MOTION_CASE_STEPS);
   Draw_More_Icon(i);
-  Draw_Menu_Line(++i, ICON_Setspeed);
-  Draw_More_Icon(i);
-  Draw_Menu_Line(++i, ICON_PrintSize); // skew correction line
-  Draw_More_Icon(i); // skew correction more icon
+  // Draw_Menu_Line(++i, ICON_Setspeed);
+  // Draw_More_Icon(i);
+  // Draw_Menu_Line(++i, ICON_PrintSize); // skew correction line
+  // Draw_More_Icon(i); // skew correction more icon
 
 }
 
@@ -2978,21 +2978,7 @@ void Draw_Print_ProgressBar()
 #endif
 }
 
-void Draw_Print_ProgressBarOcto(int progress)
-{
-// DWIN_ICON_Not_Filter_Show(ICON, ICON_Bar, 15, 98);
-// DWIN_Draw_Rectangle(1, BarFill_Color, 16 + ui.get_progress_percent() *240 /100, 98, 256, 110); //rock_20210917
-#if ENABLED(DWIN_CREALITY_480_LCD)
-  DWIN_ICON_Not_Filter_Show(Background_ICON, Background_min + progress, 15, 98);
 
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Percent_Color, Color_Bg_Black, 3, 109, 133, ui.get_progress_percent());
-  DWIN_Draw_String(false, false, font8x16, Percent_Color, Color_Bg_Black, 133 + 15, 133 - 3, F("%")); // Rock 20220728
-#elif ENABLED(DWIN_CREALITY_320_LCD)
-  DWIN_ICON_Not_Filter_Show(Background_ICON, BG_PRINTING_CIRCLE_MIN + progress, 125, 27);
-  // DWIN_Draw_IntValue(true, true, 0, font8x16, Percent_Color, Color_Bg_Black, 3, NUM_PRECENT_X, NUM_PRECENT_Y, ui.get_progress_percent());
-  // DWIN_Draw_String(false, false, font8x16, Percent_Color, Color_Bg_Black, PRECENT_X, PRECENT_Y, F("%"));
-#endif
-}
 
 void Draw_Print_ProgressElapsed()
 {
@@ -3511,7 +3497,7 @@ void HMI_ETemp()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].hotend_temp = HMI_ValueStruct.E_Temp;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(temp_line) + TEMP_SET_OFFSET, ui.material_preset[1].hotend_temp);
         return;
@@ -3585,7 +3571,7 @@ void HMI_BedTemp()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].bed_temp = HMI_ValueStruct.Bed_Temp;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(bed_line) + TEMP_SET_OFFSET, ui.material_preset[1].bed_temp);
         return;
@@ -3662,7 +3648,7 @@ void HMI_FanSpeed()
       }
       else if (HMI_ValueStruct.show_mode == -3)
       {
-        checkkey = ABSPreheat;
+        checkkey = TPUPreheat;
         ui.material_preset[1].fan_speed = HMI_ValueStruct.Fan_speed;
         DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(fan_line) + TEMP_SET_OFFSET, ui.material_preset[1].fan_speed);
         return;
@@ -3800,72 +3786,72 @@ void HMI_MaxJerkXYZE()
 
 #endif // Has classic jerk
 
-void HMI_InputShaping_Values()
-{
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState == ENCODER_DIFF_NO) return;
+// void HMI_InputShaping_Values()
+// {
+//   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+//   if (encoder_diffState == ENCODER_DIFF_NO) return;
   
-  switch (checkkey) {
-    case InputShaping_XFreq:
-      if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.InputShaping_scaled)) {
-        checkkey = InputShaping;
-        EncoderRate.enabled = false;
-        NOLESS(HMI_ValueStruct.InputShaping_scaled, 0.0f);
-        stepper.set_shaping_frequency(X_AXIS, HMI_ValueStruct.InputShaping_scaled / 100);
+//   switch (checkkey) {
+//     case InputShaping_XFreq:
+//       if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.InputShaping_scaled)) {
+//         checkkey = InputShaping;
+//         EncoderRate.enabled = false;
+//         NOLESS(HMI_ValueStruct.InputShaping_scaled, 0.0f);
+//         stepper.set_shaping_frequency(X_AXIS, HMI_ValueStruct.InputShaping_scaled / 100);
         
-        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
-        return;
-      }
+//         DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
+//         return;
+//       }
 
-      NOLESS(HMI_ValueStruct.InputShaping_scaled, 0.0f);
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
-      break;
-    case InputShaping_YFreq:
-      if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.InputShaping_scaled)) {
-        checkkey = InputShaping;
-        EncoderRate.enabled = false;
-        NOLESS(HMI_ValueStruct.InputShaping_scaled, 0.0f);
-        stepper.set_shaping_frequency(Y_AXIS, HMI_ValueStruct.InputShaping_scaled / 100);
+//       NOLESS(HMI_ValueStruct.InputShaping_scaled, 0.0f);
+//       DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
+//       break;
+//     case InputShaping_YFreq:
+//       if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.InputShaping_scaled)) {
+//         checkkey = InputShaping;
+//         EncoderRate.enabled = false;
+//         NOLESS(HMI_ValueStruct.InputShaping_scaled, 0.0f);
+//         stepper.set_shaping_frequency(Y_AXIS, HMI_ValueStruct.InputShaping_scaled / 100);
         
-        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
-        return;
-      }
+//         DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
+//         return;
+//       }
 
-      NOLESS(HMI_ValueStruct.InputShaping_scaled, 0.0f);
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
-      break;
-    case InputShaping_XZeta:
-      if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.InputShaping_scaled)) {
-        checkkey = InputShaping;
-        EncoderRate.enabled = false;
-        LIMIT(HMI_ValueStruct.InputShaping_scaled, 0.0f, 100.0f);
-        stepper.set_shaping_damping_ratio(X_AXIS, HMI_ValueStruct.InputShaping_scaled / 100);
+//       NOLESS(HMI_ValueStruct.InputShaping_scaled, 0.0f);
+//       DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
+//       break;
+//     case InputShaping_XZeta:
+//       if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.InputShaping_scaled)) {
+//         checkkey = InputShaping;
+//         EncoderRate.enabled = false;
+//         LIMIT(HMI_ValueStruct.InputShaping_scaled, 0.0f, 100.0f);
+//         stepper.set_shaping_damping_ratio(X_AXIS, HMI_ValueStruct.InputShaping_scaled / 100);
         
-        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
-        return;
-      }
-      LIMIT(HMI_ValueStruct.InputShaping_scaled, 0.0f, 100.0f);
+//         DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
+//         return;
+//       }
+//       LIMIT(HMI_ValueStruct.InputShaping_scaled, 0.0f, 100.0f);
 
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
-      break;
-    case InputShaping_YZeta:
-      if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.InputShaping_scaled)) {
-        checkkey = InputShaping;
-        EncoderRate.enabled = false;
-        LIMIT(HMI_ValueStruct.InputShaping_scaled, 0.0f, 100.0f);
-        stepper.set_shaping_damping_ratio(Y_AXIS, HMI_ValueStruct.InputShaping_scaled / 100);
+//       DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
+//       break;
+//     case InputShaping_YZeta:
+//       if (Apply_Encoder(encoder_diffState, HMI_ValueStruct.InputShaping_scaled)) {
+//         checkkey = InputShaping;
+//         EncoderRate.enabled = false;
+//         LIMIT(HMI_ValueStruct.InputShaping_scaled, 0.0f, 100.0f);
+//         stepper.set_shaping_damping_ratio(Y_AXIS, HMI_ValueStruct.InputShaping_scaled / 100);
         
-        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
-        return;
-      }
-      LIMIT(HMI_ValueStruct.InputShaping_scaled, 0.0f, 100.0f);
+//         DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
+//         return;
+//       }
+//       LIMIT(HMI_ValueStruct.InputShaping_scaled, 0.0f, 100.0f);
 
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
-      break;       
-  }
+//       DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, _MAX(HMI_ValueStruct.InputShaping_scaled, 0.0));
+//       break;       
+//   }
 
-  DWIN_UpdateLCD();
-}
+//   DWIN_UpdateLCD();
+// }
 
 
 ////
@@ -4398,32 +4384,6 @@ void make_name_without_ext(char *dst, char *src, size_t maxlen = MENU_CHAR_LIMIT
     dst[pos] = src[pos];
 }
 
-
-void octo_make_name_without_ext(char *dst, char *src, size_t maxlen = MENU_CHAR_LIMIT)
-{
-  
-  size_t pos = strlen(src); // index of ending nul
-
-  // For files, remove the extension
-  // which may be .gcode, .gco, or .g
-    while (pos && src[pos] != '.')
-      pos--; // find last '.' (stop at 0)
-
-  size_t len = pos; // nul or '.'
-  if (len > maxlen)
-  {                     // Keep the name short
-    pos = len = maxlen; // move nul down
-    dst[--pos] = '.';   // insert dots
-    dst[--pos] = '.';
-    dst[--pos] = '.';
-  }
-
-  dst[len] = '\0'; // end it
-
-  // Copy down to 0
-  while (pos--)
-    dst[pos] = src[pos];
-}
 
 void HMI_SDCardInit() { card.cdroot(); }
 
@@ -5251,14 +5211,6 @@ void DC_Show_defaut_image()
 #endif
 }
 
-void DC_Show_defaut_imageOcto()
-{
-#if ENABLED(DWIN_CREALITY_480_LCD)
-  DWIN_ICON_Show(ICON, ICON_Defaut_Image, 36, 35);
-#elif ENABLED(DWIN_CREALITY_320_LCD)
-  DWIN_ICON_Show(ICON, ICON_Defaut_Image, 2, ICON_Defaut_Image_Y);
-#endif
-}
 
 static void Display_Estimated_Time(int time) // Display remaining time.
 {
@@ -8145,35 +8097,35 @@ void Draw_Steps_Menu()
 #endif
 }
 
-void Draw_InputShaping_Menu()
-{
-  Clear_Main_Window();
-  HMI_flag.Refresh_bottom_flag = true; // Flag refresh bottom parameter
+// void Draw_InputShaping_Menu()
+// {
+//   Clear_Main_Window();
+//   HMI_flag.Refresh_bottom_flag = true; // Flag refresh bottom parameter
 
-  Draw_Title(GET_TEXT_F(MSG_INPUT_SHAPING));
-  DWIN_Draw_Label(MBASE(INPUT_SHAPING_CASE_XFREQ), GET_TEXT_F(MSG_SHAPING_A_FREQ));
-  DWIN_Draw_Label(MBASE(INPUT_SHAPING_CASE_YFREQ), GET_TEXT_F(MSG_SHAPING_B_FREQ));
-  DWIN_Draw_Label(MBASE(INPUT_SHAPING_CASE_XZETA), GET_TEXT_F(MSG_SHAPING_A_ZETA));
-  DWIN_Draw_Label(MBASE(INPUT_SHAPING_CASE_YZETA), GET_TEXT_F(MSG_SHAPING_B_ZETA));
+//   Draw_Title(GET_TEXT_F(MSG_INPUT_SHAPING));
+//   DWIN_Draw_Label(MBASE(INPUT_SHAPING_CASE_XFREQ), GET_TEXT_F(MSG_SHAPING_A_FREQ));
+//   DWIN_Draw_Label(MBASE(INPUT_SHAPING_CASE_YFREQ), GET_TEXT_F(MSG_SHAPING_B_FREQ));
+//   DWIN_Draw_Label(MBASE(INPUT_SHAPING_CASE_XZETA), GET_TEXT_F(MSG_SHAPING_A_ZETA));
+//   DWIN_Draw_Label(MBASE(INPUT_SHAPING_CASE_YZETA), GET_TEXT_F(MSG_SHAPING_B_ZETA));
 
-  Draw_Back_First();
+//   Draw_Back_First();
 
-  Draw_Menu_Line(INPUT_SHAPING_CASE_XFREQ, ICON_MaxAccX);
-  Draw_Menu_Line(INPUT_SHAPING_CASE_YFREQ, ICON_MaxAccY);
-  Draw_Menu_Line(INPUT_SHAPING_CASE_XZETA, ICON_MaxSpeedX);
-  Draw_Menu_Line(INPUT_SHAPING_CASE_YZETA, ICON_MaxSpeedY);
-#if ENABLED(DWIN_CREALITY_480_LCD)
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, stepper.get_shaping_frequency(X_AXIS) * 100);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, stepper.get_shaping_frequency(Y_AXIS) * 100);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, stepper.get_shaping_damping_ratio(X_AXIS) * 100);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, stepper.get_shaping_damping_ratio(Y_AXIS) * 100);
-#elif ENABLED(DWIN_CREALITY_320_LCD)
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, stepper.get_shaping_frequency(X_AXIS) * 100);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, stepper.get_shaping_frequency(Y_AXIS) * 100);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, stepper.get_shaping_damping_ratio(X_AXIS) * 100);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, stepper.get_shaping_damping_ratio(Y_AXIS) * 100);
-#endif
-}
+//   Draw_Menu_Line(INPUT_SHAPING_CASE_XFREQ, ICON_MaxAccX);
+//   Draw_Menu_Line(INPUT_SHAPING_CASE_YFREQ, ICON_MaxAccY);
+//   Draw_Menu_Line(INPUT_SHAPING_CASE_XZETA, ICON_MaxSpeedX);
+//   Draw_Menu_Line(INPUT_SHAPING_CASE_YZETA, ICON_MaxSpeedY);
+// #if ENABLED(DWIN_CREALITY_480_LCD)
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, stepper.get_shaping_frequency(X_AXIS) * 100);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, stepper.get_shaping_frequency(Y_AXIS) * 100);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, stepper.get_shaping_damping_ratio(X_AXIS) * 100);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, stepper.get_shaping_damping_ratio(Y_AXIS) * 100);
+// #elif ENABLED(DWIN_CREALITY_320_LCD)
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, stepper.get_shaping_frequency(X_AXIS) * 100);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, stepper.get_shaping_frequency(Y_AXIS) * 100);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, stepper.get_shaping_damping_ratio(X_AXIS) * 100);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, stepper.get_shaping_damping_ratio(Y_AXIS) * 100);
+// #endif
+// }
 
 
 // void Draw_LinearAdv_Menu()
@@ -8190,124 +8142,124 @@ void Draw_InputShaping_Menu()
 // }
 
 
-// Skew Correction Items
-void Draw_SkewItems_Menu()
-{
-  Clear_Main_Window();
-  Draw_Mid_Status_Area(true);
-  HMI_flag.Refresh_bottom_flag = true; // Flag refresh bottom parameter
+// // Skew Correction Items
+// void Draw_SkewItems_Menu()
+// {
+//   Clear_Main_Window();
+//   Draw_Mid_Status_Area(true);
+//   HMI_flag.Refresh_bottom_flag = true; // Flag refresh bottom parameter
 
-  Draw_Back_First();
-  Draw_Title(F("Skew Correction"));
+//   Draw_Back_First();
+//   Draw_Title(F("Skew Correction"));
 
-  DWIN_Draw_Label(MBASE(1), F("XY DIAGONAL AC"));
-  Draw_Menu_Line(1, ICON_PrintSize);
-  // DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(1) + 3, xyskew_d_ac * 1000);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 2, (VALUERANGE_X - 10), MBASE(1) + 3, lroundf(xyskew_d_ac * 100.0f));
+//   DWIN_Draw_Label(MBASE(1), F("XY DIAGONAL AC"));
+//   Draw_Menu_Line(1, ICON_PrintSize);
+//   // DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(1) + 3, xyskew_d_ac * 1000);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 2, (VALUERANGE_X - 10), MBASE(1) + 3, lroundf(xyskew_d_ac * 100.0f));
 
-  DWIN_Draw_Label(MBASE(2), F("XY DIAGONAL BD"));
-  Draw_Menu_Line(2, ICON_PrintSize);
-  // DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(2) + 3, xyskew_d_bd * 1000);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 2, (VALUERANGE_X - 10), MBASE(2) + 3, lroundf(xyskew_d_bd * 100.0f));
+//   DWIN_Draw_Label(MBASE(2), F("XY DIAGONAL BD"));
+//   Draw_Menu_Line(2, ICON_PrintSize);
+//   // DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(2) + 3, xyskew_d_bd * 1000);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 2, (VALUERANGE_X - 10), MBASE(2) + 3, lroundf(xyskew_d_bd * 100.0f));
 
-  DWIN_Draw_Label(MBASE(3), F("XY SIDE AD"));
-  Draw_Menu_Line(3, ICON_PrintSize);
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(3) + 3, lroundf(xyskew_s_ad * 100.0f));
+//   DWIN_Draw_Label(MBASE(3), F("XY SIDE AD"));
+//   Draw_Menu_Line(3, ICON_PrintSize);
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 2, 3, (VALUERANGE_X - 10), MBASE(3) + 3, lroundf(xyskew_s_ad * 100.0f));
 
-  DWIN_Draw_Label(MBASE(4), F("Calculate & Set"));
-  Draw_Menu_Line(4, ICON_Homing);
-}
+//   DWIN_Draw_Label(MBASE(4), F("Calculate & Set"));
+//   Draw_Menu_Line(4, ICON_Homing);
+// }
 
 
-void HMI_SkewItems_Menu()
-{
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
+// void HMI_SkewItems_Menu()
+// {
+//   ENCODER_DiffState encoder_diffState = get_encoder_state();
+//   if (encoder_diffState == ENCODER_DIFF_NO)
+//     return;
 
-  // Avoid flicker by updating only the previous menu
-  if (encoder_diffState == ENCODER_DIFF_CW)
-  {
-    if (select_skew.inc(1 + 4))
-      Move_Highlight(1, select_skew.now);
-  }
-  else if (encoder_diffState == ENCODER_DIFF_CCW)
-  {
-    if (select_skew.dec())
-      Move_Highlight(-1, select_skew.now);
-  }
-  else if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    switch (select_skew.now)
-    {
-      case 0: // Back
-        checkkey = Motion;
-        select_motion.now = MOTION_CASE_SKEW;
-        Draw_Motion_Menu();
-        break;
-      case 1: // XY_DIAG_AC
-        checkkey = skewxy_dac;
-        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(1) + 3, xyskew_d_ac * 10000);
-        EncoderRate.enabled = true;
-        break;
-      case 2: // XY_DIAG_BD
-        checkkey = skewxy_dbd;
-        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(2) + 3, xyskew_d_bd * 10000);
-        EncoderRate.enabled = true;
-        break;
-      case 3: // XY_SIDE_AD
-        checkkey = skewxy_sad;
-        DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(3) + 3, xyskew_s_ad * 10000);
-        EncoderRate.enabled = true;
-        break;
+//   // Avoid flicker by updating only the previous menu
+//   if (encoder_diffState == ENCODER_DIFF_CW)
+//   {
+//     if (select_skew.inc(1 + 4))
+//       Move_Highlight(1, select_skew.now);
+//   }
+//   else if (encoder_diffState == ENCODER_DIFF_CCW)
+//   {
+//     if (select_skew.dec())
+//       Move_Highlight(-1, select_skew.now);
+//   }
+//   else if (encoder_diffState == ENCODER_DIFF_ENTER)
+//   {
+//     switch (select_skew.now)
+//     {
+//       case 0: // Back
+//         checkkey = Motion;
+//         select_motion.now = MOTION_CASE_SKEW;
+//         Draw_Motion_Menu();
+//         break;
+//       case 1: // XY_DIAG_AC
+//         checkkey = skewxy_dac;
+//         DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(1) + 3, xyskew_d_ac * 10000);
+//         EncoderRate.enabled = true;
+//         break;
+//       case 2: // XY_DIAG_BD
+//         checkkey = skewxy_dbd;
+//         DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(2) + 3, xyskew_d_bd * 10000);
+//         EncoderRate.enabled = true;
+//         break;
+//       case 3: // XY_SIDE_AD
+//         checkkey = skewxy_sad;
+//         DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, 4, (VALUERANGE_X - 10), MBASE(3) + 3, xyskew_s_ad * 10000);
+//         EncoderRate.enabled = true;
+//         break;
 
-      case 4: // Calculate & Set
-        // Perform skew correction calculation
-        if(xyskew_d_ac != 0.0 && xyskew_d_bd != 0.0 && xyskew_s_ad != 0.0)
-        {
+//       case 4: // Calculate & Set
+//         // Perform skew correction calculation
+//         if(xyskew_d_ac != 0.0 && xyskew_d_bd != 0.0 && xyskew_s_ad != 0.0)
+//         {
            
-          skew_factor = _SKEW_FACTOR(xyskew_d_ac, xyskew_d_bd, xyskew_s_ad);
+//           skew_factor = _SKEW_FACTOR(xyskew_d_ac, xyskew_d_bd, xyskew_s_ad);
           
-          //skew factor must be between SKEW_FACTOR_MIN & SKEW_FACTOR_MAX to be valid
-          if(skew_factor < SKEW_FACTOR_MIN || skew_factor > SKEW_FACTOR_MAX){
-            skew_factor = 0.0;
-            DWIN_Draw_Rectangle(1, All_Black, 0, 200, 240, 237);
-            const char *str = "Invalid Skew Factor:";
-            DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 210, F(str));   // Centered Received String
-            DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_Yellow, Color_Bg_Black, 2, 4, (DWIN_WIDTH - 10 * MENU_CHR_W) / 2, 230, planner.skew_factor.xy * 1000);
+//           //skew factor must be between SKEW_FACTOR_MIN & SKEW_FACTOR_MAX to be valid
+//           if(skew_factor < SKEW_FACTOR_MIN || skew_factor > SKEW_FACTOR_MAX){
+//             skew_factor = 0.0;
+//             DWIN_Draw_Rectangle(1, All_Black, 0, 200, 240, 237);
+//             const char *str = "Invalid Skew Factor:";
+//             DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 210, F(str));   // Centered Received String
+//             DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_Yellow, Color_Bg_Black, 2, 4, (DWIN_WIDTH - 10 * MENU_CHR_W) / 2, 230, planner.skew_factor.xy * 1000);
 
-          }else{
+//           }else{
 
-            planner.skew_factor.xy = skew_factor;
-            settings.save();
+//             planner.skew_factor.xy = skew_factor;
+//             settings.save();
 
-            DWIN_Draw_Rectangle(1, All_Black, 0, 200, 240, 237);
-            const char *str = "Set Skew Factor Of:";
-            DWIN_Draw_String(true, true, font8x16, Color_Blue, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 210, F(str));   // Centered Received String
-            DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_Blue, Color_Bg_Black, 2, 4, (DWIN_WIDTH - 10 * MENU_CHR_W) / 2, 230, planner.skew_factor.xy * 1000);
-          }
+//             DWIN_Draw_Rectangle(1, All_Black, 0, 200, 240, 237);
+//             const char *str = "Set Skew Factor Of:";
+//             DWIN_Draw_String(true, true, font8x16, Color_Blue, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 210, F(str));   // Centered Received String
+//             DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_Blue, Color_Bg_Black, 2, 4, (DWIN_WIDTH - 10 * MENU_CHR_W) / 2, 230, planner.skew_factor.xy * 1000);
+//           }
 
-        }
-        else
-        {
-        DWIN_Draw_Rectangle(1, All_Black, 0, 174, 240, 237);
-          // Help Info
-          // Info Icon
-          DWIN_ICON_Show(ICON, 56, 115, 175);
-          const char *str = "Warning!";
-          const char *str2 = "XY Values";
-          const char *str3 = "Cannot be Zero or Invalid!";
-          // Draw Help Strings
-          DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 195, F(str));   // Centered Received String
-          DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str2) * MENU_CHR_W) / 2, 215, F(str2)); // Centered Received String
-          DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str3) * MENU_CHR_W) / 2, 235, F(str3)); // Centered Received String
+//         }
+//         else
+//         {
+//         DWIN_Draw_Rectangle(1, All_Black, 0, 174, 240, 237);
+//           // Help Info
+//           // Info Icon
+//           DWIN_ICON_Show(ICON, 56, 115, 175);
+//           const char *str = "Warning!";
+//           const char *str2 = "XY Values";
+//           const char *str3 = "Cannot be Zero or Invalid!";
+//           // Draw Help Strings
+//           DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str) * MENU_CHR_W) / 2, 195, F(str));   // Centered Received String
+//           DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str2) * MENU_CHR_W) / 2, 215, F(str2)); // Centered Received String
+//           DWIN_Draw_String(true, true, font8x16, Color_Yellow, Color_Bg_Black, (DWIN_WIDTH - strlen(str3) * MENU_CHR_W) / 2, 235, F(str3)); // Centered Received String
 
-        }
-      break;  
-    }
-  }
-  DWIN_UpdateLCD();
-}
+//         }
+//       break;  
+//     }
+//   }
+//   DWIN_UpdateLCD();
+// }
 
 
 
@@ -8362,11 +8314,11 @@ void HMI_Motion()
       select_step.reset();
       Draw_Steps_Menu();
       break;
-    case MOTION_CASE_INPUT_SHAPING: // Input Shaping
-      checkkey = InputShaping;
-      select_input_shaping.reset();
-      Draw_InputShaping_Menu();
-      break;
+    // case MOTION_CASE_INPUT_SHAPING: // Input Shaping
+    //   checkkey = InputShaping;
+    //   select_input_shaping.reset();
+    //   Draw_InputShaping_Menu();
+    //   break;
 
     // case MOTION_CASE_LINADV: // Linear Advance
     //   checkkey = LinearAdv;
@@ -8374,11 +8326,11 @@ void HMI_Motion()
     //   Draw_LinearAdv_Menu();
     //   break;  
 
-     case MOTION_CASE_SKEW: // Skew Correction
-      checkkey = SkewCorrection;
-      select_skew.reset();
-      Draw_SkewItems_Menu();
-      break;  
+    //  case MOTION_CASE_SKEW: // Skew Correction
+    //   checkkey = SkewCorrection;
+    //   select_skew.reset();
+    //   Draw_SkewItems_Menu();
+    //   break;  
 
     default:
       break;
@@ -9172,140 +9124,140 @@ void HMI_MaxAcceleration()
 }
 
 /* Input Shaping */
-void HMI_InputShaping()
-{
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
+// void HMI_InputShaping()
+// {
+//   ENCODER_DiffState encoder_diffState = get_encoder_state();
+//   if (encoder_diffState == ENCODER_DIFF_NO)
+//     return;
 
-  // Avoid flicker by updating only the previous menu
-  if (encoder_diffState == ENCODER_DIFF_CW)
-  {
-    if (select_input_shaping.inc(1 + 3 + ENABLED(HAS_HOTEND)))
-      Move_Highlight(1, select_input_shaping.now);
-  }
-  else if (encoder_diffState == ENCODER_DIFF_CCW)
-  {
-    if (select_input_shaping.dec())
-      Move_Highlight(-1, select_input_shaping.now);
-  }
-  else if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    switch (select_input_shaping.now)
-    {
-    case 0: // Back
-      checkkey = Motion;
-      select_motion.now = MOTION_CASE_INPUT_SHAPING;
-      Draw_Motion_Menu();
-      break;
-    case INPUT_SHAPING_CASE_XFREQ:
-      checkkey = InputShaping_XFreq;
-      HMI_ValueStruct.InputShaping_scaled = stepper.get_shaping_frequency(X_AXIS) * 100;
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, HMI_ValueStruct.InputShaping_scaled);
-      EncoderRate.enabled = true;
-      break;
-    case INPUT_SHAPING_CASE_YFREQ:
-      checkkey = InputShaping_YFreq;
-      HMI_ValueStruct.InputShaping_scaled = stepper.get_shaping_frequency(Y_AXIS) * 100;
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, HMI_ValueStruct.InputShaping_scaled);
-      EncoderRate.enabled = true;
-      break;
-    case INPUT_SHAPING_CASE_XZETA:
-      checkkey = InputShaping_XZeta;
-      HMI_ValueStruct.InputShaping_scaled = stepper.get_shaping_damping_ratio(X_AXIS) * 100;
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, HMI_ValueStruct.InputShaping_scaled);
-      EncoderRate.enabled = true;
-      break;
-    case INPUT_SHAPING_CASE_YZETA:
-      checkkey = InputShaping_YZeta;
-      HMI_ValueStruct.InputShaping_scaled = stepper.get_shaping_damping_ratio(Y_AXIS) * 100;
-      DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, HMI_ValueStruct.InputShaping_scaled);
-      EncoderRate.enabled = true;
-      break;
-    }
-  }
-  DWIN_UpdateLCD();
-}
-
-
-void HMI_SkewXY_DAC()
-{
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState == ENCODER_DIFF_NO) return;
-
-  EncoderRate.enabled = false;   //base step = 1 (in scaled space)
-  //Edit in hundredths (2 decimal places)
-  xyskew_d_ac *= 100.0f;
-
-  if (Apply_Encoder(encoder_diffState, xyskew_d_ac)) {
-    LIMIT(xyskew_d_ac, 0.0f, 50000.0f);     //0.00–500.00 in hundredths
-    xyskew_d_ac /= 100.0f;                  //return to real units
-    checkkey = SkewCorrection;
-
-    //fNum=2 => send integer ×100
-    DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(1) + 3, lroundf(xyskew_d_ac * 100.0f));
-    return;
-  }
-
-  xyskew_d_ac /= 100.0f;
-  LIMIT(xyskew_d_ac, 0.00f, 500.00f);
-
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(1) + 3, lroundf(xyskew_d_ac * 100.0f));
-}
+//   // Avoid flicker by updating only the previous menu
+//   if (encoder_diffState == ENCODER_DIFF_CW)
+//   {
+//     if (select_input_shaping.inc(1 + 3 + ENABLED(HAS_HOTEND)))
+//       Move_Highlight(1, select_input_shaping.now);
+//   }
+//   else if (encoder_diffState == ENCODER_DIFF_CCW)
+//   {
+//     if (select_input_shaping.dec())
+//       Move_Highlight(-1, select_input_shaping.now);
+//   }
+//   else if (encoder_diffState == ENCODER_DIFF_ENTER)
+//   {
+//     switch (select_input_shaping.now)
+//     {
+//     case 0: // Back
+//       checkkey = Motion;
+//       select_motion.now = MOTION_CASE_INPUT_SHAPING;
+//       Draw_Motion_Menu();
+//       break;
+//     case INPUT_SHAPING_CASE_XFREQ:
+//       checkkey = InputShaping_XFreq;
+//       HMI_ValueStruct.InputShaping_scaled = stepper.get_shaping_frequency(X_AXIS) * 100;
+//       DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XFREQ) + 3, HMI_ValueStruct.InputShaping_scaled);
+//       EncoderRate.enabled = true;
+//       break;
+//     case INPUT_SHAPING_CASE_YFREQ:
+//       checkkey = InputShaping_YFreq;
+//       HMI_ValueStruct.InputShaping_scaled = stepper.get_shaping_frequency(Y_AXIS) * 100;
+//       DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YFREQ) + 3, HMI_ValueStruct.InputShaping_scaled);
+//       EncoderRate.enabled = true;
+//       break;
+//     case INPUT_SHAPING_CASE_XZETA:
+//       checkkey = InputShaping_XZeta;
+//       HMI_ValueStruct.InputShaping_scaled = stepper.get_shaping_damping_ratio(X_AXIS) * 100;
+//       DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_XZETA) + 3, HMI_ValueStruct.InputShaping_scaled);
+//       EncoderRate.enabled = true;
+//       break;
+//     case INPUT_SHAPING_CASE_YZETA:
+//       checkkey = InputShaping_YZeta;
+//       HMI_ValueStruct.InputShaping_scaled = stepper.get_shaping_damping_ratio(Y_AXIS) * 100;
+//       DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Select_Color, 2, 2, VALUERANGE_X, MBASE(INPUT_SHAPING_CASE_YZETA) + 3, HMI_ValueStruct.InputShaping_scaled);
+//       EncoderRate.enabled = true;
+//       break;
+//     }
+//   }
+//   DWIN_UpdateLCD();
+// }
 
 
-void HMI_SkewXY_DBD()
-{
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState == ENCODER_DIFF_NO) return;
+// void HMI_SkewXY_DAC()
+// {
+//   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+//   if (encoder_diffState == ENCODER_DIFF_NO) return;
 
-  EncoderRate.enabled = false;   
+//   EncoderRate.enabled = false;   //base step = 1 (in scaled space)
+//   //Edit in hundredths (2 decimal places)
+//   xyskew_d_ac *= 100.0f;
 
-  xyskew_d_bd *= 100.0f;
+//   if (Apply_Encoder(encoder_diffState, xyskew_d_ac)) {
+//     LIMIT(xyskew_d_ac, 0.0f, 50000.0f);     //0.00–500.00 in hundredths
+//     xyskew_d_ac /= 100.0f;                  //return to real units
+//     checkkey = SkewCorrection;
 
-  if (Apply_Encoder(encoder_diffState, xyskew_d_bd)) {
-    LIMIT(xyskew_d_bd, 0.0f, 50000.0f);     
-    xyskew_d_bd /= 100.0f;                  
+//     //fNum=2 => send integer ×100
+//     DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(1) + 3, lroundf(xyskew_d_ac * 100.0f));
+//     return;
+//   }
 
-    checkkey = SkewCorrection;
+//   xyskew_d_ac /= 100.0f;
+//   LIMIT(xyskew_d_ac, 0.00f, 500.00f);
 
-    DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(2) + 3, lroundf(xyskew_d_bd * 100.0f));
-    return;
-  }
-
-
-  xyskew_d_bd /= 100.0f;
-  LIMIT(xyskew_d_bd, 0.00f, 500.00f);
-
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(2) + 3, lroundf(xyskew_d_bd * 100.0f));
-}
-
-
-void HMI_SkewXY_SAD()
-{
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState == ENCODER_DIFF_NO) return;
-
-  EncoderRate.enabled = false;       
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(1) + 3, lroundf(xyskew_d_ac * 100.0f));
+// }
 
 
-  xyskew_s_ad *= 100.0f;
+// void HMI_SkewXY_DBD()
+// {
+//   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+//   if (encoder_diffState == ENCODER_DIFF_NO) return;
 
-  if (Apply_Encoder(encoder_diffState, xyskew_s_ad)) {
-    LIMIT(xyskew_s_ad, 0.0f, 50000.0f);     
-    xyskew_s_ad /= 100.0f;                 
+//   EncoderRate.enabled = false;   
 
-    checkkey = SkewCorrection;
+//   xyskew_d_bd *= 100.0f;
 
-    DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(3) + 3, lroundf(xyskew_s_ad * 100.0f));
-    return;
-  }
+//   if (Apply_Encoder(encoder_diffState, xyskew_d_bd)) {
+//     LIMIT(xyskew_d_bd, 0.0f, 50000.0f);     
+//     xyskew_d_bd /= 100.0f;                  
 
-  xyskew_s_ad /= 100.0f;
-  LIMIT(xyskew_s_ad, 0.00f, 500.00f);
+//     checkkey = SkewCorrection;
 
-  DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(3) + 3, lroundf(xyskew_s_ad * 100.0f));
-}
+//     DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(2) + 3, lroundf(xyskew_d_bd * 100.0f));
+//     return;
+//   }
+
+
+//   xyskew_d_bd /= 100.0f;
+//   LIMIT(xyskew_d_bd, 0.00f, 500.00f);
+
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(2) + 3, lroundf(xyskew_d_bd * 100.0f));
+// }
+
+
+// void HMI_SkewXY_SAD()
+// {
+//   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+//   if (encoder_diffState == ENCODER_DIFF_NO) return;
+
+//   EncoderRate.enabled = false;       
+
+
+//   xyskew_s_ad *= 100.0f;
+
+//   if (Apply_Encoder(encoder_diffState, xyskew_s_ad)) {
+//     LIMIT(xyskew_s_ad, 0.0f, 50000.0f);     
+//     xyskew_s_ad /= 100.0f;                 
+
+//     checkkey = SkewCorrection;
+
+//     DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Black,3, 2, (VALUERANGE_X - 10), MBASE(3) + 3, lroundf(xyskew_s_ad * 100.0f));
+//     return;
+//   }
+
+//   xyskew_s_ad /= 100.0f;
+//   LIMIT(xyskew_s_ad, 0.00f, 500.00f);
+
+//   DWIN_Draw_FloatValue(true, true, 0, font8x16, Color_White, Color_Bg_Blue, 3, 2, (VALUERANGE_X - 10), MBASE(3) + 3, lroundf(xyskew_s_ad * 100.0f));
+// }
 
 ////
 /* Linear Advance */
@@ -9746,9 +9698,13 @@ void EachMomentUpdate()
 
       // show percent bar and value
       // rock_20211122
+      // reset variables info variables
       ui.set_progress_done();
       ui.reset_remaining_time();
       ui.total_time_reset();
+      memset(model_information.filament, 0, sizeof(model_information.filament));
+      memset(model_information.height,   0, sizeof(model_information.height));
+      
       // Show remaining time
       Draw_Print_ProgressRemain();
       Draw_Print_ProgressBar();
@@ -10430,22 +10386,22 @@ void DWIN_HandleScreen()
     HMI_MaxJerk();
     break;
 #endif
-  case InputShaping:
-    HMI_InputShaping();
-    break;
+  // case InputShaping:
+  //   HMI_InputShaping();
+  //   break;
   // case LinearAdv:
   //   HMI_LinearAdv();
-  case SkewCorrection:
-    HMI_SkewItems_Menu();
-    break;  
-  case skewxy_dac:
-    HMI_SkewXY_DAC();
-    break;
-  case skewxy_dbd:
-    HMI_SkewXY_DBD();
-    break;
-  case skewxy_sad:
-    HMI_SkewXY_SAD();
+  // case SkewCorrection:
+  //   HMI_SkewItems_Menu();
+  //   break;  
+  // case skewxy_dac:
+  //   HMI_SkewXY_DAC();
+  //   break;
+  // case skewxy_dbd:
+  //   HMI_SkewXY_DBD();
+  //   break;
+  // case skewxy_sad:
+  //   HMI_SkewXY_SAD();
     break;    
   case Step:
     HMI_Step();
@@ -10496,12 +10452,12 @@ void DWIN_HandleScreen()
     HMI_MaxJerkXYZE();
     break;
 #endif
-  case InputShaping_XFreq:
-  case InputShaping_YFreq:
-  case InputShaping_XZeta:
-  case InputShaping_YZeta:
-    HMI_InputShaping_Values();
-    break;
+  // case InputShaping_XFreq:
+  // case InputShaping_YFreq:
+  // case InputShaping_XZeta:
+  // case InputShaping_YZeta:
+  //   HMI_InputShaping_Values();
+  //   break;
   // case LinAdv_KFactor:
   //   HMI_LinearAdv_KFactor();
     break;
