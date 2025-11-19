@@ -5212,8 +5212,9 @@ void DC_Show_defaut_image()
 }
 
 
-static void Display_Estimated_Time(int time) // Display remaining time.
+static void Display_Estimated_Time(u_int32_t time) // Display remaining time.
 {
+  // SERIAL_ECHOLNPAIR("Estimated_Time=: ", time);
   int h, m, s;
   char cmd[30] = {0};
   h = time / 3600;
@@ -9700,6 +9701,7 @@ void EachMomentUpdate()
       // rock_20211122
       // reset variables info variables
       ui.set_progress_done();
+      SERIAL_ECHOLN("Resetting print progress and model information.");
       ui.reset_remaining_time();
       ui.total_time_reset();
       memset(model_information.filament, 0, sizeof(model_information.filament));

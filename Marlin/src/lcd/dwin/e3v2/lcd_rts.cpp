@@ -257,11 +257,19 @@ uint8_t read_gcode_model_information(const char* fileName) {
   char byte;
   uint16_t line_idx = 0;
 
+  // SERIAL_ECHOLNPAIR("Reading model information from G-code file: ", fileName);
+  // SERIAL_ECHOLN("Resetting model information variables.");
   ui.reset_remaining_time();
   ui.total_time_reset();
+  // memset(&model_information, 0, sizeof(model_information)); 
   memset(model_information.filament, 0, sizeof(model_information.filament));
   memset(model_information.height,   0, sizeof(model_information.height));
-  // Si tu struct tiene más campos (peso, capas, etc.), inicialízalos aquí.
+  
+  // SERIAL_ECHOLNPAIR("Remaining time reset to: ", ui.get_remaining_time());
+  // SERIAL_ECHOLNPAIR("Total time reset to: ", ui.get_total_time());
+  // SERIAL_ECHOLNPAIR("Model filament info: ", model_information.filament);
+  // SERIAL_ECHOLNPAIR("Model height info: ", model_information.height);
+
 
   card.openFileRead(fileName);
   if (!card.isFileOpen())
@@ -354,6 +362,12 @@ uint8_t read_gcode_model_information(const char* fileName) {
 
     if (have_cura_time && have_cura_filament && have_cura_height) {
       // card.closefile();
+      ui.set_remaining_time(ui.get_total_time());
+      // SERIAL_ECHOLN("Cura-type header detected and parsed successfully.");
+      // SERIAL_ECHOLNPAIR("Total time: ", ui.get_total_time());
+      // SERIAL_ECHOLNPAIR("Remaining time: ", ui.get_remaining_time());
+      // SERIAL_ECHOLNPAIR("Filament used: ", model_information.filament);
+      // SERIAL_ECHOLNPAIR("Layer height: ", model_information.height);
       return METADATA_PARSE_OK;
     }
   }
@@ -509,8 +523,16 @@ uint8_t read_gcode_model_information(const char* fileName) {
   //   model_information.total_layers = orca_layers;
 
   // Consider it OK if we get at least some useful info
-  if (have_time || have_filament_mm || have_layer_height)
-    return METADATA_PARSE_OK;
+  if (have_time && have_filament_mm && have_layer_height){
+      ui.set_remaining_time(ui.get_total_time());
+      // SERIAL_ECHOLN("Orca-type header detected and parsed successfully.");
+      // SERIAL_ECHOLNPAIR("Total time: ", ui.get_total_time());
+      // SERIAL_ECHOLNPAIR("Remaining time: ", ui.get_remaining_time());
+      // SERIAL_ECHOLNPAIR("Filament used: ", model_information.filament);
+      // SERIAL_ECHOLNPAIR("Layer height: ", model_information.height);
+      return METADATA_PARSE_OK;
+    }
+    
 
   return METADATA_PARSE_ERROR;
 }
