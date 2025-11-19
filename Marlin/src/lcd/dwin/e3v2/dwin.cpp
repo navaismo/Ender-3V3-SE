@@ -1348,8 +1348,8 @@ inline bool Apply_Encoder(const ENCODER_DiffState &encoder_diffState, auto &valr
 
 #define TUNE_CASE_SPEED 1
 #define TUNE_CASE_TEMP (TUNE_CASE_SPEED + ENABLED(HAS_HOTEND))
-#define TUNE_CASE_FLOW (TUNE_CASE_TEMP + ENABLED(HAS_HOTEND))
-#define TUNE_CASE_BED (TUNE_CASE_FLOW + ENABLED(HAS_HEATED_BED))
+// #define TUNE_CASE_FLOW (TUNE_CASE_TEMP + ENABLED(HAS_HOTEND))
+#define TUNE_CASE_BED (TUNE_CASE_TEMP + ENABLED(HAS_HEATED_BED))
 #define TUNE_CASE_FAN (TUNE_CASE_BED + ENABLED(HAS_FAN))
 #define TUNE_CASE_ZOFF (TUNE_CASE_FAN + ENABLED(HAS_ZOFFSET_ITEM))
 #define TUNE_CASE_TOTAL TUNE_CASE_ZOFF
@@ -1982,19 +1982,19 @@ void Item_Tune_Temp(const uint8_t row)
     }
 }
 
-void Item_Tune_Flow(const uint8_t row)
-{
-  if (HMI_flag.language < Language_Max)
-  {
-#if ENABLED(DWIN_CREALITY_320_LCD)
-#if HAS_HOTEND
-    DWIN_ICON_Show(HMI_flag.language, LANGUAGE_MoveE, 42, MBASE(row) + JPN_OFFSET);
-#endif
-#endif
-    Draw_Menu_Line(row, ICON_StepE);
-    DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(row) + PRINT_SET_OFFSET, planner.flow_percentage[0]);
-  }
-}
+// void Item_Tune_Flow(const uint8_t row)
+// {
+//   if (HMI_flag.language < Language_Max)
+//   {
+// #if ENABLED(DWIN_CREALITY_320_LCD)
+// #if HAS_HOTEND
+//     DWIN_ICON_Show(HMI_flag.language, LANGUAGE_MoveE, 42, MBASE(row) + JPN_OFFSET);
+// #endif
+// #endif
+//     Draw_Menu_Line(row, ICON_StepE);
+//     DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(row) + PRINT_SET_OFFSET, planner.flow_percentage[0]);
+//   }
+// }
 
 void Item_Tune_Bed(const uint8_t row)
 {
@@ -2070,8 +2070,8 @@ void Draw_Tune_Menu()
     if(TVISI(TUNE_CASE_TEMP))
       Item_Tune_Temp(TSCROL(TUNE_CASE_TEMP));  // Hotend Temp
 
-    if(TVISI(TUNE_CASE_FLOW))
-      Item_Tune_Flow(TSCROL(TUNE_CASE_FLOW));  // Flow
+    // if(TVISI(TUNE_CASE_FLOW))
+    //   Item_Tune_Flow(TSCROL(TUNE_CASE_FLOW));  // Flow
 #endif
 
 #if HAS_HEATED_BED
