@@ -239,7 +239,9 @@ Due to the memory issues we kept the feature available by usig the Mcode.
 
 ## * Linear Advance available via MCode M900 or Slicer setting *(removed ui menu)*.
 Due to the memory issues we kept the feature available by usig the Mcode.
- 
+
+## * Brightness & Dimm via MCode M255 & M256 *(removed ui menu)*.
+Due to the memory issues we kept the feature available by usig the Mcode.
 
 
 # Removed features
