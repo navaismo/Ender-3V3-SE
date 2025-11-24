@@ -196,7 +196,8 @@ typedef struct
 
 select_t select_page{0}, select_file{0}, select_print{0}, select_prepare{0}, select_control{0}, select_axis{0}, select_temp{0}, select_motion{0}, select_tune{0}, select_advset{0},
          select_PLA{0}, select_TPU{0}, //select_ABS{0}, select_PETG{0}, 
-         select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_input_shaping{0}, select_skew{0}, select_cextr{0},select_display{0}, select_item{0}, select_language{0}, select_hm_set_pid{0}, select_set_pid{0}, select_level{0}, select_show_pic{0};
+         select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_input_shaping{0}, select_skew{0}, select_cextr{0}, //select_display{0}
+         select_item{0}, select_language{0}, select_hm_set_pid{0}, select_set_pid{0}, select_level{0}, select_show_pic{0};
 
 uint8_t index_file = MROWS,
         index_prepare = MROWS,
@@ -1701,16 +1702,15 @@ void Item_Prepare_Lang(const uint8_t row)
   Draw_Menu_Line(row, ICON_Language);
 }
 
-void Item_Prepare_Display(const uint8_t row)
+void Item_Prepare_LCDSound(const uint8_t row)
 {
   if (HMI_flag.language < Language_Max)
   {
 
-    DWIN_Draw_Label(MBASE(row)+2, F("Display Settings"));
+    DWIN_Draw_Label(MBASE(row)+2, F("Toggle LCD Beeper"));
     // DWIN_Frame_AreaCopy(1,   1, 104,  56, 117, LBLX, MBASE(row));
-    DWIN_ICON_Show(ICON, ICON_More, 208, MBASE(row) - 3);
   }
-
+  
   Draw_Menu_Icon(row, ICON_Contact);
   Draw_Menu_Line(row, ICON_Contact);
 }
@@ -1793,7 +1793,7 @@ void Draw_Prepare_Menu()
     Item_Prepare_Lang(PSCROL(PREPARE_CASE_LANG)); // Language CN/EN
   
   if (PVISI(PREPARE_CASE_DISPLAY))
-    Item_Prepare_Display(PSCROL(PREPARE_CASE_DISPLAY)); // Disable LCD Beeper
+    Item_Prepare_LCDSound(PSCROL(PREPARE_CASE_DISPLAY)); // Disable LCD Beeper
       
   if (PVISI(PREPARE_CASE_CUSTOM_EXTRUDE))
     Item_Prepare_CExtrude(PSCROL(PREPARE_CASE_CUSTOM_EXTRUDE)); // Custom Extrude 
@@ -6143,153 +6143,153 @@ void HMI_AudioFeedback(const bool success = true)
 }
 
 
-void Draw_Display_Menu(){
-  Clear_Main_Window();
-  Draw_Mid_Status_Area(true);
-  HMI_flag.Refresh_bottom_flag = false; // Flag refresh bottom parameter
+// void Draw_Display_Menu(){
+//   Clear_Main_Window();
+//   Draw_Mid_Status_Area(true);
+//   HMI_flag.Refresh_bottom_flag = false; // Flag refresh bottom parameter
 
-  // Back option
-  Draw_Back_First();
-  // Title
-  Draw_Title(F("Display Settings"));
+//   // Back option
+//   Draw_Back_First();
+//   // Title
+//   Draw_Title(F("Display Settings"));
 
-  DWIN_Draw_Label(MBASE(1), F("Mute/Unmute Beeper"));
-  Draw_Menu_Line(1, ICON_Contact);
+//   DWIN_Draw_Label(MBASE(1), F("Mute/Unmute Beeper"));
+//   Draw_Menu_Line(1, ICON_Contact);
 
-  // There's no graphical asset for this label, so we just write it as string
-  DWIN_Draw_Label(MBASE(2), F("Max Brightness(%)"));
-  Draw_Menu_Line(2, ICON_PrintSize);
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2) + 3 , ((MAX_SCREEN_BRIGHTNESS-164)*100)/66);
+//   // There's no graphical asset for this label, so we just write it as string
+//   DWIN_Draw_Label(MBASE(2), F("Max Brightness(%)"));
+//   Draw_Menu_Line(2, ICON_PrintSize);
+//   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2) + 3 , ((MAX_SCREEN_BRIGHTNESS-164)*100)/66);
 
-  // There's no graphical asset for this label, so we just write it as string
-  DWIN_Draw_Label(MBASE(3), F("Dimm Brightness(%)"));
-  Draw_Menu_Line(3, ICON_Hardware_version);
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3) + 3 , ((DIMM_SCREEN_BRIGHTNESS-164)*100)/66);
+//   // There's no graphical asset for this label, so we just write it as string
+//   DWIN_Draw_Label(MBASE(3), F("Dimm Brightness(%)"));
+//   Draw_Menu_Line(3, ICON_Hardware_version);
+//   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3) + 3 , ((DIMM_SCREEN_BRIGHTNESS-164)*100)/66);
 
-  // There's no graphical asset for this label, so we just write it as string
-  DWIN_Draw_Label(MBASE(4), F(" Mins Before Dimm"));
-  Draw_Menu_Line(4, ICON_PrintTime);
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(4) + 3 , TURN_OFF_TIME);
+//   // There's no graphical asset for this label, so we just write it as string
+//   DWIN_Draw_Label(MBASE(4), F(" Mins Before Dimm"));
+//   Draw_Menu_Line(4, ICON_PrintTime);
+//   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(4) + 3 , TURN_OFF_TIME);
 
-  DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Store, 60, MBASE(5) + JPN_OFFSET);
-  Draw_Menu_Line(5, ICON_WriteEEPROM); 
-}
+//   DWIN_ICON_Show(HMI_flag.language, LANGUAGE_Store, 60, MBASE(5) + JPN_OFFSET);
+//   Draw_Menu_Line(5, ICON_WriteEEPROM); 
+// }
 
-void HMI_Display_Menu(){
-  ENCODER_DiffState encoder_diffState = get_encoder_state();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
+// void HMI_Display_Menu(){
+//   ENCODER_DiffState encoder_diffState = get_encoder_state();
+//   if (encoder_diffState == ENCODER_DIFF_NO)
+//     return;
 
-  // Avoid flicker by updating only the previous menu
-  if (encoder_diffState == ENCODER_DIFF_CW)
-  {
-    if (select_display.inc(1  + 5))
-      Move_Highlight(1, select_display.now);
-  }
-  else if (encoder_diffState == ENCODER_DIFF_CCW)
-  {
-    if (select_display.dec())
-      Move_Highlight(-1, select_display.now);
-  }
-  else if (encoder_diffState == ENCODER_DIFF_ENTER)
-  {
-    switch (select_display.now)
-    {
-    case 0: // Back
-      checkkey = Prepare;
-      select_prepare.now = PREPARE_CASE_DISPLAY;
-      Draw_Prepare_Menu();
-      break;
-    case 1: // Toggle LCD Beeper
-      toggle_LCDBeep = !toggle_LCDBeep;
-      break;
-    case 2: // Max Brightness
-      checkkey = Max_LCD_Bright;
-      //LIMIT(HMI_ValueStruct.LCD_MaxBright, 0, 100);
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(2) + 3, ((MAX_SCREEN_BRIGHTNESS-164)*100)/66);
-      EncoderRate.enabled = true;
-      break;
-    case 3: // Dim Brightness
-      checkkey = Dimm_Bright;
-      //LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(3) + 3, ((DIMM_SCREEN_BRIGHTNESS-164)*100)/66);
-      EncoderRate.enabled = true;
-      break;
-    case 4: // Dim Time
-      checkkey = DimmTime;
-      //LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
-      DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(4) + 3, HMI_ValueStruct.Dimm_Time);
-      EncoderRate.enabled = true;
-      break; 
-    case 5:
-      settings.save();    
+//   // Avoid flicker by updating only the previous menu
+//   if (encoder_diffState == ENCODER_DIFF_CW)
+//   {
+//     if (select_display.inc(1  + 5))
+//       Move_Highlight(1, select_display.now);
+//   }
+//   else if (encoder_diffState == ENCODER_DIFF_CCW)
+//   {
+//     if (select_display.dec())
+//       Move_Highlight(-1, select_display.now);
+//   }
+//   else if (encoder_diffState == ENCODER_DIFF_ENTER)
+//   {
+//     switch (select_display.now)
+//     {
+//     case 0: // Back
+//       checkkey = Prepare;
+//       select_prepare.now = PREPARE_CASE_DISPLAY;
+//       Draw_Prepare_Menu();
+//       break;
+//     case 1: // Toggle LCD Beeper
+//       toggle_LCDBeep = !toggle_LCDBeep;
+//       break;
+//     case 2: // Max Brightness
+//       checkkey = Max_LCD_Bright;
+//       //LIMIT(HMI_ValueStruct.LCD_MaxBright, 0, 100);
+//       DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(2) + 3, ((MAX_SCREEN_BRIGHTNESS-164)*100)/66);
+//       EncoderRate.enabled = true;
+//       break;
+//     case 3: // Dim Brightness
+//       checkkey = Dimm_Bright;
+//       //LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
+//       DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(3) + 3, ((DIMM_SCREEN_BRIGHTNESS-164)*100)/66);
+//       EncoderRate.enabled = true;
+//       break;
+//     case 4: // Dim Time
+//       checkkey = DimmTime;
+//       //LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
+//       DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Select_Color, 3, VALUERANGE_X, MBASE(4) + 3, HMI_ValueStruct.Dimm_Time);
+//       EncoderRate.enabled = true;
+//       break; 
+//     case 5:
+//       settings.save();    
   
 
-    }
-  }
-  DWIN_UpdateLCD();
-}
+//     }
+//   }
+//   DWIN_UpdateLCD();
+// }
 
-void HMI_LCDBright(){
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
+// void HMI_LCDBright(){
+//   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+//   if (encoder_diffState == ENCODER_DIFF_NO)
+//     return;
 
-  if (Apply_Encoder(encoder_diffState,  HMI_ValueStruct.LCD_MaxBright)) {
-    EncoderRate.enabled = false;
-    LIMIT(HMI_ValueStruct.LCD_MaxBright, 5, 100);
-    checkkey = Display_Menu;
-    DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2)+3 , HMI_ValueStruct.LCD_MaxBright);
-    int16_t luminance = 164 + ((HMI_ValueStruct.LCD_MaxBright * 66) / 100);
-    MAX_SCREEN_BRIGHTNESS = luminance;
-    DWIN_Backlight_SetLuminance(luminance);
-    //save to eeprom
-    return;
-  }
+//   if (Apply_Encoder(encoder_diffState,  HMI_ValueStruct.LCD_MaxBright)) {
+//     EncoderRate.enabled = false;
+//     LIMIT(HMI_ValueStruct.LCD_MaxBright, 5, 100);
+//     checkkey = Display_Menu;
+//     DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2)+3 , HMI_ValueStruct.LCD_MaxBright);
+//     int16_t luminance = 164 + ((HMI_ValueStruct.LCD_MaxBright * 66) / 100);
+//     MAX_SCREEN_BRIGHTNESS = luminance;
+//     DWIN_Backlight_SetLuminance(luminance);
+//     //save to eeprom
+//     return;
+//   }
 
-  LIMIT(HMI_ValueStruct.LCD_MaxBright, 5, 100);
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2)+3 , HMI_ValueStruct.LCD_MaxBright);
-}
+//   LIMIT(HMI_ValueStruct.LCD_MaxBright, 5, 100);
+//   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(2)+3 , HMI_ValueStruct.LCD_MaxBright);
+// }
 
 
-void HMI_LCDDimm(){
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
+// void HMI_LCDDimm(){
+//   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+//   if (encoder_diffState == ENCODER_DIFF_NO)
+//     return;
 
-  if (Apply_Encoder(encoder_diffState,  HMI_ValueStruct.LCD_DimmBright)) {
-    EncoderRate.enabled = false;
-    LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
-    checkkey = Display_Menu;
-    DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3)+3 , HMI_ValueStruct.LCD_DimmBright);
-    int16_t luminance = 164 + ((HMI_ValueStruct.LCD_DimmBright * 66) / 100);
-    DIMM_SCREEN_BRIGHTNESS = luminance;
-    //save to eeprom
-    return;
-  }
+//   if (Apply_Encoder(encoder_diffState,  HMI_ValueStruct.LCD_DimmBright)) {
+//     EncoderRate.enabled = false;
+//     LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
+//     checkkey = Display_Menu;
+//     DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3)+3 , HMI_ValueStruct.LCD_DimmBright);
+//     int16_t luminance = 164 + ((HMI_ValueStruct.LCD_DimmBright * 66) / 100);
+//     DIMM_SCREEN_BRIGHTNESS = luminance;
+//     //save to eeprom
+//     return;
+//   }
 
-  LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3)+3 , HMI_ValueStruct.LCD_DimmBright);
-}
+//   LIMIT(HMI_ValueStruct.LCD_DimmBright, 0, 100);
+//   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(3)+3 , HMI_ValueStruct.LCD_DimmBright);
+// }
 
-void HMI_DimmTime(){
-  ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
-  if (encoder_diffState == ENCODER_DIFF_NO)
-    return;
+// void HMI_DimmTime(){
+//   ENCODER_DiffState encoder_diffState = Encoder_ReceiveAnalyze();
+//   if (encoder_diffState == ENCODER_DIFF_NO)
+//     return;
 
-  if (Apply_Encoder(encoder_diffState,  HMI_ValueStruct.Dimm_Time)) {
-    EncoderRate.enabled = false;
-    LIMIT(HMI_ValueStruct.Dimm_Time, 1, 60);
-    checkkey = Display_Menu;
-    DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(4)+3 , HMI_ValueStruct.Dimm_Time);
-    TURN_OFF_TIME = HMI_ValueStruct.Dimm_Time;
-    //save to eeprom
-    return;
-  }
+//   if (Apply_Encoder(encoder_diffState,  HMI_ValueStruct.Dimm_Time)) {
+//     EncoderRate.enabled = false;
+//     LIMIT(HMI_ValueStruct.Dimm_Time, 1, 60);
+//     checkkey = Display_Menu;
+//     DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(4)+3 , HMI_ValueStruct.Dimm_Time);
+//     TURN_OFF_TIME = HMI_ValueStruct.Dimm_Time;
+//     //save to eeprom
+//     return;
+//   }
 
-  LIMIT(HMI_ValueStruct.Dimm_Time, 1, 60);
-  DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(4)+3 , HMI_ValueStruct.Dimm_Time);
-}
+//   LIMIT(HMI_ValueStruct.Dimm_Time, 1, 60);
+//   DWIN_Draw_IntValue(true, true, 0, font8x16, Color_White, Color_Bg_Black, 3, VALUERANGE_X, MBASE(4)+3 , HMI_ValueStruct.Dimm_Time);
+// }
 
 
 
@@ -6503,7 +6503,7 @@ void HMI_Prepare()
           Item_Prepare_Lang(MROWS);
 
         if(index_prepare == PREPARE_CASE_DISPLAY)
-          Item_Prepare_Display(MROWS); 
+          Item_Prepare_LCDSound(MROWS); 
         
           if(index_prepare == PREPARE_CASE_CUSTOM_EXTRUDE)
           Item_Prepare_CExtrude(MROWS);   
@@ -6707,10 +6707,8 @@ void HMI_Prepare()
 
 #if ENABLED(DWIN_LCD_BEEP)
     case PREPARE_CASE_DISPLAY: // Toggle LCD sound
-      //toggle_LCDBeep = !toggle_LCDBeep;
-      select_display.reset();
-      Draw_Display_Menu();
-      checkkey = Display_Menu;      
+       toggle_LCDBeep = !toggle_LCDBeep;
+       settings.save(); 
       break;  
 #endif
 
@@ -7152,8 +7150,9 @@ void HMI_Leveling()
       {
         gcode.process_subcommands_now_P(PSTR("M420 S0"));
         checkkey = Level_Value_Edit;
-        select_level.reset();
-        xy_int8_t mesh_Count = {0, 0};
+        // select_level.reset();
+        // xy_int8_t mesh_Count = {0, 0};
+        xy_int8_t mesh_Count = Converted_Grid_Point(select_level.now);
         Draw_Dots_On_Screen(&mesh_Count, 1, Select_Block_Color);
         EncoderRate.enabled = true;
         DO_BLOCKING_MOVE_TO_Z(5, 5); // Raise to a height of 5mm each time before moving
@@ -7177,6 +7176,7 @@ void HMI_Leveling()
       {
         Goto_MainMenu(); // Return to the main interface
       }
+      select_level.reset();
       // HMI_flag.Refresh_bottom_flag=false;//The flag does not refresh the bottom parameters
       // Draw_Mid_Status_Area(true); //rock_20230529 //Update all parameters once
     }
@@ -10472,18 +10472,18 @@ void DWIN_HandleScreen()
   case custom_extrude_length:
     HMI_CustomExtrudeLength();
     break;  
-  case Display_Menu:
-    HMI_Display_Menu();
-    break;
-  case Max_LCD_Bright:
-    HMI_LCDBright();
-    break;
-  case Dimm_Bright:
-    HMI_LCDDimm();
-    break;    
-  case DimmTime:
-    HMI_DimmTime();
-    break;        
+  // case Display_Menu:
+  //   HMI_Display_Menu();
+  //   break;
+  // case Max_LCD_Bright:
+  //   HMI_LCDBright();
+  //   break;
+  // case Dimm_Bright:
+  //   HMI_LCDDimm();
+  //   break;    
+  // case DimmTime:
+  //   HMI_DimmTime();
+  //   break;        
   case Step_value:
     HMI_StepXYZE();
     break;
