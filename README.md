@@ -53,7 +53,7 @@ After Creality released the [Ender 3 V3 SE source code](https://github.com/Creal
 >First you need to flash or have at least(or superior) the creality firmware version 1.0.6. and the TFT files for the display.
 >If your printer is already in that version(or sperior) you can do it directly.
 >
->From: [Latest Release of Printer's Firmware for SD](https://github.com/navaismo/Ender-3V3-SE) download the ZIP file.
+>From: [Latest Release of Printer's Firmware for SD](https://github.com/navaismo/Ender-3V3-SE/releases/tag/v1.1.0) download the ZIP file.
 >
 >Unzip and:
 >
