@@ -1,7 +1,7 @@
 # Ender3 V3 SE  Community Edition Firmware OnlySD
 
 <div align="center">
-   <img src="./repo_assets/fwVersion.gif" width="18%" height="18%"/>      
+   <img src="./repo_assets/fwVersion.gif" width="30%" height="30%"/>      
 </div>
 
 <br>
@@ -86,7 +86,7 @@ So after many bug reports we decided to make this repo as the firmware of the mo
 
 <br>
 
-> [!CAUTION]
+> [!IMPORTANT]
 > 
 > **IMPORTANT**
 >
@@ -106,7 +106,7 @@ You spoke and we've heard, we have splitted the LEVEL Menu.
 
 
 <div align="center">
-   <img src="./repo_assets/LevelMenu.gif" width="20%" height="20%"/>      
+   <img src="./repo_assets/LevelMenu.gif" width="30%" height="30%"/>      
 </div>
 
 <br>
@@ -116,7 +116,7 @@ You spoke and we've heard, we have splitted the LEVEL Menu.
 Based on the fork of [@aschmitt1909](https://github.com/aschmitt1909/Ender-3V3-SE), and merged with the [PR#18](https://github.com/navaismo/Ender-3V3-SE/pull/18) from [@eduard-sukharev](https://github.com/eduard-sukharev)
 
 <div align="center">
-   <img src="./repo_assets/Grid6x6.gif" width="20%" height="20%"/>      
+   <img src="./repo_assets/Grid6x6.gif" width="30%" height="30%"/>      
 </div>
 
 <br>
@@ -127,7 +127,7 @@ Merged the fix of [PR#39](https://github.com/navaismo/Ender-3V3-SE/pull/39) from
 
 
 <div align="center">
-   <img src="./repo_assets/GcodeInfo.gif" width="20%" height="20%"/>      
+   <img src="./repo_assets/GcodeInfo.gif" width="30%" height="30%"/>      
 </div>
 
 <br>
@@ -136,7 +136,7 @@ Merged the fix of [PR#39](https://github.com/navaismo/Ender-3V3-SE/pull/39) from
 ## * Test Probe UI (CRTouch stow & CRTouch deploy).
 
 <div align="center">
-   <img src="./repo_assets/Probe.gif" width="20%" height="20%"/>      
+   <img src="./repo_assets/Probe.gif" width="30%" height="30%"/>      
 </div>
 
 <br>
@@ -157,7 +157,7 @@ Added a custom Extrusion Menu under Prepare Menu from feature request on [Issue#
 >
 
 <div align="center">
-   <img src="./repo_assets/cextrude.gif" width="20%" height="20%"/>      
+   <img src="./repo_assets/cextrude.gif" width="30%" height="30%"/>      
 </div>
 
 
@@ -170,7 +170,7 @@ To preseve the state of the feature go to Menu Control --> Save settings.
 
 
 <div align="center">
-   <img src="./repo_assets/buzzer.gif" width="20%" height="20%"/>      
+   <img src="./repo_assets/buzzer.gif" width="30%" height="30%"/>      
 </div>
 
 
@@ -181,7 +181,7 @@ To preseve the state of the feature go to Menu Control --> Save settings.
 Added Submenu under Control Menu to show the Print Stats gather by Marlin. From feature request on [Issue #48](https://github.com/navaismo/Ender-3V3-SE/issues/48)
 
 <div align="center">
-   <img src="./repo_assets/statistics.gif" width="20%" height="20%"/>      
+   <img src="./repo_assets/statistics.gif" width="30%" height="30%"/>      
 </div>
 
 
@@ -193,7 +193,7 @@ To avoid undesired resets we added a confirmation menu to ensure not to loose ou
 
 
 <div align="center">
-   <img src="./repo_assets/Reset.gif" width="20%" height="20%"/>      
+   <img src="./repo_assets/Reset.gif" width="30%" height="30%"/>      
 </div>
 
 
