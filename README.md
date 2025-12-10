@@ -1,3 +1,13 @@
+<div align="center">
+   <a href="https://github.com/navaismo/Marlin_bugfix_2.1_E3V3SE">
+   <img src="./repo_assets/banner_eol.png" width="40%" height="40%"/>      
+   <a/>
+</div>
+
+<br><br>
+
+
+
 # Ender3 V3 SE  Community Edition Firmware OnlySD
 
 <div align="center">
