@@ -1,6 +1,6 @@
 <div align="center">
    <a href="https://github.com/navaismo/Marlin_bugfix_2.1_E3V3SE">
-   <img src="./repo_assets/banner_eol.png" width="100%" height="100%"/>      
+   <img src="./repo_assets/sinking.png" width="100%" height="100%"/>      
    <a/>
 </div>
 
